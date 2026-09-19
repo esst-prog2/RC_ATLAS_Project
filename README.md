@@ -65,3 +65,8 @@ These features belong to the wider RC Atlas idea, but the course project is deli
 - Scope is the largest project risk. RC Atlas is a broader product idea, but implementing its complete administration, reporting, MEAL, financial, and portfolio functionality would not fit the course project. Those features are deliberately excluded from the first useful version.
 - No confidential project data is required. The course version uses fictional organizations, projects, users, and tasks, so the repository and classroom demonstration can remain public.
 - The final demonstration must run locally from a documented setup and must not depend on a cloud deployment, paid API, or external organizational system.
+
+## Development
+
+Local setup, startup, testing, and runtime-file guidance is available in
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

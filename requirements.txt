@@ -1,0 +1,6 @@
+# Runtime dependencies
+fastapi
+uvicorn
+
+# Test dependency used by FastAPI's TestClient
+httpx
