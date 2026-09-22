@@ -509,6 +509,26 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn("fieldUpdateScopeAllows", task_actions)
         self.assertIn('assigneeUsername === currentUsername', task_actions)
 
+    def test_course_mvp_task_handoff_uses_canonical_identity_and_two_checkpoints(self):
+        composer = self.html.split("async function createOperationalTaskFromForm", 1)[1].split("function clearProtectedPanels", 1)[0]
+        meal_predicate = self.html.split("function taskRequiresMealReview", 1)[1].split("function buildOperationalInboxItems", 1)[0]
+        task_actions = self.html.split("function taskWorkflowActionButtons", 1)[1].split("function operationalTaskCardHtml", 1)[0]
+        approval_posture = self.html.split("function taskApprovalState", 1)[1].split("function taskEvidenceState", 1)[0]
+
+        self.assertIn('<select id="taskAssigneeInput">', self.html)
+        self.assertIn("function populateTaskAssigneePicker", self.html)
+        self.assertIn("workplan?.eligible_assignees", self.html)
+        self.assertIn("assignee_username: assigneeUsername", composer)
+        self.assertNotIn("assignee_name:", composer)
+        self.assertNotIn('status: "not_started"', composer)
+        self.assertIn('status === "pending_validation"', meal_predicate)
+        self.assertIn("task?.submitted_at", meal_predicate)
+        self.assertIn("task?.validated_at", meal_predicate)
+        self.assertIn("needsMealReview && canValidate", task_actions)
+        self.assertIn("awaitsManagerApproval && canApprove", task_actions)
+        self.assertIn("Validated by MEAL - awaiting final approval", approval_posture)
+        self.assertNotIn('status === "pending_validation" && canApprove', task_actions)
+
     def test_programme_manager_command_center_uses_real_portfolio_sources(self):
         self.assertIn('id="programmeManagerWorkspace"', self.html)
         self.assertIn('id="legacyOverviewWorkspace"', self.html)

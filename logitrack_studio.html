@@ -7785,7 +7785,9 @@
                     </label>
                     <label>
                       <span id="taskAssigneeLabel">Assignee</span>
-                      <input id="taskAssigneeInput" type="text" placeholder="Paulo Ernesto">
+                      <select id="taskAssigneeInput">
+                        <option value="">Select project member</option>
+                      </select>
                     </label>
                     <label>
                       <span id="taskDueDateLabel">Due Date</span>
@@ -14516,7 +14518,8 @@
       const taskAssigneeInput = document.getElementById("taskAssigneeInput");
       const taskDescriptionInput = document.getElementById("taskDescriptionInput");
       if (taskTitleInput) taskTitleInput.placeholder = localizedCopy({ EN: "Confirm district validation plan", PT: "Confirmar plano distrital de validacao", FR: "Confirmer le plan de validation du district" });
-      if (taskAssigneeInput) taskAssigneeInput.placeholder = localizedCopy({ EN: "Assignee name", PT: "Nome do responsavel", FR: "Nom du responsable" });
+      const taskAssigneePlaceholder = taskAssigneeInput?.querySelector('option[value=""]');
+      if (taskAssigneePlaceholder) taskAssigneePlaceholder.textContent = localizedCopy({ EN: "Select project member", PT: "Selecionar membro do projeto", FR: "Selectionner un membre du projet" });
       if (taskDescriptionInput) taskDescriptionInput.placeholder = localizedCopy({ EN: "Clarify the outcome, update, and evidence needed.", PT: "Clarifique o resultado, a atualizacao e a evidencia necessaria.", FR: "Precisez le resultat, la mise a jour et les preuves requises." });
       const priorityLabels = {
         low: localizedCopy({ EN: "Low", PT: "Baixa", FR: "Faible" }),
@@ -19279,25 +19282,29 @@
           }),
         };
       }
-      if (status === "pending_validation") {
+      if (status === "pending_validation" && task?.validated_at) {
         return {
-          label: localizedCopy({ EN: "Pending validation", PT: "Validacao pendente", FR: "Validation en attente" }),
-          tone: "warn",
+          label: localizedCopy({
+            EN: "Validated by MEAL - awaiting final approval",
+            PT: "Validada pelo MEAL - aguarda aprovacao final",
+            FR: "Validee par le MEAL - en attente d'approbation finale",
+          }),
+          tone: "info",
           note: localizedCopy({
-            EN: "Reporting confidence is waiting on validation clearance.",
-            PT: "A confianca de reporte aguarda liberacao de validacao.",
-            FR: "La confiance de reporting attend la validation.",
+            EN: "MEAL validation is complete. Programme Manager final approval is now required.",
+            PT: "A validacao MEAL esta concluida. A aprovacao final da Gestora do Programa e agora necessaria.",
+            FR: "La validation MEAL est terminee. L'approbation finale de la Responsable de Programme est maintenant requise.",
           }),
         };
       }
-      if (task?.validated_at) {
+      if (status === "pending_validation") {
         return {
-          label: localizedCopy({ EN: "Validated", PT: "Validada", FR: "Validee" }),
-          tone: "info",
+          label: localizedCopy({ EN: "Pending MEAL validation", PT: "Validacao MEAL pendente", FR: "Validation MEAL en attente" }),
+          tone: "warn",
           note: localizedCopy({
-            EN: "MEAL validation is complete and awaiting management closure.",
-            PT: "A validacao MEAL esta concluida e aguarda fecho da gestao.",
-            FR: "La validation MEAL est terminee et attend la cloture de gestion.",
+            EN: "Submitted work is waiting for evidence review by MEAL.",
+            PT: "O trabalho submetido aguarda revisao de evidencia pelo MEAL.",
+            FR: "Le travail soumis attend l'examen des preuves par le MEAL.",
           }),
         };
       }
@@ -19457,8 +19464,9 @@
 
     function taskRequiresMealReview(task) {
       const status = workflowStatusKey(task?.status);
-      const hasEvidence = (numericValue(task?.evidence_count) ?? 0) > 0 || toArray(task?.evidence_placeholders).length > 0;
-      return status === "pending_validation" || (hasEvidence && !textSafe(task?.validated_at || "", "") && status !== "completed");
+      return status === "pending_validation"
+        && !!textSafe(task?.submitted_at || "", "")
+        && !textSafe(task?.validated_at || "", "");
     }
 
     function buildOperationalInboxItems() {
@@ -20464,10 +20472,13 @@
       const currentUsername = textSafe(currentRoleIdentity(profile.id).username || "", "").toLowerCase();
       const assigneeUsername = textSafe(task.assignee_username || "", "").toLowerCase();
       const fieldUpdateScopeAllows = profile.id !== "field_coordinator" || (!!currentUsername && assigneeUsername === currentUsername);
-      const canUpdate = fieldUpdateScopeAllows && hasAnyPermission(["UPDATE_TASK_PROGRESS", "SUBMIT_EVIDENCE", "MANAGE_WORKPLAN", "ASSIGN_TASKS"]);
+      const fieldExecutionStateAllows = profile.id !== "field_coordinator" || ["not_started", "in_progress", "overdue", "escalated"].includes(status);
+      const canUpdate = fieldUpdateScopeAllows && fieldExecutionStateAllows && hasAnyPermission(["UPDATE_TASK_PROGRESS", "SUBMIT_EVIDENCE", "MANAGE_WORKPLAN", "ASSIGN_TASKS"]);
       const canValidate = hasPermission("VALIDATE_EVIDENCE");
       const canApprove = hasPermission("APPROVE_TASKS");
       const canEscalate = hasAnyPermission(["ASSIGN_TASKS", "APPROVE_TASKS", "MANAGE_WORKPLAN"]);
+      const needsMealReview = taskRequiresMealReview(task);
+      const awaitsManagerApproval = status === "pending_validation" && !!textSafe(task.validated_at || "", "") && !textSafe(task.approved_at || "", "");
       if (canUpdate) {
         buttons.push(`<button class="small ghost" type="button" data-action-tone="neutral" data-task-action="save" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Save Update", PT: "Guardar Atualizacao", FR: "Enregistrer" })}</button>`);
       }
@@ -20477,12 +20488,12 @@
       if (["in_progress", "overdue", "escalated"].includes(status) && canUpdate) {
         buttons.push(`<button class="small secondary" type="button" data-action-tone="primary" data-task-action="submit" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Submit for Validation", PT: "Submeter para Validacao", FR: "Soumettre a Validation" })}</button>`);
       }
-      if (status === "pending_validation" && canValidate) {
+      if (needsMealReview && canValidate) {
         buttons.push(`<button class="small secondary" type="button" data-action-tone="primary" data-task-action="validate" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Validate", PT: "Validar", FR: "Valider" })}</button>`);
-      }
-      if (status === "pending_validation" && canApprove) {
-        buttons.push(`<button class="small" type="button" data-action-tone="primary" data-task-action="approve" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Approve", PT: "Aprovar", FR: "Approuver" })}</button>`);
         buttons.push(`<button class="small ghost" type="button" data-action-tone="warning" data-task-action="rework" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Request Rework", PT: "Pedir Re-trabalho", FR: "Demander Reprise" })}</button>`);
+      }
+      if (awaitsManagerApproval && canApprove) {
+        buttons.push(`<button class="small" type="button" data-action-tone="primary" data-task-action="approve" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Approve", PT: "Aprovar", FR: "Approuver" })}</button>`);
       }
       if (!["completed", "pending_validation"].includes(status) && canEscalate) {
         buttons.push(`<button class="small ghost" type="button" data-action-tone="danger" data-task-action="escalate" data-task-id="${textSafe(task.task_id)}">${localizedCopy({ EN: "Escalate", PT: "Escalar", FR: "Escalader" })}</button>`);
@@ -20638,6 +20649,30 @@
       if (previous) select.value = previous;
     }
 
+    function populateTaskAssigneePicker(workplan) {
+      const select = document.getElementById("taskAssigneeInput");
+      if (!select) return;
+      const previous = select.value;
+      const eligibleAssignees = toArray(workplan?.eligible_assignees);
+      select.innerHTML = `<option value="">${localizedCopy({
+        EN: "Select project member",
+        PT: "Selecionar membro do projeto",
+        FR: "Selectionner un membre du projet",
+      })}</option>`;
+      eligibleAssignees.forEach(item => {
+        const option = document.createElement("option");
+        option.value = textSafe(item.username || "", "");
+        const roleLabel = translateLiteralText(textSafe(item.role_label || item.role || "", ""));
+        option.textContent = roleLabel
+          ? `${textSafe(item.full_name || item.username || "", "")} - ${roleLabel}`
+          : textSafe(item.full_name || item.username || "", "");
+        select.appendChild(option);
+      });
+      if (eligibleAssignees.some(item => textSafe(item.username || "", "") === previous)) {
+        select.value = previous;
+      }
+    }
+
     function renderWorkplanTimeline(workplan) {
       const lead = document.getElementById("workplanTimelineLead");
       const box = document.getElementById("workplanTimelineBox");
@@ -20738,6 +20773,7 @@
         renderHomeOperationalExperience();
         renderTaskDrawer();
         populateTaskIndicatorPicker(state.projectSnapshot);
+        populateTaskAssigneePicker(workplan);
         return;
       }
       const cards = document.getElementById("workplanCards");
@@ -20786,6 +20822,7 @@
       renderHomeOperationalExperience();
       renderTaskDrawer();
       populateTaskIndicatorPicker(state.projectSnapshot);
+      populateTaskAssigneePicker(workplan);
       renderWorkplanTimeline(workplan);
     }
 
@@ -23901,17 +23938,25 @@
         showMessage(localizedCopy({ EN: "Task title is required.", PT: "O titulo da tarefa e obrigatorio.", FR: "Le titre de la tache est obligatoire." }), "warn");
         return;
       }
+      const assigneeUsername = document.getElementById("taskAssigneeInput")?.value || "";
+      if (!assigneeUsername) {
+        showMessage(localizedCopy({
+          EN: "Select an eligible project member.",
+          PT: "Selecione um membro elegivel do projeto.",
+          FR: "Selectionnez un membre eligible du projet.",
+        }), "warn");
+        return;
+      }
       try {
         const payload = {
           project_id: state.projectId,
           title,
-          assignee_name: document.getElementById("taskAssigneeInput")?.value.trim(),
+          assignee_username: assigneeUsername,
           due_date: document.getElementById("taskDueDateInput")?.value || "",
           priority: document.getElementById("taskPriorityInput")?.value || "medium",
           category: document.getElementById("taskCategoryInput")?.value || "implementation",
           linked_indicator_id: document.getElementById("taskIndicatorInput")?.value || "",
           description: document.getElementById("taskDescriptionInput")?.value.trim(),
-          status: "not_started",
         };
         await callApi("/v1/demo/tasks", {
           method: "POST",

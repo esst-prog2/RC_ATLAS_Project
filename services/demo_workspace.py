@@ -32,6 +32,16 @@ TASK_STATUS_LABELS = {
 
 PRIORITY_ORDER = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
+FIELD_TASK_UPDATE_FIELDS = frozenset({
+    "comment",
+    "evidence_note",
+    "progress_pct",
+    "status",
+    "submit_for_validation",
+})
+FIELD_MUTABLE_TASK_STATUSES = frozenset({"not_started", "in_progress", "overdue", "escalated"})
+FIELD_SUBMITTABLE_TASK_STATUSES = frozenset({"in_progress", "overdue", "escalated"})
+
 ROLE_EXPERIENCE = {
     "organization_admin": {
         "title": "Organization Admin",
@@ -164,6 +174,95 @@ class DemoWorkspaceService:
         assignee_username = str(getattr(task, "assignee_username", "") or "").strip().lower()
         if not actor_username or actor_username != assignee_username:
             raise ServiceError(403, "Field coordinators may update only tasks assigned to their authenticated account.")
+
+    def _actor_role(self, actor: Any) -> str:
+        return str(getattr(actor, "role", "") or "").strip().lower()
+
+    def _ensure_actor_project_scope(self, actor: Any, project: Any) -> None:
+        if actor is None:
+            return
+        actor_organization_id = str(getattr(actor, "organization_id", "") or "").strip()
+        project_organization_id = str(getattr(project, "organization_id", "") or "").strip()
+        if actor_organization_id and project_organization_id and actor_organization_id != project_organization_id:
+            raise ServiceError(403, "Access denied for this project's organization.")
+
+    def _eligible_project_assignees(self, data: Any, project: Any) -> List[Dict[str, Any]]:
+        project_id = str(getattr(project, "id", "") or "").strip()
+        organization_id = str(getattr(project, "organization_id", "") or "").strip()
+        assignments_by_user_id: Dict[str, Any] = {}
+        for assignment in getattr(project, "team_assignments", []) or []:
+            if str(getattr(assignment, "project_id", "") or "").strip() != project_id:
+                continue
+            if str(getattr(assignment, "organization_id", "") or "").strip() != organization_id:
+                continue
+            if str(getattr(assignment, "status", "active") or "active").strip().lower() != "active":
+                continue
+            user_id = str(getattr(assignment, "user_id", "") or "").strip()
+            if user_id and user_id not in assignments_by_user_id:
+                assignments_by_user_id[user_id] = assignment
+
+        eligible: List[Dict[str, Any]] = []
+        for user in getattr(data, "users", []) or []:
+            assignment = assignments_by_user_id.get(str(getattr(user, "id", "") or "").strip())
+            if assignment is None:
+                continue
+            if str(getattr(user, "organization_id", "") or "").strip() != organization_id:
+                continue
+            if not bool(getattr(user, "is_active", False)):
+                continue
+            if str(getattr(user, "status", "active") or "active").strip().lower() != "active":
+                continue
+            sanitized = self.deps.sanitize_user(user)
+            eligible.append({
+                "user_id": str(getattr(user, "id", "") or ""),
+                "username": str(getattr(user, "username", "") or ""),
+                "full_name": str(getattr(user, "full_name", "") or getattr(user, "username", "") or ""),
+                "role": str(getattr(user, "role", "") or ""),
+                "role_label": str(sanitized.get("role_label") or getattr(user, "role", "") or ""),
+                "project_role": str(getattr(assignment, "role", "") or ""),
+                "team_id": str(getattr(assignment, "team_id", "") or getattr(user, "team_id", "") or ""),
+            })
+        return sorted(eligible, key=lambda item: (item["full_name"].lower(), item["username"].lower()))
+
+    def _resolve_task_assignee(self, data: Any, project: Any, username: Any) -> Any:
+        canonical_username = str(username or "").strip()
+        if not canonical_username:
+            raise ServiceError(400, "Task creation requires an eligible project assignee.")
+        user = self.deps.find_user_by_username(data, canonical_username)
+        if user is None:
+            raise ServiceError(400, "The selected task assignee is not eligible for this project.")
+        eligible_user_ids = {item["user_id"] for item in self._eligible_project_assignees(data, project)}
+        if str(getattr(user, "id", "") or "") not in eligible_user_ids:
+            raise ServiceError(400, "The selected task assignee is not eligible for this project.")
+        return user
+
+    def _validate_task_update_request(self, actor: Any, task: Any, payload: Dict[str, Any]) -> None:
+        role = self._actor_role(actor)
+        current_status = _normalize_task_status(getattr(task, "status", "not_started"))
+        submit_for_validation = bool(payload.get("submit_for_validation"))
+
+        if role == "field_coordinator":
+            self._enforce_task_update_scope(actor, task)
+            unsupported_fields = sorted(set(payload) - FIELD_TASK_UPDATE_FIELDS)
+            if unsupported_fields:
+                raise ServiceError(403, "Field coordinators may update only progress, evidence, comments, and submission state.")
+            if current_status not in FIELD_MUTABLE_TASK_STATUSES:
+                raise ServiceError(409, "This task is not currently open for Field execution updates.")
+            if "status" in payload:
+                requested_status = _normalize_task_status(payload.get("status"))
+                if requested_status != "in_progress":
+                    raise ServiceError(403, "Field coordinators cannot set arbitrary task status values.")
+                if current_status != "not_started" or submit_for_validation:
+                    raise ServiceError(409, "Only a Not Started task can be started through this action.")
+            if submit_for_validation and current_status not in FIELD_SUBMITTABLE_TASK_STATUSES:
+                raise ServiceError(409, "Only active Field work can be submitted for MEAL validation.")
+        elif submit_for_validation:
+            raise ServiceError(403, "Only the assigned Field Coordinator may submit this task for validation.")
+
+        if "status" in payload:
+            requested_status = _normalize_task_status(payload.get("status"))
+            if requested_status in {"pending_validation", "completed"}:
+                raise ServiceError(409, "Use the supported submission and approval actions for this workflow transition.")
 
     def _organization_id_for_actor(self, data: Any, actor: Any) -> str:
         if actor is not None and getattr(actor, "organization_id", ""):
@@ -840,6 +939,7 @@ class DemoWorkspaceService:
         project = self.deps.find_project(data, project_id)
         if project is None:
             raise ServiceError(404, f"Project '{project_id}' not found.")
+        self._ensure_actor_project_scope(actor, project)
 
         payload = self.deps.build_bi_payload(data)
         metadata = self._project_metadata_map(data).get(project_id, {})
@@ -858,7 +958,7 @@ class DemoWorkspaceService:
         district_rows = [row for row in payload["kpi_district"] if row.get("project_id") == project_id]
         indicator_rows = [row for row in payload["kpi_indicator"] if row.get("project_id") == project_id]
         activity_rows = [row for row in payload["activities"] if row.get("project_id") == project_id]
-        task_rows = [row for row in payload["tasks"] if row.get("project_id") == project_id]
+        task_rows = self._project_task_rows(data, project_id)
         workflow = self._workflow_rollup(task_rows)
         records = [
             row for row in data.reporting_records
@@ -990,13 +1090,18 @@ class DemoWorkspaceService:
         x_auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
-        self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_WORKPLAN")
+        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_WORKPLAN")
+        project = self.deps.find_project(data, project_id)
+        if project is None:
+            raise ServiceError(404, f"Project '{project_id}' not found.")
+        self._ensure_actor_project_scope(actor, project)
         snapshot = self.project_executive_snapshot(project_id, x_api_key=x_api_key, x_auth_token=x_auth_token)
         tasks = snapshot["tasks"]
         upcoming = [row for row in tasks if not _task_is_complete(row.get("status")) and row.get("due_date") and not self._task_is_overdue(row)]
         workflow = snapshot.get("workflow", {})
         return {
             "project_id": project_id,
+            "eligible_assignees": self._eligible_project_assignees(data, project),
             "summary": snapshot["executive"],
             "activities": snapshot["activities"],
             "tasks": tasks,
@@ -1126,6 +1231,11 @@ class DemoWorkspaceService:
         project = self.deps.find_project(data, project_id)
         if project is None:
             raise ServiceError(404, f"Project '{project_id}' not found.")
+        self._ensure_actor_project_scope(actor, project)
+        task_name = str(payload.get("title") or payload.get("name") or "").strip()
+        if not task_name:
+            raise ServiceError(400, "Task creation requires 'title' or 'name'.")
+        assignee = self._resolve_task_assignee(data, project, payload.get("assignee_username"))
 
         ops = data.ops_by_project.get(project_id)
         if ops is None:
@@ -1152,19 +1262,21 @@ class DemoWorkspaceService:
             ops.activities.append(activity)
 
         task_cls = self._task_class(data)
-        status = _normalize_task_status(payload.get("status") or "not_started")
+        status = "not_started"
+        assignee_name = str(getattr(assignee, "full_name", "") or getattr(assignee, "username", "") or "")
+        assignee_username = str(getattr(assignee, "username", "") or "")
         task = task_cls(
             id=str(payload.get("id") or f"task_{project_id}_{_safe_slug(payload.get('title') or payload.get('name') or self.deps.now_iso_utc())}"),
-            name=str(payload.get("title") or payload.get("name") or "").strip(),
-            owner=str(payload.get("owner") or payload.get("assignee_name") or "").strip(),
+            name=task_name,
+            owner=assignee_name,
             due_date=self._coerce_date(payload.get("due_date")),
             status=status,
             organization_id=str(getattr(project, "organization_id", "") or getattr(actor, "organization_id", "")),
             notes=str(payload.get("description") or payload.get("notes") or "").strip(),
-            assignee_username=str(payload.get("assignee_username") or "").strip(),
-            assignee_name=str(payload.get("assignee_name") or payload.get("owner") or "").strip(),
+            assignee_username=assignee_username,
+            assignee_name=assignee_name,
             priority=_normalize_priority(payload.get("priority")),
-            progress_pct=float(payload.get("progress_pct") or _task_progress_default(status)),
+            progress_pct=_task_progress_default(status),
             category=str(payload.get("category") or "implementation").strip().lower() or "implementation",
             linked_indicator_id=str(payload.get("linked_indicator_id") or "").strip(),
             evidence_placeholders=[str(item).strip() for item in payload.get("evidence_placeholders", []) if str(item).strip()],
@@ -1175,8 +1287,6 @@ class DemoWorkspaceService:
             validated_at="",
             approved_at="",
         )
-        if not task.name:
-            raise ServiceError(400, "Task creation requires 'title' or 'name'.")
         self._append_task_log_entry(
             task,
             actor,
@@ -1191,6 +1301,7 @@ class DemoWorkspaceService:
             "activity_id": activity.id,
             "task_id": task.id,
             "task_name": task.name,
+            "assignee_username": task.assignee_username,
             "assignee_name": task.assignee_name or task.owner,
             "priority": task.priority,
             "message": f"{task.name} was assigned to {task.assignee_name or task.owner or 'the team'}.",
@@ -1220,12 +1331,18 @@ class DemoWorkspaceService:
         x_auth_token: Optional[str],
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
-        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="UPDATE_TASK_PROGRESS")
+        actor = self.deps.authorize_request(
+            data,
+            x_api_key,
+            x_auth_token,
+            required_permissions=["UPDATE_TASK_PROGRESS", "MANAGE_WORKPLAN", "ASSIGN_TASKS"],
+        )
         context = self._find_task_context(data, task_id)
         task = context["task"]
         project = context["project"]
         activity = context["activity"]
-        self._enforce_task_update_scope(actor, task)
+        self._ensure_actor_project_scope(actor, project)
+        self._validate_task_update_request(actor, task, payload)
 
         if "status" in payload:
             task.status = _normalize_task_status(payload.get("status"))
@@ -1263,6 +1380,8 @@ class DemoWorkspaceService:
         if submit_for_validation:
             task.status = "pending_validation"
             task.submitted_at = self.deps.now_iso_utc()
+            task.validated_at = ""
+            task.approved_at = ""
             task.progress_pct = max(float(getattr(task, "progress_pct", 0.0) or 0.0), 90.0)
         if escalate:
             task.status = "escalated"
@@ -1286,16 +1405,28 @@ class DemoWorkspaceService:
             message_bits.append(f"status changed to {_task_status_label(task.status)}")
         update_message = ", ".join(message_bits) or "task details updated"
 
+        normalized_status = _normalize_task_status(getattr(task, "status", "not_started"))
+        log_event_type = (
+            "submitted_for_validation" if submit_for_validation
+            else "task_started" if "status" in payload and normalized_status in {"in_progress", "overdue"}
+            else "task_updated"
+        )
+        audit_action = (
+            "demo.task.submitted" if submit_for_validation
+            else "demo.task.started" if log_event_type == "task_started"
+            else "demo.task.updated"
+        )
+
         self._append_task_log_entry(
             task,
             actor,
-            "task_updated",
+            log_event_type,
             update_message,
             {"project_id": project.id, "activity_id": activity.id, "task_id": task.id},
         )
         self.deps.append_audit_event(
             data,
-            action="demo.task.updated",
+            action=audit_action,
             target_type="task",
             target_id=task.id,
             actor=actor,
@@ -1337,23 +1468,37 @@ class DemoWorkspaceService:
         task = context["task"]
         project = context["project"]
         activity = context["activity"]
+        self._ensure_actor_project_scope(actor, project)
+
+        status = _normalize_task_status(getattr(task, "status", "not_started"))
+        submitted_at = str(getattr(task, "submitted_at", "") or "").strip()
+        validated_at = str(getattr(task, "validated_at", "") or "").strip()
+        approved_at = str(getattr(task, "approved_at", "") or "").strip()
 
         if decision in {"validate", "validated"}:
+            if status != "pending_validation" or not submitted_at or validated_at:
+                raise ServiceError(409, "Only an unvalidated submitted task can complete MEAL validation.")
             task.validated_at = self.deps.now_iso_utc()
-            if task.status == "not_started":
-                task.status = "pending_validation"
             event_type = "demo.task.validated"
+            task_event_type = "validated"
             message = "Validation checkpoint completed."
         elif decision in {"approve", "approved"}:
+            if status != "pending_validation" or not validated_at or approved_at:
+                raise ServiceError(409, "Final approval requires a pending task already validated by MEAL.")
             task.approved_at = self.deps.now_iso_utc()
-            task.validated_at = task.validated_at or self.deps.now_iso_utc()
             task.status = "completed"
             task.progress_pct = 100.0
             event_type = "demo.task.approved"
+            task_event_type = "approved"
             message = "Manager approval completed and task closed."
         elif decision in {"reject", "rejected", "changes_required"}:
+            if status != "pending_validation" or not submitted_at or validated_at:
+                raise ServiceError(409, "Only an unvalidated submitted task can be returned for rework.")
             task.status = "in_progress"
-            event_type = "demo.task.validated"
+            task.validated_at = ""
+            task.approved_at = ""
+            event_type = "demo.task.returned"
+            task_event_type = "returned_for_rework"
             message = "Validation requested further work before closure."
         else:
             raise ServiceError(400, "Unsupported validation decision. Use validated, approved, or rejected.")
@@ -1367,7 +1512,7 @@ class DemoWorkspaceService:
         self._append_task_log_entry(
             task,
             actor,
-            decision,
+            task_event_type,
             message,
             {"project_id": project.id, "activity_id": activity.id, "task_id": task.id},
         )
@@ -1384,6 +1529,9 @@ class DemoWorkspaceService:
                 "task_id": task.id,
                 "task_name": task.name,
                 "status": task.status,
+                "submitted_at": getattr(task, "submitted_at", ""),
+                "validated_at": getattr(task, "validated_at", ""),
+                "approved_at": getattr(task, "approved_at", ""),
                 "message": f"{task.name}: {message}",
             },
         )

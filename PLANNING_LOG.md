@@ -6,3 +6,5 @@
 2026-09-22 | Preserve the two-step RC Atlas closure model: Field submits, MEAL validates or returns, and Programme Manager gives final approval; after MEAL validation Teresa must see that approval is pending, without adding a validated task status. | Decided by the user.
 2026-09-22 | Create the OpenSpec change course-mvp-workflow-alignment with resolved proposal, specification, design, and implementation tasks, stopping before apply. | Decided by the user.
 2026-09-22 | Create a local Git safety checkpoint of the current RC Atlas state before OpenSpec Apply, excluding Site.txt and without pushing. | Decided by the user.
+2026-09-22 | Apply the approved OpenSpec change course-mvp-workflow-alignment completely, verify it with targeted and full tests, and stop without staging, committing, or pushing. | Decided by the user.
+2026-09-22 | Commit and publish the verified final RC Atlas course MVP state, including the completed OpenSpec course-mvp-workflow-alignment change, to the existing GitHub main branch while excluding Site.txt and local/runtime artifacts. | Decided by the user.

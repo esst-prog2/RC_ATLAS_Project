@@ -315,8 +315,8 @@ class DemoSmokeTests(unittest.TestCase):
                     self.assertEqual(denied_response.status_code, 403)
 
                 assigned_update = demo_service.update_task(
-                    "task_res_1",
-                    {"progress_pct": 92, "evidence_note": "Fictional follow-up evidence note"},
+                    "task_res_5",
+                    {"progress_pct": 82, "evidence_note": "Fictional follow-up evidence note"},
                     None,
                     field_token,
                 )
