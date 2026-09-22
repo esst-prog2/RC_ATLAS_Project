@@ -2,6 +2,10 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 
+RESULT_TYPES = ("goal", "outcome", "output")
+INDICATOR_RESULT_TYPES = ("outcome", "output")
+
+
 @dataclass
 class OrganizationAccount:
     id: str
@@ -119,6 +123,68 @@ class NotificationRule:
     last_run_at: str = ""
     created_at: str = ""
     updated_at: str = ""
+
+
+@dataclass
+class ResultNode:
+    id: str
+    organization_id: str
+    project_id: str
+    result_type: str
+    title: str
+    description: str = ""
+    parent_id: str = ""
+    display_order: int = 0
+    status: str = "active"
+    created_at: str = ""
+    updated_at: str = ""
+
+    def __post_init__(self) -> None:
+        self.id = str(self.id or "").strip()
+        self.organization_id = str(self.organization_id or "").strip()
+        self.project_id = str(self.project_id or "").strip()
+        self.result_type = str(self.result_type or "").strip().lower()
+        self.title = str(self.title or "").strip()
+        self.parent_id = str(self.parent_id or "").strip()
+        self.status = str(self.status or "active").strip().lower() or "active"
+        if not self.id or not self.organization_id or not self.project_id or not self.title:
+            raise ValueError("Result nodes require id, organization_id, project_id, and title.")
+        if self.result_type not in RESULT_TYPES:
+            raise ValueError(f"Unsupported result type: '{self.result_type}'.")
+        if self.result_type == "goal" and self.parent_id:
+            raise ValueError("A Goal cannot have a parent result.")
+        if self.result_type in {"outcome", "output"} and not self.parent_id:
+            raise ValueError(f"A {self.result_type.title()} requires a parent result.")
+        try:
+            self.display_order = int(self.display_order)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Result display_order must be an integer.") from exc
+        if self.display_order < 0:
+            raise ValueError("Result display_order cannot be negative.")
+
+
+@dataclass
+class IndicatorResultLink:
+    id: str
+    organization_id: str
+    project_id: str
+    indicator_id: str
+    result_id: str
+    result_type: str
+    created_at: str = ""
+    updated_at: str = ""
+
+    def __post_init__(self) -> None:
+        self.id = str(self.id or "").strip()
+        self.organization_id = str(self.organization_id or "").strip()
+        self.project_id = str(self.project_id or "").strip()
+        self.indicator_id = str(self.indicator_id or "").strip()
+        self.result_id = str(self.result_id or "").strip()
+        self.result_type = str(self.result_type or "").strip().lower()
+        if not all((self.id, self.organization_id, self.project_id, self.indicator_id, self.result_id)):
+            raise ValueError("Indicator result links require stable ownership and relationship identifiers.")
+        if self.result_type not in INDICATOR_RESULT_TYPES:
+            raise ValueError("Indicators may link only to an Outcome or Output.")
 
 
 @dataclass

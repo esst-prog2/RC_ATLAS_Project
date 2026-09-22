@@ -4925,6 +4925,621 @@
       color: var(--text);
     }
 
+    /* Logical Framework builder */
+    .project-config-workspace-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+    .app-shell.role-programme-manager .project-config-workspace-nav button {
+      min-height: 32px;
+      margin-bottom: -1px;
+      padding: 7px 2px 8px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: #42566d;
+      box-shadow: none;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .app-shell.role-programme-manager .project-config-workspace-nav button:hover {
+      background: transparent;
+      color: #174e9d;
+    }
+    .app-shell.role-programme-manager .project-config-workspace-nav button.active {
+      border-bottom-color: #175cd3;
+      background: transparent;
+      color: #174e9d;
+      box-shadow: none;
+    }
+    .view[data-view="project-config"],
+    .project-config-workspace {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .project-config-grid,
+    .project-config-grid > *,
+    #projectRegistryTable {
+      min-width: 0;
+      max-width: 100%;
+    }
+    #projectRegistryTable > .admin-table {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+    }
+    .project-config-workspace.hidden {
+      display: none;
+    }
+    .lf-workspace {
+      --lf-blue: #175cd3;
+      --lf-navy: #0b1f3a;
+      --lf-border: #d7e0ea;
+      display: grid;
+      gap: 18px;
+      min-width: 0;
+      max-width: 100%;
+      color: #172b45;
+    }
+    .lf-workspace.hidden {
+      display: none;
+    }
+    .lf-page-header,
+    .lf-section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      min-width: 0;
+    }
+    .lf-page-header {
+      align-items: flex-end;
+      padding: 2px 0 13px;
+      border: 0;
+      border-bottom: 1px solid var(--lf-border);
+      border-radius: 0;
+      background: transparent;
+    }
+    .lf-page-header > div,
+    .lf-section-head > div {
+      min-width: 0;
+    }
+    .lf-eyebrow {
+      color: #5c6f85;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+    .lf-page-header h2,
+    .lf-drawer-header h2 {
+      margin: 0;
+      color: var(--lf-navy);
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    .lf-page-header p,
+    .lf-section-head p,
+    .lf-drawer-header p {
+      margin: 5px 0 0;
+      color: #5c6f85;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .lf-project-context {
+      display: grid;
+      grid-template-columns: minmax(240px, 360px) auto;
+      align-items: end;
+      gap: 8px;
+      min-width: 0;
+    }
+    .lf-project-field {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+    .lf-project-field label {
+      font-size: 11px;
+    }
+    .lf-project-context select {
+      width: 100%;
+      min-width: 0;
+      max-width: 340px;
+    }
+    .lf-panel {
+      min-width: 0;
+      max-width: 100%;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .lf-section-head {
+      align-items: center;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #e3e9f0;
+    }
+    .lf-section-head h3 {
+      margin: 0;
+      color: var(--lf-navy);
+      font-size: 15px;
+      line-height: 1.3;
+    }
+    .lf-access-note {
+      padding: 10px 12px;
+      border: 1px solid #c8d6e6;
+      border-radius: 5px;
+      background: #f4f7fb;
+      color: #405770;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .lf-access-note.archived {
+      border-color: #e1c98f;
+      background: #fff9eb;
+      color: #755111;
+    }
+    .lf-tree {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+      padding-top: 9px;
+    }
+    .lf-branch,
+    .lf-children,
+    .lf-node-content {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+    .lf-children {
+      margin-left: 18px;
+      padding-left: 18px;
+      border-left: 1px solid #cfdae6;
+    }
+    .lf-node {
+      min-width: 0;
+      border: 1px solid #d9e2ec;
+      border-left: 3px solid #175cd3;
+      border-radius: 5px;
+      background: #ffffff;
+    }
+    .lf-node.outcome {
+      border-left-color: #4677bd;
+      background: #fbfcfe;
+    }
+    .lf-node.output {
+      border-left-color: #8799ad;
+      background: #fdfefe;
+    }
+    .lf-node.archived {
+      border-left-color: #9aa8b8;
+      background: #f5f7f9;
+      opacity: 0.78;
+    }
+    .lf-node-header {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 9px;
+      min-width: 0;
+      padding: 10px 11px;
+    }
+    .lf-collapse-btn,
+    .lf-menu summary {
+      display: inline-grid;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid #d4dee9;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #3f5873;
+      box-shadow: none;
+      font-size: 13px;
+      line-height: 1;
+    }
+    .lf-node-title-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-width: 0;
+    }
+    .lf-node-title {
+      min-width: 0;
+      color: #142b46;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .lf-level-badge,
+    .lf-status-badge,
+    .lf-count {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      max-width: 100%;
+      padding: 2px 6px;
+      border: 1px solid #cfdbe8;
+      border-radius: 4px;
+      background: #f2f6fb;
+      color: #38526d;
+      font-size: 10.5px;
+      font-weight: 650;
+      line-height: 1.3;
+    }
+    .lf-level-badge {
+      border-color: #bfd0ea;
+      background: #edf4ff;
+      color: #174e9d;
+      text-transform: uppercase;
+    }
+    .lf-node-description {
+      margin-top: 4px;
+      color: #63758a;
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+    .lf-node-meta {
+      margin-top: 5px;
+      color: #74859a;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .lf-menu {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+    .lf-menu summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+    }
+    .lf-menu summary::-webkit-details-marker {
+      display: none;
+    }
+    .lf-menu-popover {
+      position: absolute;
+      z-index: 8;
+      top: 32px;
+      right: 0;
+      display: grid;
+      width: 190px;
+      padding: 5px;
+      border: 1px solid #cfd9e5;
+      border-radius: 5px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(15, 31, 52, 0.13);
+    }
+    .lf-menu-popover button {
+      justify-content: flex-start;
+      min-height: 30px;
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: #233d58;
+      box-shadow: none;
+      font-size: 11.5px;
+      font-weight: 550;
+      text-align: left;
+    }
+    .lf-menu-popover button:hover {
+      background: #edf4fd;
+    }
+    .lf-menu-popover button.danger {
+      color: #a33327;
+    }
+    .lf-indicator-group {
+      display: grid;
+      gap: 6px;
+      margin: 0 11px 10px 48px;
+      padding-top: 8px;
+      border-top: 1px solid #e5ebf1;
+    }
+    .lf-indicator-group-label {
+      color: #66788d;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .lf-indicator-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #f4f7fb;
+    }
+    .lf-indicator-row strong {
+      display: block;
+      min-width: 0;
+      color: #213a55;
+      font-size: 11.5px;
+      font-weight: 600;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .lf-indicator-row span {
+      color: #6a7b8f;
+      font-size: 10.5px;
+    }
+    .lf-empty,
+    .lf-loading,
+    .lf-error {
+      display: grid;
+      justify-items: start;
+      gap: 7px;
+      min-height: 0;
+      align-content: start;
+      padding: 11px 12px;
+      border: 1px dashed #cbd7e4;
+      border-radius: 5px;
+      background: #f9fbfd;
+      color: #576b81;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .lf-empty strong,
+    .lf-error strong {
+      color: #213a55;
+      font-size: 13px;
+    }
+    .lf-table-scroll {
+      min-width: 0;
+      max-width: 100%;
+      margin-top: 8px;
+      overflow-x: auto;
+      border: 1px solid #dfe6ee;
+      border-radius: 5px;
+    }
+    .lf-indicator-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .lf-indicator-table th,
+    .lf-indicator-table td {
+      padding: 7px 9px;
+      border-bottom: 1px solid #e6ecf2;
+      color: #314a64;
+      font-size: 11.5px;
+      line-height: 1.35;
+      text-align: left;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+    }
+    .lf-indicator-table th {
+      background: #f4f7fa;
+      color: #64768a;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .lf-indicator-table tr:last-child td {
+      border-bottom: 0;
+    }
+    .lf-indicator-name {
+      color: #18334f;
+      font-weight: 650;
+    }
+    .lf-drawer-shell {
+      position: fixed;
+      z-index: 72;
+      inset: 0;
+      display: flex;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+    .lf-drawer-shell.hidden {
+      display: none;
+    }
+    .lf-drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      background: rgba(8, 25, 47, 0.24);
+      box-shadow: none;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .app-shell.role-programme-manager .lf-drawer-backdrop,
+    .app-shell.role-programme-manager .lf-drawer-backdrop:hover {
+      padding: 0;
+      border-radius: 0;
+      background: rgba(8, 25, 47, 0.24);
+      box-shadow: none;
+      transform: none;
+    }
+    .app-shell.role-programme-manager .lf-menu-popover button {
+      justify-content: flex-start;
+      min-height: 30px;
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: #233d58;
+      box-shadow: none;
+      font-size: 11.5px;
+      font-weight: 550;
+      text-align: left;
+    }
+    .app-shell.role-programme-manager .lf-menu-popover button:hover {
+      background: #edf4fd;
+      color: #174e9d;
+    }
+    .app-shell.role-programme-manager .lf-menu-popover button.danger {
+      background: transparent;
+      color: #a33327;
+    }
+    .lf-drawer-panel {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      width: min(560px, 100%);
+      max-width: 100%;
+      height: 100dvh;
+      border-left: 1px solid #cbd7e4;
+      background: #f7f9fc;
+      box-shadow: -10px 0 28px rgba(11, 31, 58, 0.14);
+      pointer-events: auto;
+    }
+    .lf-drawer-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      min-width: 0;
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid #dbe3ec;
+      background: #ffffff;
+    }
+    .lf-drawer-header > div {
+      min-width: 0;
+    }
+    .lf-drawer-header h2 {
+      font-size: 19px;
+    }
+    .lf-drawer-content {
+      min-width: 0;
+      overflow-y: auto;
+      padding: 16px 18px 22px;
+    }
+    .lf-form {
+      display: grid;
+      gap: 14px;
+    }
+    .lf-form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(140px, 0.42fr);
+      gap: 12px;
+    }
+    .lf-form label,
+    .lf-target-option label {
+      color: #435970;
+      font-size: 11px;
+      font-weight: 650;
+    }
+    .lf-form textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+    .lf-form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid #dfe6ee;
+    }
+    .lf-link-options {
+      display: grid;
+      gap: 7px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 2px;
+    }
+    .lf-target-option {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 9px;
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid #d9e2eb;
+      border-radius: 5px;
+      background: #ffffff;
+    }
+    .lf-target-option input {
+      width: auto;
+      margin-top: 2px;
+    }
+    .lf-target-option strong {
+      display: block;
+      color: #1d3853;
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .lf-target-option span {
+      display: block;
+      margin-top: 2px;
+      color: #6a7c90;
+      font-size: 10.5px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 900px) {
+      .lf-page-header,
+      .lf-section-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .lf-project-context {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      .lf-project-context select {
+        max-width: none;
+      }
+    }
+    @media (max-width: 600px) {
+      .lf-page-header {
+        padding: 0 0 11px;
+      }
+      .lf-page-header h2 {
+        font-size: 20px;
+      }
+      .lf-project-context,
+      .lf-form-grid {
+        grid-template-columns: 1fr;
+      }
+      .lf-children {
+        margin-left: 8px;
+        padding-left: 9px;
+      }
+      .lf-node-header {
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+        gap: 6px;
+        padding: 9px 8px;
+      }
+      .lf-indicator-group {
+        margin-left: 40px;
+        margin-right: 8px;
+      }
+      .lf-drawer-panel {
+        width: 100%;
+        border-left: 0;
+      }
+    }
+
     /* Programme Manager analytical workspace */
     body.programme-manager-active {
       background: #eef2f7;
@@ -7429,7 +8044,13 @@
           </section>
 
           <section class="view" data-view="project-config">
-            <section class="panel stack">
+            <nav id="projectConfigWorkspaceNav" class="project-config-workspace-nav" aria-label="Project Configuration">
+              <button class="active" type="button" data-project-config-workspace="registry">Projects</button>
+              <button type="button" data-project-config-workspace="logical-framework">Logical Framework</button>
+            </nav>
+
+            <div id="projectRegistryWorkspace" class="project-config-workspace">
+            <section id="projectRegistryOverviewPanel" class="panel stack">
               <div class="panel-head">
                 <div>
                   <h2>Project Configuration Studio</h2>
@@ -7604,6 +8225,40 @@
                 <div id="projectStudioState" class="panel-note">Start with project details, then move through coverage, team, review, and publish.</div>
               </section>
             </div>
+            </div>
+
+            <section id="logicalFrameworkWorkspace" class="lf-workspace hidden" aria-labelledby="logicalFrameworkTitle">
+              <header class="lf-page-header">
+                <div>
+                  <h2 id="logicalFrameworkTitle">Logical Framework</h2>
+                  <p id="logicalFrameworkLead">Define the project results chain and connect existing indicators to Outcomes and Outputs.</p>
+                </div>
+                <div class="lf-project-context">
+                  <div class="lf-project-field">
+                    <label id="logicalFrameworkProjectLabel" for="logicalFrameworkProjectSelect">Project</label>
+                    <select id="logicalFrameworkProjectSelect"></select>
+                  </div>
+                  <button id="logicalFrameworkAddGoalBtn" type="button">Add Goal</button>
+                </div>
+              </header>
+
+              <div id="logicalFrameworkAccessNote" class="lf-access-note hidden" role="status"></div>
+
+              <section class="lf-panel" aria-labelledby="logicalFrameworkStructureTitle">
+                <div class="lf-section-head">
+                  <h3 id="logicalFrameworkStructureTitle">Results Structure</h3>
+                </div>
+                <div id="logicalFrameworkTree" class="lf-tree" aria-live="polite"></div>
+              </section>
+
+              <section class="lf-panel" aria-labelledby="logicalFrameworkUnassignedTitle">
+                <div class="lf-section-head">
+                  <h3 id="logicalFrameworkUnassignedTitle">Unassigned Indicators</h3>
+                  <span id="logicalFrameworkUnassignedCount" class="lf-count">0</span>
+                </div>
+                <div id="logicalFrameworkUnassignedTable" class="lf-table-scroll"></div>
+              </section>
+            </section>
           </section>
 
           <section class="view" data-view="studio-lab">
@@ -8109,6 +8764,21 @@
               <button id="taskDrawerCloseBtn" class="ghost small" type="button">Close</button>
             </div>
             <div id="taskDrawerContent" class="task-drawer-content"></div>
+          </aside>
+        </div>
+
+        <div id="logicalFrameworkDrawerShell" class="lf-drawer-shell hidden" aria-hidden="true">
+          <button id="logicalFrameworkDrawerBackdrop" class="lf-drawer-backdrop" type="button" aria-label="Close Logical Framework editor"></button>
+          <aside id="logicalFrameworkDrawerPanel" class="lf-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="logicalFrameworkDrawerTitle">
+            <header class="lf-drawer-header">
+              <div>
+                <div id="logicalFrameworkDrawerEyebrow" class="lf-eyebrow">Logical Framework</div>
+                <h2 id="logicalFrameworkDrawerTitle">Edit result</h2>
+                <p id="logicalFrameworkDrawerSubtitle">Update the selected result.</p>
+              </div>
+              <button id="logicalFrameworkDrawerCloseBtn" class="ghost small" type="button">Close</button>
+            </header>
+            <div id="logicalFrameworkDrawerContent" class="lf-drawer-content"></div>
           </aside>
         </div>
       </div>
@@ -9284,6 +9954,14 @@
       projectStudioMode: "create",
       projectStudioStep: "details",
       selectedRegistryProjectId: "",
+      projectConfigWorkspace: "registry",
+      logicalFramework: null,
+      logicalFrameworkProjectId: "",
+      logicalFrameworkLoadState: "idle",
+      logicalFrameworkError: "",
+      logicalFrameworkCollapsedGoals: [],
+      logicalFrameworkCollapsedOutcomes: [],
+      logicalFrameworkDrawer: null,
       presentationSlideIndex: 0,
       splashDismissed: false,
     };
@@ -9312,6 +9990,9 @@
       VIEW_EXECUTIVE_SNAPSHOT: { label: "Project executive snapshot" },
       VIEW_INDICATORS: { label: "Indicator intelligence" },
       EDIT_INDICATORS: { label: "Edit indicators" },
+      VIEW_LOGICAL_FRAMEWORK: { label: "View Logical Framework" },
+      MANAGE_LOGICAL_FRAMEWORK: { label: "Manage Logical Framework" },
+      LINK_RESULT_INDICATORS: { label: "Link result indicators" },
       VIEW_DATA_QUALITY: { label: "Data quality" },
       VALIDATE_EVIDENCE: { label: "Validate evidence" },
       VIEW_WORKPLAN: { label: "Workplan visibility" },
@@ -9340,6 +10021,9 @@
       "projects.create": "MANAGE_PROJECTS",
       "projects.manage": "MANAGE_WORKPLAN",
       "indicators.view": "VIEW_INDICATORS",
+      "logical_framework.view": "VIEW_LOGICAL_FRAMEWORK",
+      "logical_framework.manage": "MANAGE_LOGICAL_FRAMEWORK",
+      "logical_framework.link_indicators": "LINK_RESULT_INDICATORS",
       "reporting.view": "VIEW_REPORTS",
       "data_quality.view": "VIEW_DATA_QUALITY",
       "tasks.view_assigned": "VIEW_WORKPLAN",
@@ -9363,6 +10047,9 @@
         "WORKSPACE_VIEW",
         "VIEW_PORTFOLIO",
         "VIEW_EXECUTIVE_SNAPSHOT",
+        "VIEW_LOGICAL_FRAMEWORK",
+        "MANAGE_LOGICAL_FRAMEWORK",
+        "LINK_RESULT_INDICATORS",
         "VIEW_WORKPLAN",
         "MANAGE_WORKPLAN",
         "MANAGE_PROJECTS",
@@ -9380,6 +10067,8 @@
         "VIEW_EXECUTIVE_SNAPSHOT",
         "VIEW_INDICATORS",
         "EDIT_INDICATORS",
+        "VIEW_LOGICAL_FRAMEWORK",
+        "LINK_RESULT_INDICATORS",
         "VIEW_DATA_QUALITY",
         "VIEW_WORKPLAN",
         "UPDATE_TASK_PROGRESS",
@@ -9391,6 +10080,7 @@
         "WORKSPACE_VIEW",
         "VIEW_PORTFOLIO",
         "VIEW_EXECUTIVE_SNAPSHOT",
+        "VIEW_LOGICAL_FRAMEWORK",
         "VIEW_WORKPLAN",
         "UPDATE_TASK_PROGRESS",
         "SUBMIT_EVIDENCE",
@@ -9400,6 +10090,7 @@
         "WORKSPACE_VIEW",
         "VIEW_PORTFOLIO",
         "VIEW_EXECUTIVE_SNAPSHOT",
+        "VIEW_LOGICAL_FRAMEWORK",
         "VIEW_NOTIFICATIONS",
         "VIEW_RISKS",
         "VIEW_REPORTS",
@@ -9417,7 +10108,7 @@
       { view: "reports", key: "nav.reports", anyPermissions: ["VIEW_REPORTS", "GENERATE_REPORTS"] },
       { view: "studio-lab", key: "nav.studio_lab", anyPermissions: ["WORKSPACE_ADMIN"] },
       { view: "admin", key: "nav.admin", anyPermissions: ["MANAGE_USERS", "MANAGE_ORGANIZATION", "VIEW_AUDIT_LOG", "WORKSPACE_ADMIN"] },
-      { view: "project-config", key: "nav.project_config", anyPermissions: ["MANAGE_PROJECTS"] },
+      { view: "project-config", key: "nav.project_config", anyPermissions: ["MANAGE_PROJECTS", "VIEW_LOGICAL_FRAMEWORK"] },
     ];
 
     const flashBox = document.getElementById("flash");
@@ -11110,6 +11801,8 @@
       renderCode("mappingBox", state.datasetMapping || t("quality.select_dataset"));
       renderCode("qualityBox", state.datasetQualityReport || t("quality.select_dataset"));
       renderDatasetNarrativeCode(state.datasetNarrative);
+      renderProjectConfigWorkspaceNavigation();
+      if (state.logicalFrameworkDrawer) renderLogicalFrameworkDrawer();
       if (state.presentationMode) {
         renderPresentationDeck();
       }
@@ -18189,6 +18882,7 @@
           { view: "indicator-intelligence", label: localizedCopy({ EN: "Indicator Intelligence", PT: "Inteligencia de Indicadores", FR: "Intelligence des Indicateurs" }) },
           { view: "quality", label: localizedCopy({ EN: "Data Quality", PT: "Qualidade de Dados", FR: "Qualite des Donnees" }) },
           { view: "workplan", label: localizedCopy({ EN: "Validation Workflow", PT: "Fluxo de Validacao", FR: "Flux de Validation" }) },
+          { view: "project-config", label: localizedCopy({ EN: "Logical Framework", PT: "Quadro Lógico", FR: "Cadre Logique" }) },
           { view: "narratives", label: localizedCopy({ EN: "Narrative Summary", PT: "Resumo Narrativo", FR: "Resume Narratif" }) },
           { view: "reports", label: localizedCopy({ EN: "Reports", PT: "Relatorios", FR: "Rapports" }) },
         ],
@@ -18196,6 +18890,7 @@
           { view: "overview", label: localizedCopy({ EN: "My Tasks", PT: "Minhas Tarefas", FR: "Mes Taches" }) },
           { view: "workplan", label: localizedCopy({ EN: "Workplan", PT: "Plano de Trabalho", FR: "Plan de Travail" }) },
           { view: "notifications", label: localizedCopy({ EN: "Field Notifications", PT: "Notificacoes de Campo", FR: "Notifications Terrain" }) },
+          { view: "project-config", label: localizedCopy({ EN: "Logical Framework", PT: "Quadro Lógico", FR: "Cadre Logique" }) },
           { view: "executive", label: localizedCopy({ EN: "Implementation Updates", PT: "Atualizacoes de Implementacao", FR: "Mises a Jour d'Execution" }) },
         ],
         executive_viewer: [
@@ -18203,6 +18898,7 @@
           { view: "overview", label: localizedCopy({ EN: "Portfolio Overview", PT: "Visao do Portfolio", FR: "Vue du Portefeuille" }) },
           { view: "risks", label: localizedCopy({ EN: "Strategic Risks", PT: "Riscos Estrategicos", FR: "Risques Strategiques" }) },
           { view: "reports", label: localizedCopy({ EN: "Reports", PT: "Relatorios", FR: "Rapports" }) },
+          { view: "project-config", label: localizedCopy({ EN: "Logical Framework", PT: "Quadro Lógico", FR: "Cadre Logique" }) },
           { view: "notifications", label: localizedCopy({ EN: "Operational Signals", PT: "Sinais Operacionais", FR: "Signaux Operationnels" }) },
         ],
       };
@@ -21113,10 +21809,10 @@
       const key = textSafe(status || "draft", "draft").toLowerCase();
       return {
         draft: localizedCopy({ EN: "Draft", PT: "Rascunho", FR: "Brouillon" }),
-        published: localizedCopy({ EN: "Published", PT: "Publicado", FR: "Publie" }),
+        published: localizedCopy({ EN: "Published", PT: "Publicado", FR: "Publié" }),
         active: localizedCopy({ EN: "Active", PT: "Ativo", FR: "Actif" }),
         paused: localizedCopy({ EN: "Paused", PT: "Pausado", FR: "En Pause" }),
-        completed: localizedCopy({ EN: "Completed", PT: "Concluido", FR: "Termine" }),
+        completed: localizedCopy({ EN: "Completed", PT: "Concluído", FR: "Terminé" }),
         archived: localizedCopy({ EN: "Archived", PT: "Arquivado", FR: "Archive" }),
       }[key] || localizedCopy({ EN: "Draft", PT: "Rascunho", FR: "Brouillon" });
     }
@@ -21127,7 +21823,27 @@
     }
 
     function projectAssignmentRoleLabel(roleId) {
-      return presentText(operationalRoleProfileById(roleId).title || translateLiteralText(textSafe(roleId || "role")));
+      const labels = {
+        organization_admin: { EN: "Organization Admin", PT: "Administrador da Organização", FR: "Administrateur de l’Organisation" },
+        programme_manager: { EN: "Programme Manager", PT: "Gestor do Programa", FR: "Responsable de Programme" },
+        meal_officer: { EN: "MEAL Officer", PT: "Responsável de MEAL", FR: "Responsable MEAL" },
+        field_coordinator: { EN: "Field Coordinator", PT: "Coordenador de Campo", FR: "Coordinateur Terrain" },
+        executive_viewer: { EN: "Executive Viewer", PT: "Visualizador Executivo", FR: "Observateur Exécutif" },
+      };
+      return labels[roleId]
+        ? localizedCopy(labels[roleId])
+        : presentText(operationalRoleProfileById(roleId).title || translateLiteralText(textSafe(roleId || "role")));
+    }
+
+    function projectRegistryRoleLabel(value) {
+      const canonical = {
+        organization_admin: "organization_admin",
+        programme_manager: "programme_manager",
+        meal_officer: "meal_officer",
+        field_coordinator: "field_coordinator",
+        executive_viewer: "executive_viewer",
+      }[textSafe(value || "", "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")];
+      return canonical ? projectAssignmentRoleLabel(canonical) : presentText(value || "-");
     }
 
     function projectRegistryActionLabel(action) {
@@ -21138,7 +21854,7 @@
         publish: localizedCopy({ EN: "Publish", PT: "Publicar", FR: "Publier" }),
         activate: localizedCopy({ EN: "Activate", PT: "Ativar", FR: "Activer" }),
         deactivate: localizedCopy({ EN: "Pause", PT: "Pausar", FR: "Mettre en Pause" }),
-        complete: localizedCopy({ EN: "Complete", PT: "Concluir", FR: "Cloturer" }),
+        complete: localizedCopy({ EN: "Complete", PT: "Concluir", FR: "Clôturer" }),
         archive: localizedCopy({ EN: "Archive", PT: "Arquivar", FR: "Archiver" }),
         restore: localizedCopy({ EN: "Restore", PT: "Restaurar", FR: "Restaurer" }),
       }[key] || presentText(action || "Action");
@@ -21155,7 +21871,7 @@
         return localizedCopy({ EN: "Refresh Published Shell", PT: "Atualizar Shell Publicada", FR: "Actualiser la Structure Publiee" });
       }
       if (!projectStudioCanPublish(normalized)) {
-        return localizedCopy({ EN: "Publication Locked", PT: "Publicacao Bloqueada", FR: "Publication Verrouillee" });
+        return localizedCopy({ EN: "Publication Locked", PT: "Publicação Bloqueada", FR: "Publication Verrouillée" });
       }
       return localizedCopy({ EN: "Publish Project", PT: "Publicar Projeto", FR: "Publier le Projet" });
     }
@@ -21174,6 +21890,885 @@
         { roleId: "field_coordinator", selectId: "projectFieldCoordinators" },
         { roleId: "executive_viewer", selectId: "projectExecutiveViewers" },
       ];
+    }
+
+    function projectConfigurationCopy(key, values = {}) {
+      const copy = {
+        overview_title: { EN: "Project Configuration Studio", PT: "Configuração de Projetos", FR: "Configuration des Projets" },
+        overview_note: {
+          EN: "Create, configure, publish, and govern organization projects through a structured registry workflow that future modules can attach to safely.",
+          PT: "Crie, configure, publique e governe os projetos da organização através de um fluxo de registo estruturado.",
+          FR: "Créez, configurez, publiez et gouvernez les projets de l'organisation dans un registre structuré.",
+        },
+        create_new: { EN: "Create New Project", PT: "Criar Novo Projeto", FR: "Créer un Nouveau Projet" },
+        refresh_registry: { EN: "Refresh Registry", PT: "Atualizar Registo", FR: "Actualiser le Registre" },
+        projects: { EN: "Projects", PT: "Projetos", FR: "Projets" },
+        projects_note: { EN: "First-class project registry entries", PT: "Projetos registados na organização", FR: "Projets inscrits au registre de l'organisation" },
+        draft: { EN: "Draft", PT: "Rascunho", FR: "Brouillon" },
+        draft_note: { EN: "Projects still being configured", PT: "Projetos ainda em configuração", FR: "Projets encore en configuration" },
+        published_active: { EN: "Published + Active", PT: "Publicados + Ativos", FR: "Publiés + Actifs" },
+        published_active_note: { EN: "Live projects with workspace shells ready", PT: "Projetos ativos com o espaço de trabalho preparado", FR: "Projets actifs avec un espace de travail prêt" },
+        inactive_states: { EN: "Paused / Completed / Archived", PT: "Pausados / Concluídos / Arquivados", FR: "En Pause / Terminés / Archivés" },
+        inactive_states_note: { EN: "Lifecycle states requiring governance follow-up", PT: "Estados do ciclo de vida que exigem acompanhamento", FR: "États du cycle de vie exigeant un suivi" },
+        registry_title: { EN: "Project Registry", PT: "Registo de Projetos", FR: "Registre des Projets" },
+        registry_note: { EN: "Search, filter, sort, and manage project lifecycle states across the current organization.", PT: "Pesquise, filtre, ordene e gira os estados do ciclo de vida dos projetos da organização.", FR: "Recherchez, filtrez, triez et gérez les états du cycle de vie des projets de l'organisation." },
+        search: { EN: "Search", PT: "Pesquisar", FR: "Rechercher" },
+        search_placeholder: { EN: "Search by project name, code, donor, programme, or country", PT: "Pesquisar por nome, código, doador, programa ou país", FR: "Rechercher par nom, code, bailleur, programme ou pays" },
+        status: { EN: "Status", PT: "Estado", FR: "Statut" },
+        all_statuses: { EN: "All statuses", PT: "Todos os estados", FR: "Tous les statuts" },
+        status_draft: { EN: "Draft", PT: "Rascunho", FR: "Brouillon" },
+        status_published: { EN: "Published", PT: "Publicado", FR: "Publié" },
+        status_active: { EN: "Active", PT: "Ativo", FR: "Actif" },
+        status_paused: { EN: "Paused", PT: "Pausado", FR: "En pause" },
+        status_completed: { EN: "Completed", PT: "Concluído", FR: "Terminé" },
+        status_archived: { EN: "Archived", PT: "Arquivado", FR: "Archivé" },
+        sort: { EN: "Sort", PT: "Ordenar", FR: "Trier" },
+        recently_updated: { EN: "Recently Updated", PT: "Atualizados recentemente", FR: "Récemment mis à jour" },
+        recently_created: { EN: "Recently Created", PT: "Criados recentemente", FR: "Récemment créés" },
+        project_name: { EN: "Project Name", PT: "Nome do Projeto", FR: "Nom du Projet" },
+        lifecycle_status: { EN: "Lifecycle Status", PT: "Estado do Ciclo de Vida", FR: "État du Cycle de Vie" },
+        project_code: { EN: "Project Code", PT: "Código do Projeto", FR: "Code du Projet" },
+        reset_filters: { EN: "Reset Filters", PT: "Repor Filtros", FR: "Réinitialiser les Filtres" },
+        create_project: { EN: "Create Project", PT: "Criar Projeto", FR: "Créer un Projet" },
+        create_lead: { EN: "Guide a project from metadata setup to publication without touching code or seed files.", PT: "Conduza o projeto da configuração dos metadados até à publicação.", FR: "Guidez le projet de la configuration des métadonnées jusqu'à la publication." },
+        edit_project: { EN: "Edit Project", PT: "Editar Projeto", FR: "Modifier le Projet" },
+        edit_lead: { EN: "Update metadata, coverage, team assignment, and lifecycle readiness for the selected project.", PT: "Atualize os metadados, a cobertura, a equipa e o ciclo de vida do projeto selecionado.", FR: "Mettez à jour les métadonnées, la couverture, l'équipe et le cycle de vie du projet sélectionné." },
+        step_details_title: { EN: "Project Details", PT: "Detalhes do Projeto", FR: "Détails du Projet" },
+        step_details_note: { EN: "Identity and core metadata", PT: "Identidade e metadados principais", FR: "Identité et métadonnées principales" },
+        step_coverage_title: { EN: "Geographic Coverage", PT: "Cobertura Geográfica", FR: "Couverture Géographique" },
+        step_coverage_note: { EN: "Country, dates, and footprint", PT: "País, datas e cobertura", FR: "Pays, dates et empreinte" },
+        step_team_title: { EN: "Project Team", PT: "Equipa do Projeto", FR: "Équipe du Projet" },
+        step_team_note: { EN: "Role assignments and ownership", PT: "Atribuição de funções e responsabilidades", FR: "Attribution des rôles et responsabilités" },
+        step_review_title: { EN: "Review", PT: "Revisão", FR: "Révision" },
+        step_review_note: { EN: "Readiness before publishing", PT: "Prontidão antes da publicação", FR: "Prêt avant publication" },
+        step_publish_title: { EN: "Publish", PT: "Publicar", FR: "Publier" },
+        step_publish_note: { EN: "Workspace shell generation", PT: "Geração da estrutura do espaço de trabalho", FR: "Génération de la structure de l’espace de travail" },
+        step: { EN: "Step {number}", PT: "Etapa {number}", FR: "Étape {number}" },
+        programme: { EN: "Programme", PT: "Programa", FR: "Programme" },
+        donor: { EN: "Donor", PT: "Doador", FR: "Bailleur" },
+        partner: { EN: "Implementing Partner", PT: "Parceiro de Implementação", FR: "Partenaire de Mise en Œuvre" },
+        sector: { EN: "Sector", PT: "Setor", FR: "Secteur" },
+        description: { EN: "Description", PT: "Descrição", FR: "Description" },
+        description_placeholder: { EN: "Describe the project, its implementation focus, and its operational purpose.", PT: "Descreva o projeto, o foco de implementação e o objetivo operacional.", FR: "Décrivez le projet, son axe de mise en œuvre et son objectif opérationnel." },
+        country: { EN: "Country", PT: "País", FR: "Pays" },
+        start_date: { EN: "Start Date", PT: "Data de Início", FR: "Date de Début" },
+        end_date: { EN: "End Date", PT: "Data de Fim", FR: "Date de Fin" },
+        province_coverage: { EN: "Province Coverage", PT: "Cobertura Provincial", FR: "Couverture Provinciale" },
+        district_coverage: { EN: "District Coverage", PT: "Cobertura Distrital", FR: "Couverture des Districts" },
+        back: { EN: "Back", PT: "Anterior", FR: "Précédent" },
+        next: { EN: "Next", PT: "Seguinte", FR: "Suivant" },
+        reset: { EN: "Reset", PT: "Repor", FR: "Réinitialiser" },
+        save_project: { EN: "Save Project", PT: "Guardar Projeto", FR: "Enregistrer le Projet" },
+        update_project: { EN: "Update Project", PT: "Atualizar Projeto", FR: "Mettre à Jour le Projet" },
+        start_state: { EN: "Start with project details, then move through coverage, team, review, and publish.", PT: "Comece pelos detalhes do projeto e avance pela cobertura, equipa, revisão e publicação.", FR: "Commencez par les détails du projet, puis passez à la couverture, l'équipe, la révision et la publication." },
+        editing_state: { EN: "Editing {project}. Save changes before using lifecycle actions.", PT: "A editar {project}. Guarde as alterações antes de usar as ações do ciclo de vida.", FR: "Modification de {project}. Enregistrez avant d'utiliser les actions du cycle de vie." },
+        code: { EN: "Code", PT: "Código", FR: "Code" },
+        assigned_users: { EN: "Assigned Users", PT: "Utilizadores Atribuídos", FR: "Utilisateurs Affectés" },
+        created_updated: { EN: "Created / Updated", PT: "Criado / Atualizado", FR: "Créé / Mis à Jour" },
+        actions: { EN: "Actions", PT: "Ações", FR: "Actions" },
+        no_matches: { EN: "No projects match the current registry filters.", PT: "Nenhum projeto corresponde aos filtros atuais.", FR: "Aucun projet ne correspond aux filtres actuels." },
+        no_projects: { EN: "No projects are registered for this organization yet.", PT: "Ainda não existem projetos registados nesta organização.", FR: "Aucun projet n'est encore enregistré pour cette organisation." },
+        untitled: { EN: "Untitled project", PT: "Projeto sem título", FR: "Projet sans titre" },
+        programme_unset: { EN: "Programme not set", PT: "Programa não definido", FR: "Programme non défini" },
+        sector_unset: { EN: "Sector not set", PT: "Setor não definido", FR: "Secteur non défini" },
+        district_count: { EN: "{count} district(s)", PT: "{count} distrito(s)", FR: "{count} district(s)" },
+        no_roles: { EN: "No roles assigned", PT: "Sem funções atribuídas", FR: "Aucun rôle attribué" },
+        review_project: { EN: "Project", PT: "Projeto", FR: "Projet" },
+        review_programme_donor: { EN: "Programme / Donor", PT: "Programa / Doador", FR: "Programme / Bailleur" },
+        review_coverage: { EN: "Coverage", PT: "Cobertura", FR: "Couverture" },
+        review_lifecycle: { EN: "Lifecycle", PT: "Ciclo de Vida", FR: "Cycle de Vie" },
+        review_team: { EN: "Project Team", PT: "Equipa do Projeto", FR: "Équipe du Projet" },
+      };
+      let result = localizedCopy(copy[key] || { EN: key, PT: key, FR: key });
+      Object.entries(values).forEach(([name, value]) => {
+        result = result.replaceAll("{" + name + "}", textSafe(value, ""));
+      });
+      return result;
+    }
+
+    function renderProjectStudioModeChrome() {
+      const editing = state.projectStudioMode === "edit";
+      const project = projectRegistryActiveProject();
+      const title = document.getElementById("projectStudioTitle");
+      const lead = document.getElementById("projectStudioLead");
+      const status = document.getElementById("projectStudioState");
+      const save = document.getElementById("saveProjectBtn");
+      if (title) title.textContent = projectConfigurationCopy(editing ? "edit_project" : "create_project");
+      if (lead) lead.textContent = projectConfigurationCopy(editing ? "edit_lead" : "create_lead");
+      if (status) {
+        status.textContent = editing
+          ? projectConfigurationCopy("editing_state", { project: project?.project_name || projectConfigurationCopy("review_project") })
+          : projectConfigurationCopy("start_state");
+      }
+      if (save) save.textContent = projectConfigurationCopy(editing ? "update_project" : "save_project");
+    }
+
+    function renderProjectConfigurationChrome() {
+      const bindings = [
+        ["#projectRegistryOverviewPanel h2", "overview_title"],
+        ["#projectRegistryOverviewPanel .panel-note", "overview_note"],
+        ["#projectRegistryNewBtn", "create_new"],
+        ["#projectRegistryRefreshBtn", "refresh_registry"],
+        [".project-config-grid > section:first-child .panel-head h2", "registry_title"],
+        [".project-config-grid > section:first-child .panel-head .panel-note", "registry_note"],
+        ["label[for='projectRegistrySearchInput']", "search"],
+        ["label[for='projectRegistryStatusFilter']", "status"],
+        ["label[for='projectRegistrySort']", "sort"],
+        ["#projectRegistryResetFiltersBtn", "reset_filters"],
+        ["label[for='projectNameInput']", "project_name"],
+        ["label[for='projectCodeInput']", "project_code"],
+        ["label[for='projectProgrammeInput']", "programme"],
+        ["label[for='projectDonorInput']", "donor"],
+        ["label[for='projectPartnerInput']", "partner"],
+        ["label[for='projectSectorInput']", "sector"],
+        ["label[for='projectDescriptionInput']", "description"],
+        ["label[for='projectCountryInput']", "country"],
+        ["label[for='projectStatusInput']", "lifecycle_status"],
+        ["label[for='projectStartDateInput']", "start_date"],
+        ["label[for='projectEndDateInput']", "end_date"],
+        ["label[for='projectProvincesInput']", "province_coverage"],
+        ["label[for='projectDistrictsInput']", "district_coverage"],
+        ["#projectStepBackBtn", "back"],
+        ["#projectStepNextBtn", "next"],
+        ["#projectStudioResetBtn", "reset"],
+      ];
+      bindings.forEach(([selector, key]) => setStaticText(selector, projectConfigurationCopy(key)));
+      setStaticPlaceholder("#projectRegistrySearchInput", projectConfigurationCopy("search_placeholder"));
+      setStaticPlaceholder("#projectDescriptionInput", projectConfigurationCopy("description_placeholder"));
+
+      const statusLabels = {
+        "": "all_statuses",
+        draft: "status_draft",
+        published: "status_published",
+        active: "status_active",
+        paused: "status_paused",
+        completed: "status_completed",
+        archived: "status_archived",
+      };
+      document.querySelectorAll("#projectRegistryStatusFilter option, #projectStatusInput option").forEach(option => {
+        option.textContent = projectConfigurationCopy(statusLabels[option.value] || "status");
+      });
+      const sortLabels = {
+        updated_desc: "recently_updated",
+        created_desc: "recently_created",
+        name_asc: "project_name",
+        status_asc: "lifecycle_status",
+        code_asc: "project_code",
+      };
+      document.querySelectorAll("#projectRegistrySort option").forEach(option => {
+        option.textContent = projectConfigurationCopy(sortLabels[option.value] || "sort");
+      });
+      const roleLabels = {
+        projectProgrammeManagers: "programme_manager",
+        projectMealOfficers: "meal_officer",
+        projectFieldCoordinators: "field_coordinator",
+        projectExecutiveViewers: "executive_viewer",
+      };
+      Object.entries(roleLabels).forEach(([selectId, roleId]) => {
+        const label = document.querySelector("label[for='" + selectId + "']");
+        if (label) label.textContent = projectAssignmentRoleLabel(roleId);
+      });
+      renderProjectStudioModeChrome();
+      renderProjectRegistrySummary();
+      renderProjectRegistry();
+      renderProjectStudioStepper();
+    }
+
+    function logicalFrameworkCopy(key, values = {}) {
+      const copy = {
+        projects: { EN: "Projects", PT: "Projetos", FR: "Projets" },
+        logical_framework: { EN: "Logical Framework", PT: "Quadro Lógico", FR: "Cadre Logique" },
+        results_architecture: { EN: "Results Architecture", PT: "Arquitetura de Resultados", FR: "Architecture des Résultats" },
+        title: { EN: "Logical Framework", PT: "Quadro Lógico", FR: "Cadre Logique" },
+        lead: {
+          EN: "Define the project results chain and connect existing indicators to Outcomes and Outputs.",
+          PT: "Defina a cadeia de resultados do projeto e ligue os indicadores existentes a Resultados e Produtos.",
+          FR: "Définissez la chaîne de résultats du projet et reliez les indicateurs existants aux Effets et aux Produits.",
+        },
+        project: { EN: "Project", PT: "Projeto", FR: "Projet" },
+        refresh: { EN: "Refresh", PT: "Atualizar", FR: "Actualiser" },
+        results_structure: { EN: "Results Structure", PT: "Estrutura de Resultados", FR: "Structure des Résultats" },
+        results_structure_note: {
+          EN: "Goal to Outcome to Output, with linked indicators shown in context.",
+          PT: "Objetivo para Resultado para Produto, com os indicadores ligados apresentados em contexto.",
+          FR: "Objectif vers Effet vers Produit, avec les indicateurs liés affichés en contexte.",
+        },
+        add_goal: { EN: "Add Goal", PT: "Adicionar Objetivo", FR: "Ajouter un Objectif" },
+        add_outcome: { EN: "Add Outcome", PT: "Adicionar Resultado", FR: "Ajouter un Effet" },
+        add_output: { EN: "Add Output", PT: "Adicionar Produto", FR: "Ajouter un Produit" },
+        unassigned_indicators: { EN: "Unassigned Indicators", PT: "Indicadores Não Atribuídos", FR: "Indicateurs Non Attribués" },
+        unassigned_note: {
+          EN: "Existing indicators that are not yet linked to an Outcome or Output.",
+          PT: "Indicadores existentes que ainda não estão ligados a um Resultado ou Produto.",
+          FR: "Indicateurs existants qui ne sont pas encore reliés à un Effet ou un Produit.",
+        },
+        no_projects: { EN: "No accessible projects are available.", PT: "Não existem projetos acessíveis.", FR: "Aucun projet accessible n'est disponible." },
+        loading: { EN: "Loading Logical Framework...", PT: "A carregar o Quadro Lógico...", FR: "Chargement du Cadre Logique..." },
+        load_error: { EN: "Logical Framework could not be loaded.", PT: "Não foi possível carregar o Quadro Lógico.", FR: "Le Cadre Logique n'a pas pu être chargé." },
+        retry: { EN: "Retry", PT: "Tentar novamente", FR: "Réessayer" },
+        empty_title: { EN: "No results structure has been configured.", PT: "Ainda não foi configurada uma estrutura de resultados.", FR: "Aucune structure de résultats n'a été configurée." },
+        empty_manage: { EN: "Create the first Goal to begin the project results chain.", PT: "Crie um Objetivo para iniciar a cadeia de resultados do projeto.", FR: "Créez le premier Objectif pour commencer la chaîne de résultats du projet." },
+        empty_read: { EN: "A project manager can create the first Goal when the results chain is ready.", PT: "Um gestor de programa pode criar o primeiro Objetivo quando a cadeia estiver pronta.", FR: "Un gestionnaire de programme peut créer le premier Objectif lorsque la chaîne est prête." },
+        no_unassigned: { EN: "All project indicators are assigned.", PT: "Todos os indicadores do projeto estão atribuídos.", FR: "Tous les indicateurs du projet sont attribués." },
+        read_only: { EN: "Read-only view. Structural changes are not available for this role.", PT: "Vista apenas de leitura. As alterações estruturais não estão disponíveis para esta função.", FR: "Vue en lecture seule. Les modifications structurelles ne sont pas disponibles pour ce rôle." },
+        link_only: { EN: "Indicator linking is available. Structural editing remains read-only.", PT: "A ligação de indicadores está disponível. A edição estrutural permanece apenas de leitura.", FR: "La liaison des indicateurs est disponible. La structure reste en lecture seule." },
+        archived: { EN: "This project is archived. Its Logical Framework is read-only.", PT: "Este projeto está arquivado. O Quadro Lógico é apenas de leitura.", FR: "Ce projet est archivé. Son Cadre Logique est en lecture seule." },
+        linked_indicators: { EN: "Linked indicators", PT: "Indicadores ligados", FR: "Indicateurs liés" },
+        no_linked: { EN: "No indicators linked", PT: "Sem indicadores ligados", FR: "Aucun indicateur lié" },
+        indicator: { EN: "Indicator", PT: "Indicador", FR: "Indicateur" },
+        unit: { EN: "Unit", PT: "Unidade", FR: "Unité" },
+        target: { EN: "Target", PT: "Meta", FR: "Cible" },
+        legacy_level: { EN: "Legacy level", PT: "Nível legado", FR: "Niveau historique" },
+        action: { EN: "Action", PT: "Ação", FR: "Action" },
+        link: { EN: "Link", PT: "Ligar", FR: "Lier" },
+        unlink: { EN: "Unlink", PT: "Desligar", FR: "Délier" },
+        edit: { EN: "Edit", PT: "Editar", FR: "Modifier" },
+        move_up: { EN: "Move up", PT: "Mover para cima", FR: "Monter" },
+        move_down: { EN: "Move down", PT: "Mover para baixo", FR: "Descendre" },
+        archive: { EN: "Archive", PT: "Arquivar", FR: "Archiver" },
+        link_indicator: { EN: "Link indicator", PT: "Ligar indicador", FR: "Lier un indicateur" },
+        more_actions: { EN: "More actions", PT: "Mais ações", FR: "Plus d'actions" },
+        active: { EN: "Active", PT: "Ativo", FR: "Actif" },
+        draft: { EN: "Draft", PT: "Rascunho", FR: "Brouillon" },
+        status_archived: { EN: "Archived", PT: "Arquivado", FR: "Archivé" },
+        goal: { EN: "Goal", PT: "Objetivo", FR: "Objectif" },
+        outcome: { EN: "Outcome", PT: "Resultado", FR: "Effet" },
+        output: { EN: "Output", PT: "Produto", FR: "Produit" },
+        close: { EN: "Close", PT: "Fechar", FR: "Fermer" },
+        cancel: { EN: "Cancel", PT: "Cancelar", FR: "Annuler" },
+        save: { EN: "Save changes", PT: "Guardar alterações", FR: "Enregistrer" },
+        create: { EN: "Create result", PT: "Criar resultado", FR: "Créer le résultat" },
+        title_label: { EN: "Title", PT: "Título", FR: "Titre" },
+        description: { EN: "Description", PT: "Descrição", FR: "Description" },
+        status: { EN: "Status", PT: "Estado", FR: "Statut" },
+        position: { EN: "Position", PT: "Posição", FR: "Position" },
+        select_indicator: { EN: "Select an unassigned indicator", PT: "Selecione um indicador não atribuído", FR: "Sélectionnez un indicateur non attribué" },
+        select_result: { EN: "Select an Outcome or Output", PT: "Selecione um Resultado ou Produto", FR: "Sélectionnez un Effet ou un Produit" },
+        search_indicators: { EN: "Search indicators", PT: "Pesquisar indicadores", FR: "Rechercher des indicateurs" },
+        link_selected: { EN: "Link selected indicator", PT: "Ligar indicador selecionado", FR: "Lier l'indicateur sélectionné" },
+        create_result: { EN: "Create {type}", PT: "Criar {type}", FR: "Créer {type}" },
+        edit_result: { EN: "Edit {type}", PT: "Editar {type}", FR: "Modifier {type}" },
+        create_note: { EN: "Add this result beneath {parent}.", PT: "Adicione este resultado sob {parent}.", FR: "Ajoutez ce résultat sous {parent}." },
+        goal_note: { EN: "Add a top-level Goal to this project.", PT: "Adicione um Objetivo de nível superior a este projeto.", FR: "Ajoutez un Objectif de premier niveau à ce projet." },
+        edit_note: { EN: "Update title, description, or lifecycle status. Hierarchy changes use separate actions.", PT: "Atualize o título, a descrição ou o estado. As alterações de hierarquia usam ações separadas.", FR: "Modifiez le titre, la description ou le statut. La hiérarchie utilise des actions séparées." },
+        link_to_result: { EN: "Link an existing unassigned indicator to {result}.", PT: "Ligue um indicador não atribuído existente a {result}.", FR: "Liez un indicateur non attribué existant à {result}." },
+        link_indicator_to: { EN: "Choose one Outcome or Output for this indicator.", PT: "Escolha um Resultado ou Produto para este indicador.", FR: "Choisissez un Effet ou un Produit pour cet indicateur." },
+        no_available_indicators: { EN: "No unassigned indicators are available.", PT: "Não existem indicadores não atribuídos disponíveis.", FR: "Aucun indicateur non attribué n'est disponible." },
+        no_available_results: { EN: "Create an Outcome or Output before linking this indicator.", PT: "Crie um Resultado ou Produto antes de ligar este indicador.", FR: "Créez un Effet ou un Produit avant de lier cet indicateur." },
+        title_required: { EN: "A result title is required.", PT: "É necessário um título para o resultado.", FR: "Un titre de résultat est requis." },
+        selection_required: { EN: "Select one item before continuing.", PT: "Selecione um item antes de continuar.", FR: "Sélectionnez un élément avant de continuer." },
+        created_success: { EN: "Result created.", PT: "Resultado criado.", FR: "Résultat créé." },
+        updated_success: { EN: "Result updated.", PT: "Resultado atualizado.", FR: "Résultat mis à jour." },
+        reordered_success: { EN: "Result order updated.", PT: "Ordem dos resultados atualizada.", FR: "Ordre des résultats mis à jour." },
+        archived_success: { EN: "Result archived.", PT: "Resultado arquivado.", FR: "Résultat archivé." },
+        linked_success: { EN: "Indicator linked.", PT: "Indicador ligado.", FR: "Indicateur lié." },
+        unlinked_success: { EN: "Indicator unlinked.", PT: "Indicador desligado.", FR: "Indicateur délié." },
+        archive_confirm: { EN: "Archive {title}? Existing descendants and indicator links will remain in the hierarchy.", PT: "Arquivar {title}? Os descendentes e as ligações de indicadores existentes permanecerão na hierarquia.", FR: "Archiver {title} ? Les descendants et les liens d'indicateurs existants resteront dans la hiérarchie." },
+      };
+      let result = localizedCopy(copy[key] || { EN: key, PT: key, FR: key });
+      Object.entries(values).forEach(([name, value]) => {
+        result = result.replaceAll("{" + name + "}", textSafe(value, ""));
+      });
+      return result;
+    }
+
+    function logicalFrameworkProjectOptions() {
+      const source = toArray(state.adminProjects).length
+        ? state.adminProjects
+        : toArray(state.workspace?.project_cards);
+      const seen = new Set();
+      return source.map(item => ({
+        id: textSafe(item.project_id || item.id || "", ""),
+        name: textSafe(item.project_name || item.name || "Untitled project", "Untitled project"),
+        code: textSafe(item.project_code || item.code || "", ""),
+        status: textSafe(item.status || "active", "active").toLowerCase(),
+      })).filter(item => item.id && !seen.has(item.id) && seen.add(item.id));
+    }
+
+    function logicalFrameworkActiveProject() {
+      return logicalFrameworkProjectOptions().find(item => item.id === state.logicalFrameworkProjectId) || null;
+    }
+
+    function logicalFrameworkIsArchived() {
+      return logicalFrameworkActiveProject()?.status === "archived";
+    }
+
+    function logicalFrameworkCanManage() {
+      return hasRequestPermission("MANAGE_LOGICAL_FRAMEWORK") && !logicalFrameworkIsArchived();
+    }
+
+    function logicalFrameworkCanLink() {
+      return hasRequestPermission("LINK_RESULT_INDICATORS") && !logicalFrameworkIsArchived();
+    }
+
+    function renderProjectConfigWorkspaceNavigation() {
+      renderProjectConfigurationChrome();
+      const canManageProjects = hasRequestPermission("MANAGE_PROJECTS");
+      if (!canManageProjects) state.projectConfigWorkspace = "logical-framework";
+      document.querySelectorAll("[data-project-config-workspace]").forEach(button => {
+        const workspaceId = button.dataset.projectConfigWorkspace || "";
+        button.classList.toggle("active", workspaceId === state.projectConfigWorkspace);
+        button.hidden = workspaceId === "registry" && !canManageProjects;
+        button.textContent = logicalFrameworkCopy(workspaceId === "registry" ? "projects" : "logical_framework");
+      });
+      document.getElementById("projectRegistryWorkspace")?.classList.toggle("hidden", state.projectConfigWorkspace !== "registry");
+      document.getElementById("logicalFrameworkWorkspace")?.classList.toggle("hidden", state.projectConfigWorkspace !== "logical-framework");
+      renderLogicalFrameworkWorkspace();
+    }
+
+    async function setProjectConfigWorkspace(workspaceId, options = {}) {
+      const requested = workspaceId === "registry" ? "registry" : "logical-framework";
+      state.projectConfigWorkspace = requested === "registry" && !hasRequestPermission("MANAGE_PROJECTS")
+        ? "logical-framework"
+        : requested;
+      renderProjectConfigWorkspaceNavigation();
+      if (state.projectConfigWorkspace === "logical-framework" && options.load !== false) {
+        await loadLogicalFramework(state.logicalFrameworkProjectId);
+      }
+    }
+
+    function renderLogicalFrameworkChrome() {
+      const labels = {
+        logicalFrameworkTitle: "title",
+        logicalFrameworkLead: "lead",
+        logicalFrameworkProjectLabel: "project",
+        logicalFrameworkStructureTitle: "results_structure",
+        logicalFrameworkStructureNote: "results_structure_note",
+        logicalFrameworkUnassignedTitle: "unassigned_indicators",
+        logicalFrameworkUnassignedNote: "unassigned_note",
+      };
+      Object.entries(labels).forEach(([id, key]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = logicalFrameworkCopy(key);
+      });
+      const addGoal = document.getElementById("logicalFrameworkAddGoalBtn");
+      if (addGoal) addGoal.textContent = logicalFrameworkCopy("add_goal");
+      const close = document.getElementById("logicalFrameworkDrawerCloseBtn");
+      if (close) close.textContent = logicalFrameworkCopy("close");
+    }
+
+    function renderLogicalFrameworkProjectSelect() {
+      const select = document.getElementById("logicalFrameworkProjectSelect");
+      if (!select) return "";
+      const options = logicalFrameworkProjectOptions();
+      const candidate = [
+        state.logicalFrameworkProjectId,
+        state.selectedRegistryProjectId,
+        state.projectId,
+        options[0]?.id,
+      ].find(projectId => options.some(item => item.id === projectId)) || "";
+      state.logicalFrameworkProjectId = candidate;
+      select.innerHTML = options.length
+        ? options.map(item => {
+            const context = [item.code, projectLifecycleLabel(item.status)].filter(Boolean).join(" - ");
+            return '<option value="' + escapeProgrammeHtml(item.id) + '">' + escapeProgrammeHtml(item.name) + (context ? ' (' + escapeProgrammeHtml(context) + ')' : '') + '</option>';
+          }).join("")
+        : '<option value="">' + escapeProgrammeHtml(logicalFrameworkCopy("no_projects")) + '</option>';
+      select.value = candidate;
+      select.disabled = !options.length;
+      return candidate;
+    }
+
+    function renderLogicalFrameworkAccessNote() {
+      const note = document.getElementById("logicalFrameworkAccessNote");
+      if (!note) return;
+      let message = "";
+      if (logicalFrameworkIsArchived()) {
+        message = logicalFrameworkCopy("archived");
+      } else if (!logicalFrameworkCanManage() && logicalFrameworkCanLink()) {
+        message = logicalFrameworkCopy("link_only");
+      } else if (!logicalFrameworkCanManage()) {
+        message = logicalFrameworkCopy("read_only");
+      }
+      note.textContent = message;
+      note.classList.toggle("hidden", !message);
+      note.classList.toggle("archived", logicalFrameworkIsArchived());
+    }
+
+    async function loadLogicalFramework(projectId = state.logicalFrameworkProjectId) {
+      if (state.currentView !== "project-config" || state.projectConfigWorkspace !== "logical-framework") return;
+      if (!hasRequestPermission("VIEW_LOGICAL_FRAMEWORK")) {
+        state.logicalFramework = null;
+        state.logicalFrameworkLoadState = "error";
+        state.logicalFrameworkError = logicalFrameworkCopy("read_only");
+        renderLogicalFrameworkWorkspace();
+        return;
+      }
+      renderLogicalFrameworkProjectSelect();
+      const selectedProjectId = textSafe(projectId || state.logicalFrameworkProjectId || "", "");
+      if (!selectedProjectId) {
+        state.logicalFramework = null;
+        state.logicalFrameworkLoadState = "empty";
+        state.logicalFrameworkError = "";
+        renderLogicalFrameworkWorkspace();
+        return;
+      }
+      state.logicalFrameworkProjectId = selectedProjectId;
+      state.logicalFrameworkLoadState = "loading";
+      state.logicalFrameworkError = "";
+      renderLogicalFrameworkWorkspace();
+      try {
+        state.logicalFramework = await callApi("/v1/projects/" + encodeURIComponent(selectedProjectId) + "/logical-framework", {
+          headers: headers(false),
+          audit: { page: "project-config", module: "logical_framework" },
+        });
+        state.logicalFrameworkLoadState = "loaded";
+      } catch (error) {
+        state.logicalFramework = null;
+        state.logicalFrameworkLoadState = "error";
+        state.logicalFrameworkError = error.message || logicalFrameworkCopy("load_error");
+      }
+      renderLogicalFrameworkWorkspace();
+    }
+
+    function logicalFrameworkAllResults() {
+      const results = [];
+      toArray(state.logicalFramework?.goals).forEach(goal => {
+        results.push(goal);
+        toArray(goal.outcomes).forEach(outcome => {
+          results.push(outcome);
+          toArray(outcome.outputs).forEach(output => results.push(output));
+        });
+      });
+      return results;
+    }
+
+    function logicalFrameworkFindResult(resultId) {
+      return logicalFrameworkAllResults().find(item => item.id === resultId) || null;
+    }
+
+    function logicalFrameworkSiblings(result) {
+      if (!result) return [];
+      if (result.result_type === "goal") return toArray(state.logicalFramework?.goals);
+      const parent = logicalFrameworkFindResult(result.parent_id);
+      if (result.result_type === "outcome") return toArray(parent?.outcomes);
+      return toArray(parent?.outputs);
+    }
+
+    function logicalFrameworkResultPath(result) {
+      if (!result) return "";
+      if (result.result_type === "outcome") {
+        const goal = logicalFrameworkFindResult(result.parent_id);
+        return [goal?.title, result.title].filter(Boolean).join(" / ");
+      }
+      if (result.result_type === "output") {
+        const outcome = logicalFrameworkFindResult(result.parent_id);
+        const goal = logicalFrameworkFindResult(outcome?.parent_id);
+        return [goal?.title, outcome?.title, result.title].filter(Boolean).join(" / ");
+      }
+      return result.title || "";
+    }
+
+    function logicalFrameworkIsCollapsed(result) {
+      const collection = result?.result_type === "goal"
+        ? state.logicalFrameworkCollapsedGoals
+        : state.logicalFrameworkCollapsedOutcomes;
+      return toArray(collection).includes(result?.id);
+    }
+
+    function logicalFrameworkToggleCollapse(result) {
+      if (!result || !["goal", "outcome"].includes(result.result_type)) return;
+      const key = result.result_type === "goal"
+        ? "logicalFrameworkCollapsedGoals"
+        : "logicalFrameworkCollapsedOutcomes";
+      const values = new Set(toArray(state[key]));
+      if (values.has(result.id)) values.delete(result.id);
+      else values.add(result.id);
+      state[key] = Array.from(values);
+      renderLogicalFrameworkWorkspace();
+    }
+
+    function logicalFrameworkStatusLabel(status) {
+      const key = textSafe(status || "active", "active").toLowerCase();
+      if (key === "archived") return logicalFrameworkCopy("status_archived");
+      if (key === "draft") return logicalFrameworkCopy("draft");
+      return logicalFrameworkCopy("active");
+    }
+
+    function logicalFrameworkMenuHtml(result) {
+      const actions = [];
+      const siblings = logicalFrameworkSiblings(result);
+      const index = siblings.findIndex(item => item.id === result.id);
+      if (logicalFrameworkCanManage() && result.status !== "archived") {
+        if (result.result_type === "goal") {
+          actions.push(["add-outcome", logicalFrameworkCopy("add_outcome"), ""]);
+        }
+        if (result.result_type === "outcome") {
+          actions.push(["add-output", logicalFrameworkCopy("add_output"), ""]);
+        }
+        actions.push(["edit", logicalFrameworkCopy("edit"), ""]);
+        if (index > 0) actions.push(["move-up", logicalFrameworkCopy("move_up"), ""]);
+        if (index >= 0 && index < siblings.length - 1) actions.push(["move-down", logicalFrameworkCopy("move_down"), ""]);
+        actions.push(["archive", logicalFrameworkCopy("archive"), "danger"]);
+      }
+      if (logicalFrameworkCanLink() && ["outcome", "output"].includes(result.result_type) && result.status !== "archived") {
+        actions.splice(result.result_type === "outcome" && logicalFrameworkCanManage() ? 1 : 0, 0, ["link-result", logicalFrameworkCopy("link_indicator"), ""]);
+      }
+      if (!actions.length) return "";
+      const buttons = actions.map(action =>
+        '<button class="' + action[2] + '" type="button" role="menuitem" data-lf-action="' + action[0] + '" data-result-id="' + escapeProgrammeHtml(result.id) + '">' + escapeProgrammeHtml(action[1]) + '</button>'
+      ).join("");
+      return '<details class="lf-menu"><summary aria-label="' + escapeProgrammeHtml(logicalFrameworkCopy("more_actions")) + '">...</summary><div class="lf-menu-popover" role="menu">' + buttons + '</div></details>';
+    }
+
+    function logicalFrameworkIndicatorsHtml(result) {
+      const indicators = toArray(result?.indicators);
+      if (!indicators.length) {
+        return '<div class="lf-indicator-group"><div class="lf-indicator-group-label">' + escapeProgrammeHtml(logicalFrameworkCopy("no_linked")) + '</div></div>';
+      }
+      const rows = indicators.map(indicator => {
+        const unlink = logicalFrameworkCanLink() && result.status !== "archived"
+          ? '<button class="ghost small" type="button" data-lf-action="unlink" data-indicator-id="' + escapeProgrammeHtml(indicator.id) + '">' + escapeProgrammeHtml(logicalFrameworkCopy("unlink")) + '</button>'
+          : "";
+        const detail = [indicator.unit, indicator.frequency].filter(Boolean).join(" / ");
+        return '<div class="lf-indicator-row"><div><strong>' + escapeProgrammeHtml(indicator.name || indicator.id) + '</strong><span>' + escapeProgrammeHtml(detail || indicator.id) + '</span></div>' + unlink + '</div>';
+      }).join("");
+      return '<div class="lf-indicator-group"><div class="lf-indicator-group-label">' + escapeProgrammeHtml(logicalFrameworkCopy("linked_indicators")) + '</div>' + rows + '</div>';
+    }
+
+    function logicalFrameworkNodeHtml(result, childHtml = "") {
+      const type = textSafe(result?.result_type || "", "").toLowerCase();
+      const expandable = ["goal", "outcome"].includes(type);
+      const collapsed = expandable && logicalFrameworkIsCollapsed(result);
+      const collapse = expandable
+        ? '<button class="lf-collapse-btn" type="button" data-lf-action="toggle" data-result-id="' + escapeProgrammeHtml(result.id) + '" aria-expanded="' + String(!collapsed) + '" aria-label="' + escapeProgrammeHtml((collapsed ? "Expand " : "Collapse ") + (result.title || type)) + '">' + (collapsed ? "+" : "-") + '</button>'
+        : '<span class="lf-collapse-btn" aria-hidden="true">-</span>';
+      const description = textSafe(result?.description || "", "");
+      const indicators = ["outcome", "output"].includes(type) ? logicalFrameworkIndicatorsHtml(result) : "";
+      const node = '<article class="lf-node ' + escapeProgrammeHtml(type) + ' ' + (result.status === "archived" ? "archived" : "") + '" data-result-id="' + escapeProgrammeHtml(result.id) + '">' +
+        '<div class="lf-node-header">' +
+          collapse +
+          '<div><div class="lf-node-title-row"><span class="lf-level-badge">' + escapeProgrammeHtml(logicalFrameworkCopy(type)) + '</span><strong class="lf-node-title">' + escapeProgrammeHtml(result.title || "Untitled result") + '</strong><span class="lf-status-badge">' + escapeProgrammeHtml(logicalFrameworkStatusLabel(result.status)) + '</span></div>' +
+          (description ? '<div class="lf-node-description">' + escapeProgrammeHtml(description) + '</div>' : '') +
+          '<div class="lf-node-meta">' + escapeProgrammeHtml(logicalFrameworkCopy("position")) + ' ' + escapeProgrammeHtml(String(numericValue(result.display_order) + 1)) + '</div></div>' +
+          logicalFrameworkMenuHtml(result) +
+        '</div>' + indicators + '</article>';
+      return '<div class="lf-branch">' + node + (!collapsed && childHtml ? '<div class="lf-children">' + childHtml + '</div>' : '') + '</div>';
+    }
+
+    function logicalFrameworkTreeHtml() {
+      const goals = toArray(state.logicalFramework?.goals);
+      if (!goals.length) {
+        return '<div class="lf-empty"><strong>' + escapeProgrammeHtml(logicalFrameworkCopy("empty_title")) + '</strong><span>' + escapeProgrammeHtml(logicalFrameworkCopy(logicalFrameworkCanManage() ? "empty_manage" : "empty_read")) + '</span></div>';
+      }
+      return goals.map(goal => {
+        const outcomes = toArray(goal.outcomes).map(outcome => {
+          const outputs = toArray(outcome.outputs).map(output => logicalFrameworkNodeHtml(output)).join("");
+          return logicalFrameworkNodeHtml(outcome, outputs);
+        }).join("");
+        return logicalFrameworkNodeHtml(goal, outcomes);
+      }).join("");
+    }
+
+    function logicalFrameworkUnassignedHtml() {
+      const indicators = toArray(state.logicalFramework?.unassigned_indicators);
+      if (!indicators.length) {
+        return '<div class="lf-empty"><strong>' + escapeProgrammeHtml(logicalFrameworkCopy("no_unassigned")) + '</strong></div>';
+      }
+      const rows = indicators.map(indicator => {
+        const action = logicalFrameworkCanLink()
+          ? '<button class="ghost small" type="button" data-lf-action="link-indicator" data-indicator-id="' + escapeProgrammeHtml(indicator.id) + '">' + escapeProgrammeHtml(logicalFrameworkCopy("link")) + '</button>'
+          : "";
+        const target = indicator.target === null || indicator.target === undefined || indicator.target === "" ? "-" : formatValue(indicator.target);
+        return '<tr><td><div class="lf-indicator-name">' + escapeProgrammeHtml(indicator.name || indicator.id) + '</div><div class="subtle">' + escapeProgrammeHtml(indicator.id) + '</div></td><td>' + escapeProgrammeHtml(indicator.unit || "-") + '</td><td>' + escapeProgrammeHtml(String(target)) + '</td><td>' + escapeProgrammeHtml(indicator.level || "-") + '</td><td>' + action + '</td></tr>';
+      }).join("");
+      return '<table class="lf-indicator-table"><colgroup><col style="width:42%"><col style="width:16%"><col style="width:14%"><col style="width:16%"><col style="width:12%"></colgroup><thead><tr><th>' + escapeProgrammeHtml(logicalFrameworkCopy("indicator")) + '</th><th>' + escapeProgrammeHtml(logicalFrameworkCopy("unit")) + '</th><th>' + escapeProgrammeHtml(logicalFrameworkCopy("target")) + '</th><th>' + escapeProgrammeHtml(logicalFrameworkCopy("legacy_level")) + '</th><th>' + escapeProgrammeHtml(logicalFrameworkCopy("action")) + '</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    }
+
+    function renderLogicalFrameworkWorkspace() {
+      renderLogicalFrameworkChrome();
+      const projectId = renderLogicalFrameworkProjectSelect();
+      renderLogicalFrameworkAccessNote();
+      const tree = document.getElementById("logicalFrameworkTree");
+      const table = document.getElementById("logicalFrameworkUnassignedTable");
+      const count = document.getElementById("logicalFrameworkUnassignedCount");
+      const addGoal = document.getElementById("logicalFrameworkAddGoalBtn");
+      if (!tree || !table || !count || !addGoal) return;
+      addGoal.hidden = !projectId || !logicalFrameworkCanManage();
+      if (!projectId || state.logicalFrameworkLoadState === "empty") {
+        tree.innerHTML = '<div class="lf-empty"><strong>' + escapeProgrammeHtml(logicalFrameworkCopy("no_projects")) + '</strong></div>';
+        table.innerHTML = '<div class="lf-empty">' + escapeProgrammeHtml(logicalFrameworkCopy("no_projects")) + '</div>';
+        count.textContent = "0";
+        return;
+      }
+      if (state.logicalFrameworkLoadState === "loading" || state.logicalFrameworkLoadState === "idle") {
+        tree.innerHTML = '<div class="lf-loading">' + escapeProgrammeHtml(logicalFrameworkCopy("loading")) + '</div>';
+        table.innerHTML = '<div class="lf-loading">' + escapeProgrammeHtml(logicalFrameworkCopy("loading")) + '</div>';
+        count.textContent = "-";
+        return;
+      }
+      if (state.logicalFrameworkLoadState === "error") {
+        const errorMessage = state.logicalFrameworkError || logicalFrameworkCopy("load_error");
+        tree.innerHTML = '<div class="lf-error"><strong>' + escapeProgrammeHtml(logicalFrameworkCopy("load_error")) + '</strong><span>' + escapeProgrammeHtml(errorMessage) + '</span><button type="button" data-lf-action="retry">' + escapeProgrammeHtml(logicalFrameworkCopy("retry")) + '</button></div>';
+        table.innerHTML = '<div class="lf-error">' + escapeProgrammeHtml(errorMessage) + '</div>';
+        count.textContent = "-";
+        return;
+      }
+      tree.innerHTML = logicalFrameworkTreeHtml();
+      table.innerHTML = logicalFrameworkUnassignedHtml();
+      count.textContent = formatValue(toArray(state.logicalFramework?.unassigned_indicators).length);
+    }
+
+    function closeLogicalFrameworkDrawer() {
+      state.logicalFrameworkDrawer = null;
+      const shell = document.getElementById("logicalFrameworkDrawerShell");
+      shell?.classList.add("hidden");
+      shell?.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("lf-drawer-open");
+    }
+
+    function openLogicalFrameworkDrawer(mode, options = {}) {
+      state.logicalFrameworkDrawer = {
+        mode,
+        resultId: textSafe(options.resultId || "", ""),
+        resultType: textSafe(options.resultType || "", ""),
+        parentId: textSafe(options.parentId || "", ""),
+        indicatorId: textSafe(options.indicatorId || "", ""),
+        search: "",
+      };
+      renderLogicalFrameworkDrawer();
+      const shell = document.getElementById("logicalFrameworkDrawerShell");
+      shell?.classList.remove("hidden");
+      shell?.setAttribute("aria-hidden", "false");
+      document.body.classList.add("lf-drawer-open");
+      window.setTimeout(() => {
+        document.querySelector("#logicalFrameworkDrawerContent input, #logicalFrameworkDrawerContent textarea, #logicalFrameworkDrawerContent select")?.focus();
+      }, 0);
+    }
+
+    function logicalFrameworkTargetOptionsHtml(selectedId = "") {
+      const targets = logicalFrameworkAllResults().filter(item =>
+        ["outcome", "output"].includes(item.result_type) && item.status !== "archived"
+      );
+      if (!targets.length) {
+        return '<div class="lf-empty">' + escapeProgrammeHtml(logicalFrameworkCopy("no_available_results")) + '</div>';
+      }
+      return '<div class="lf-link-options">' + targets.map(item =>
+        '<label class="lf-target-option"><input type="radio" name="lfLinkResult" value="' + escapeProgrammeHtml(item.id) + '" ' + (item.id === selectedId ? "checked" : "") + '><span><strong>' + escapeProgrammeHtml(item.title) + '</strong><span>' + escapeProgrammeHtml(logicalFrameworkCopy(item.result_type) + " / " + logicalFrameworkResultPath(item)) + '</span></span></label>'
+      ).join("") + '</div>';
+    }
+
+    function logicalFrameworkIndicatorOptionsHtml(search = "") {
+      const query = textSafe(search || "", "").toLowerCase();
+      const indicators = toArray(state.logicalFramework?.unassigned_indicators).filter(item =>
+        !query || [item.name, item.id, item.unit, item.level].join(" ").toLowerCase().includes(query)
+      );
+      if (!indicators.length) {
+        return '<div class="lf-empty">' + escapeProgrammeHtml(logicalFrameworkCopy("no_available_indicators")) + '</div>';
+      }
+      return '<div class="lf-link-options">' + indicators.map(item =>
+        '<label class="lf-target-option"><input type="radio" name="lfLinkIndicator" value="' + escapeProgrammeHtml(item.id) + '"><span><strong>' + escapeProgrammeHtml(item.name || item.id) + '</strong><span>' + escapeProgrammeHtml([item.unit, item.level, item.id].filter(Boolean).join(" / ")) + '</span></span></label>'
+      ).join("") + '</div>';
+    }
+
+    function renderLogicalFrameworkDrawer() {
+      const drawer = state.logicalFrameworkDrawer;
+      const content = document.getElementById("logicalFrameworkDrawerContent");
+      if (!drawer || !content) return;
+      const title = document.getElementById("logicalFrameworkDrawerTitle");
+      const subtitle = document.getElementById("logicalFrameworkDrawerSubtitle");
+      const eyebrow = document.getElementById("logicalFrameworkDrawerEyebrow");
+      if (eyebrow) eyebrow.textContent = logicalFrameworkCopy("logical_framework");
+      const result = logicalFrameworkFindResult(drawer.resultId);
+      const parent = logicalFrameworkFindResult(drawer.parentId);
+      if (drawer.mode === "create") {
+        const typeLabel = logicalFrameworkCopy(drawer.resultType);
+        title.textContent = logicalFrameworkCopy("create_result", { type: typeLabel });
+        subtitle.textContent = parent
+          ? logicalFrameworkCopy("create_note", { parent: parent.title })
+          : logicalFrameworkCopy("goal_note");
+        const siblings = drawer.resultType === "goal"
+          ? toArray(state.logicalFramework?.goals)
+          : drawer.resultType === "outcome"
+            ? toArray(parent?.outcomes)
+            : toArray(parent?.outputs);
+        content.innerHTML = '<form id="logicalFrameworkResultForm" class="lf-form">' +
+          '<div><label for="lfResultTitle">' + escapeProgrammeHtml(logicalFrameworkCopy("title_label")) + '</label><input id="lfResultTitle" maxlength="240" required></div>' +
+          '<div><label for="lfResultDescription">' + escapeProgrammeHtml(logicalFrameworkCopy("description")) + '</label><textarea id="lfResultDescription" maxlength="4000"></textarea></div>' +
+          '<div class="lf-form-grid"><div><label for="lfResultStatus">' + escapeProgrammeHtml(logicalFrameworkCopy("status")) + '</label><select id="lfResultStatus"><option value="active">' + escapeProgrammeHtml(logicalFrameworkCopy("active")) + '</option><option value="draft">' + escapeProgrammeHtml(logicalFrameworkCopy("draft")) + '</option></select></div>' +
+          '<div><label for="lfResultPosition">' + escapeProgrammeHtml(logicalFrameworkCopy("position")) + '</label><input id="lfResultPosition" type="number" min="1" value="' + String(siblings.length + 1) + '"></div></div>' +
+          '<div class="lf-form-actions"><button class="ghost" type="button" data-lf-drawer-action="cancel">' + escapeProgrammeHtml(logicalFrameworkCopy("cancel")) + '</button><button type="submit">' + escapeProgrammeHtml(logicalFrameworkCopy("create")) + '</button></div></form>';
+        return;
+      }
+      if (drawer.mode === "edit" && result) {
+        title.textContent = logicalFrameworkCopy("edit_result", { type: logicalFrameworkCopy(result.result_type) });
+        subtitle.textContent = logicalFrameworkCopy("edit_note");
+        content.innerHTML = '<form id="logicalFrameworkResultForm" class="lf-form">' +
+          '<div><label for="lfResultTitle">' + escapeProgrammeHtml(logicalFrameworkCopy("title_label")) + '</label><input id="lfResultTitle" maxlength="240" required value="' + escapeProgrammeHtml(result.title || "") + '"></div>' +
+          '<div><label for="lfResultDescription">' + escapeProgrammeHtml(logicalFrameworkCopy("description")) + '</label><textarea id="lfResultDescription" maxlength="4000">' + escapeProgrammeHtml(result.description || "") + '</textarea></div>' +
+          '<div><label for="lfResultStatus">' + escapeProgrammeHtml(logicalFrameworkCopy("status")) + '</label><select id="lfResultStatus"><option value="active" ' + (result.status === "active" ? "selected" : "") + '>' + escapeProgrammeHtml(logicalFrameworkCopy("active")) + '</option><option value="draft" ' + (result.status === "draft" ? "selected" : "") + '>' + escapeProgrammeHtml(logicalFrameworkCopy("draft")) + '</option></select></div>' +
+          '<div class="lf-form-actions"><button class="ghost" type="button" data-lf-drawer-action="cancel">' + escapeProgrammeHtml(logicalFrameworkCopy("cancel")) + '</button><button type="submit">' + escapeProgrammeHtml(logicalFrameworkCopy("save")) + '</button></div></form>';
+        return;
+      }
+      if (drawer.mode === "link-result" && result) {
+        title.textContent = logicalFrameworkCopy("link_indicator");
+        subtitle.textContent = logicalFrameworkCopy("link_to_result", { result: result.title });
+        content.innerHTML = '<form id="logicalFrameworkLinkForm" class="lf-form"><div><label for="lfIndicatorSearch">' + escapeProgrammeHtml(logicalFrameworkCopy("search_indicators")) + '</label><input id="lfIndicatorSearch" value="' + escapeProgrammeHtml(drawer.search || "") + '"></div><div id="lfIndicatorOptions">' + logicalFrameworkIndicatorOptionsHtml(drawer.search) + '</div><div class="lf-form-actions"><button class="ghost" type="button" data-lf-drawer-action="cancel">' + escapeProgrammeHtml(logicalFrameworkCopy("cancel")) + '</button><button type="submit">' + escapeProgrammeHtml(logicalFrameworkCopy("link_selected")) + '</button></div></form>';
+        return;
+      }
+      const indicator = toArray(state.logicalFramework?.unassigned_indicators).find(item => item.id === drawer.indicatorId);
+      title.textContent = logicalFrameworkCopy("link_indicator");
+      subtitle.textContent = indicator?.name || logicalFrameworkCopy("link_indicator_to");
+      content.innerHTML = '<form id="logicalFrameworkLinkForm" class="lf-form"><p class="panel-note">' + escapeProgrammeHtml(logicalFrameworkCopy("link_indicator_to")) + '</p>' + logicalFrameworkTargetOptionsHtml() + '<div class="lf-form-actions"><button class="ghost" type="button" data-lf-drawer-action="cancel">' + escapeProgrammeHtml(logicalFrameworkCopy("cancel")) + '</button><button type="submit">' + escapeProgrammeHtml(logicalFrameworkCopy("link_selected")) + '</button></div></form>';
+    }
+
+    async function logicalFrameworkMutation(path, options, successKey) {
+      const response = await callApi(path, {
+        ...options,
+        headers: headers(),
+        audit: { page: "project-config", module: "logical_framework_action" },
+      });
+      await loadLogicalFramework(state.logicalFrameworkProjectId);
+      if (successKey) showMessage(logicalFrameworkCopy(successKey), "good");
+      return response;
+    }
+
+    async function submitLogicalFrameworkDrawer() {
+      const drawer = state.logicalFrameworkDrawer;
+      if (!drawer) return;
+      const projectId = state.logicalFrameworkProjectId;
+      if (drawer.mode === "create" || drawer.mode === "edit") {
+        if (!logicalFrameworkCanManage()) {
+          showMessage(logicalFrameworkCopy("read_only"), "warn");
+          return;
+        }
+        const title = textSafe(document.getElementById("lfResultTitle")?.value || "", "").trim();
+        if (!title) {
+          showMessage(logicalFrameworkCopy("title_required"), "warn");
+          document.getElementById("lfResultTitle")?.focus();
+          return;
+        }
+        const payload = {
+          title,
+          description: textSafe(document.getElementById("lfResultDescription")?.value || "", "").trim(),
+          status: textSafe(document.getElementById("lfResultStatus")?.value || "active", "active"),
+        };
+        if (drawer.mode === "create") {
+          payload.result_type = drawer.resultType;
+          payload.parent_id = drawer.parentId;
+          payload.display_order = Math.max(0, numericValue(document.getElementById("lfResultPosition")?.value || 1) - 1);
+          await logicalFrameworkMutation(
+            "/v1/projects/" + encodeURIComponent(projectId) + "/logical-framework/results",
+            { method: "POST", body: JSON.stringify(payload) },
+            "created_success"
+          );
+        } else {
+          await logicalFrameworkMutation(
+            "/v1/projects/" + encodeURIComponent(projectId) + "/logical-framework/results/" + encodeURIComponent(drawer.resultId),
+            { method: "PATCH", body: JSON.stringify(payload) },
+            "updated_success"
+          );
+        }
+        closeLogicalFrameworkDrawer();
+        return;
+      }
+      if (!logicalFrameworkCanLink()) {
+        showMessage(logicalFrameworkCopy("read_only"), "warn");
+        return;
+      }
+      let indicatorId = drawer.indicatorId;
+      let resultId = "";
+      if (drawer.mode === "link-result") {
+        indicatorId = document.querySelector('input[name="lfLinkIndicator"]:checked')?.value || "";
+        resultId = drawer.resultId;
+      } else {
+        resultId = document.querySelector('input[name="lfLinkResult"]:checked')?.value || "";
+      }
+      if (!indicatorId || !resultId) {
+        showMessage(logicalFrameworkCopy("selection_required"), "warn");
+        return;
+      }
+      await logicalFrameworkMutation(
+        "/v1/projects/" + encodeURIComponent(projectId) + "/logical-framework/indicators/" + encodeURIComponent(indicatorId) + "/link",
+        { method: "PUT", body: JSON.stringify({ result_id: resultId }) },
+        "linked_success"
+      );
+      closeLogicalFrameworkDrawer();
+    }
+
+    async function reorderLogicalFrameworkResult(result, direction) {
+      if (!logicalFrameworkCanManage()) {
+        showMessage(logicalFrameworkCopy("read_only"), "warn");
+        return;
+      }
+      const siblings = logicalFrameworkSiblings(result);
+      const index = siblings.findIndex(item => item.id === result.id);
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (index < 0 || target < 0 || target >= siblings.length) return;
+      const ordered = siblings.map(item => item.id);
+      [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+      await logicalFrameworkMutation(
+        "/v1/projects/" + encodeURIComponent(state.logicalFrameworkProjectId) + "/logical-framework/reorder",
+        { method: "POST", body: JSON.stringify({ ordered_result_ids: ordered }) },
+        "reordered_success"
+      );
+    }
+
+    async function archiveLogicalFrameworkResult(result) {
+      if (!logicalFrameworkCanManage() || !result) return;
+      const confirmed = window.confirm(logicalFrameworkCopy("archive_confirm", { title: result.title }));
+      if (!confirmed) return;
+      await logicalFrameworkMutation(
+        "/v1/projects/" + encodeURIComponent(state.logicalFrameworkProjectId) + "/logical-framework/results/" + encodeURIComponent(result.id) + "/archive",
+        { method: "POST" },
+        "archived_success"
+      );
+    }
+
+    async function unlinkLogicalFrameworkIndicator(indicatorId) {
+      if (!logicalFrameworkCanLink() || !indicatorId) return;
+      await logicalFrameworkMutation(
+        "/v1/projects/" + encodeURIComponent(state.logicalFrameworkProjectId) + "/logical-framework/indicators/" + encodeURIComponent(indicatorId) + "/link",
+        { method: "DELETE" },
+        "unlinked_success"
+      );
+    }
+
+    async function runLogicalFrameworkAction(action, trigger) {
+      const result = logicalFrameworkFindResult(trigger?.dataset?.resultId || "");
+      if (action === "retry") {
+        await loadLogicalFramework(state.logicalFrameworkProjectId);
+        return;
+      }
+      if (action === "toggle") {
+        logicalFrameworkToggleCollapse(result);
+        return;
+      }
+      if (action === "add-goal") {
+        if (logicalFrameworkCanManage()) openLogicalFrameworkDrawer("create", { resultType: "goal" });
+        return;
+      }
+      if (action === "add-outcome" && result) {
+        if (logicalFrameworkCanManage()) openLogicalFrameworkDrawer("create", { resultType: "outcome", parentId: result.id });
+        return;
+      }
+      if (action === "add-output" && result) {
+        if (logicalFrameworkCanManage()) openLogicalFrameworkDrawer("create", { resultType: "output", parentId: result.id });
+        return;
+      }
+      if (action === "edit" && result) {
+        if (logicalFrameworkCanManage()) openLogicalFrameworkDrawer("edit", { resultId: result.id });
+        return;
+      }
+      if (action === "move-up" || action === "move-down") {
+        await reorderLogicalFrameworkResult(result, action === "move-up" ? "up" : "down");
+        return;
+      }
+      if (action === "archive") {
+        await archiveLogicalFrameworkResult(result);
+        return;
+      }
+      if (action === "link-result" && result) {
+        if (logicalFrameworkCanLink()) openLogicalFrameworkDrawer("link-result", { resultId: result.id });
+        return;
+      }
+      if (action === "link-indicator") {
+        if (logicalFrameworkCanLink()) openLogicalFrameworkDrawer("link-indicator", { indicatorId: trigger.dataset.indicatorId || "" });
+        return;
+      }
+      if (action === "unlink") {
+        await unlinkLogicalFrameworkIndicator(trigger.dataset.indicatorId || "");
+      }
     }
 
     function projectRegistryActiveProject() {
@@ -21439,9 +23034,9 @@
       if (!box) return;
       box.innerHTML = PROJECT_STUDIO_STEPS.map((item, index) => `
         <button class="project-step ${item.id === state.projectStudioStep ? "active" : ""}" type="button" data-project-step="${item.id}">
-          <span class="project-step-number">${localizedCopy({ EN: `Step ${index + 1}`, PT: `Passo ${index + 1}`, FR: `Etape ${index + 1}` })}</span>
-          <strong>${presentText(item.title)}</strong>
-          <span class="subtle">${presentText(item.note)}</span>
+          <span class="project-step-number">${escapeProgrammeHtml(projectConfigurationCopy("step", { number: index + 1 }))}</span>
+          <strong>${escapeProgrammeHtml(projectConfigurationCopy("step_" + item.id + "_title"))}</strong>
+          <span class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("step_" + item.id + "_note"))}</span>
         </button>
       `).join("");
       document.querySelectorAll(".project-step-panel").forEach(panel => {
@@ -21473,10 +23068,10 @@
       if (!box) return;
       const summary = state.projectRegistrySummary || { total: 0, draft: 0, published: 0, active: 0, paused: 0, completed: 0, archived: 0 };
       box.innerHTML = `
-        <div class="admin-summary-card"><div class="subtle">Projects</div><div class="metric">${formatValue(summary.total || 0)}</div><div class="subtle">First-class project registry entries</div></div>
-        <div class="admin-summary-card"><div class="subtle">Draft</div><div class="metric">${formatValue(summary.draft || 0)}</div><div class="subtle">Projects still being configured</div></div>
-        <div class="admin-summary-card"><div class="subtle">Published + Active</div><div class="metric">${formatValue((summary.published || 0) + (summary.active || 0))}</div><div class="subtle">Live projects with workspace shells ready</div></div>
-        <div class="admin-summary-card"><div class="subtle">Paused / Completed / Archived</div><div class="metric">${formatValue((summary.paused || 0) + (summary.completed || 0) + (summary.archived || 0))}</div><div class="subtle">Lifecycle states requiring governance follow-up</div></div>
+        <div class="admin-summary-card"><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("projects"))}</div><div class="metric">${formatValue(summary.total || 0)}</div><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("projects_note"))}</div></div>
+        <div class="admin-summary-card"><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("draft"))}</div><div class="metric">${formatValue(summary.draft || 0)}</div><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("draft_note"))}</div></div>
+        <div class="admin-summary-card"><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("published_active"))}</div><div class="metric">${formatValue((summary.published || 0) + (summary.active || 0))}</div><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("published_active_note"))}</div></div>
+        <div class="admin-summary-card"><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("inactive_states"))}</div><div class="metric">${formatValue((summary.paused || 0) + (summary.completed || 0) + (summary.archived || 0))}</div><div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("inactive_states_note"))}</div></div>
       `;
     }
 
@@ -21515,38 +23110,40 @@
       if (!box) return;
       const items = filteredProjectRegistryItems();
       if (!items.length) {
-        box.innerHTML = `<div class="list-item">${state.projectRegistrySearch || state.projectRegistryStatusFilter ? "No projects match the current registry filters." : "No projects are registered for this organization yet."}</div>`;
+        box.innerHTML = `<div class="list-item">${escapeProgrammeHtml(projectConfigurationCopy(state.projectRegistrySearch || state.projectRegistryStatusFilter ? "no_matches" : "no_projects"))}</div>`;
         return;
       }
       box.innerHTML = `
         <div class="admin-table project-registry-table">
           <div class="admin-table-head">
-            <div>Project</div>
-            <div>Code</div>
-            <div>Status</div>
-            <div>Country</div>
-            <div>Assigned Users</div>
-            <div>Created / Updated</div>
-            <div>Actions</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("review_project"))}</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("code"))}</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("status"))}</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("country"))}</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("assigned_users"))}</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("created_updated"))}</div>
+            <div>${escapeProgrammeHtml(projectConfigurationCopy("actions"))}</div>
           </div>
           ${items.map(item => `
             <div class="admin-table-row ${item.project_id === state.selectedRegistryProjectId ? "active" : ""}">
               <div>
-                <strong>${presentText(item.project_name || "Untitled project")}</strong>
-                <div class="subtle">${presentText(item.programme || item.donor || item.sector || "Programme not set")}</div>
+                <strong>${presentText(item.project_name || projectConfigurationCopy("untitled"))}</strong>
+                <div class="subtle">${presentText(item.programme || item.donor || item.sector || projectConfigurationCopy("programme_unset"))}</div>
               </div>
               <div>
                 <strong>${presentText(item.project_code || "-")}</strong>
-                <div class="subtle">${presentText(item.sector || "Sector not set")}</div>
+                <div class="subtle">${presentText(item.sector || projectConfigurationCopy("sector_unset"))}</div>
               </div>
               <div>${projectLifecycleBadge(item.status)}</div>
               <div>
                 <strong>${presentText(item.country || "-")}</strong>
-                <div class="subtle">${formatValue(toArray(item.district_coverage || []).length)} district(s)</div>
+                <div class="subtle">${escapeProgrammeHtml(projectConfigurationCopy("district_count", { count: formatValue(toArray(item.district_coverage || []).length) }))}</div>
               </div>
               <div>
                 <strong>${formatValue(item.assigned_users_total || 0)}</strong>
-                <div class="subtle">${presentText(toArray(item.assigned_roles || []).join(", ") || "No roles assigned")}</div>
+                <div class="subtle">${toArray(item.assigned_roles || []).length
+                  ? toArray(item.assigned_roles || []).map(projectRegistryRoleLabel).join(", ")
+                  : escapeProgrammeHtml(projectConfigurationCopy("no_roles"))}</div>
               </div>
               <div>
                 <strong>${formatDateForUi(item.created_at, { mode: "full" })}</strong>
@@ -21573,14 +23170,20 @@
             const user = usersById.get(item.user_id);
             return `${projectAssignmentRoleLabel(item.role)}: ${user?.full_name || item.user_id}`;
           })
-        : [localizedCopy({ EN: "No project team members assigned yet.", PT: "Ainda nao existem membros atribuidos a esta equipa de projeto.", FR: "Aucun membre d'equipe projet n'est encore assigne." })];
+        : [localizedCopy({ EN: "No project team members assigned yet.", PT: "Ainda não existem membros atribuídos à equipa do projeto.", FR: "Aucun membre n'est encore affecté à l'équipe du projet." })];
+      const notDefined = localizedCopy({ EN: "Not defined yet", PT: "Ainda não definido", FR: "Pas encore défini" });
+      const codePending = localizedCopy({ EN: "Will be generated from the project name if left blank", PT: "Será gerado a partir do nome do projeto se ficar em branco", FR: "Sera généré depuis le nom du projet si ce champ reste vide" });
+      const programmePending = localizedCopy({ EN: "Programme and donor still pending", PT: "Programa e doador ainda pendentes", FR: "Programme et bailleur encore à définir" });
+      const countryPending = localizedCopy({ EN: "Country pending", PT: "País pendente", FR: "Pays à définir" });
+      const provinceCount = localizedCopy({ EN: `${draft.province_coverage.length} province(s)`, PT: `${draft.province_coverage.length} província(s)`, FR: `${draft.province_coverage.length} province(s)` });
+      const districtCount = projectConfigurationCopy("district_count", { count: draft.district_coverage.length });
       box.innerHTML = `
-        <div class="project-review-row"><strong>Project</strong><span>${presentText(draft.project_name || "Not defined yet")}</span></div>
-        <div class="project-review-row"><strong>Code</strong><span>${presentText(draft.project_code || "Will be generated from the project name if left blank")}</span></div>
-        <div class="project-review-row"><strong>Programme / Donor</strong><span>${presentText([draft.programme, draft.donor].filter(Boolean).join(" - ") || "Programme and donor still pending")}</span></div>
-        <div class="project-review-row"><strong>Coverage</strong><span>${presentText(`${draft.country || "Country pending"} • ${draft.province_coverage.length} province(s) • ${draft.district_coverage.length} district(s)`)}</span></div>
-        <div class="project-review-row"><strong>Lifecycle</strong><span>${projectLifecycleBadge(draft.status || "draft")}</span></div>
-        <div class="project-review-row"><strong>Project Team</strong><span>${presentText(teamSummary.join(" • "))}</span></div>
+        <div class="project-review-row"><strong>${escapeProgrammeHtml(projectConfigurationCopy("review_project"))}</strong><span>${presentText(draft.project_name || notDefined)}</span></div>
+        <div class="project-review-row"><strong>${escapeProgrammeHtml(projectConfigurationCopy("code"))}</strong><span>${presentText(draft.project_code || codePending)}</span></div>
+        <div class="project-review-row"><strong>${escapeProgrammeHtml(projectConfigurationCopy("review_programme_donor"))}</strong><span>${presentText([draft.programme, draft.donor].filter(Boolean).join(" - ") || programmePending)}</span></div>
+        <div class="project-review-row"><strong>${escapeProgrammeHtml(projectConfigurationCopy("review_coverage"))}</strong><span>${presentText(`${draft.country || countryPending} • ${provinceCount} • ${districtCount}`)}</span></div>
+        <div class="project-review-row"><strong>${escapeProgrammeHtml(projectConfigurationCopy("review_lifecycle"))}</strong><span>${projectLifecycleBadge(draft.status || "draft")}</span></div>
+        <div class="project-review-row"><strong>${escapeProgrammeHtml(projectConfigurationCopy("review_team"))}</strong><span>${presentText(teamSummary.join(" • "))}</span></div>
       `;
     }
 
@@ -21589,24 +23192,27 @@
       const stateBox = document.getElementById("projectPublishState");
       if (!box || !stateBox) return;
       const containers = toArray(project?.workspace_shell?.containers || PROJECT_WORKSPACE_CONTAINERS.map(item => ({ ...item, status: "reserved", ready: false })));
-      box.innerHTML = containers.map(item => `
-        <article class="project-shell-card">
-          <strong>${presentText(item.label || item.key)}</strong>
-          <div class="subtle">${presentText(item.status || "reserved")}</div>
-          <div class="subtle">${presentText(item.ready ? "Ready" : "Reserved for a future module")}</div>
-        </article>
-      `).join("");
+      box.innerHTML = containers.map(item => {
+        const logicalFrameworkModule = item.key === "logical_framework";
+        const readiness = logicalFrameworkModule
+          ? localizedCopy({ EN: "Builder available", PT: "Builder disponível", FR: "Builder disponible" })
+          : presentText(item.ready ? "Ready" : "Reserved for a future module");
+        const openAction = logicalFrameworkModule
+          ? '<button class="ghost small" type="button" data-project-module="logical-framework">' + escapeProgrammeHtml(localizedCopy({ EN: "Open builder", PT: "Abrir builder", FR: "Ouvrir le builder" })) + '</button>'
+          : "";
+        return '<article class="project-shell-card"><strong>' + presentText(item.label || item.key) + '</strong><div class="subtle">' + presentText(item.status || "reserved") + '</div><div class="subtle">' + readiness + '</div>' + openAction + '</article>';
+      }).join("");
       const current = project || currentProjectStudioDraft();
       const status = textSafe(current?.status || "draft", "draft").toLowerCase();
       stateBox.textContent = status === "draft"
         ? localizedCopy({
             EN: "Publishing will generate the minimum reserved project workspace shell for future modules.",
-            PT: "A publicacao vai gerar a shell minima reservada do workspace do projeto para modulos futuros.",
+            PT: "A publicação vai gerar a estrutura mínima reservada do workspace do projeto para módulos futuros.",
             FR: "La publication generera la structure minimale reservee du workspace projet pour les modules futurs.",
           })
         : localizedCopy({
             EN: "The published project shell is ready to host indicators, logframe, workplan, reporting, budget, and document modules later.",
-            PT: "A shell publicada do projeto ja esta pronta para acolher mais tarde os modulos de indicadores, quadro logico, workplan, reporting, orcamento e documentos.",
+            PT: "A estrutura publicada do projeto já está pronta para acolher mais tarde os módulos de indicadores, quadro lógico, plano de trabalho, reporting, orçamento e documentos.",
             FR: "La structure publiee du projet est prete a accueillir plus tard les modules indicateurs, cadre logique, plan de travail, reporting, budget et documents.",
           });
     }
@@ -21636,10 +23242,7 @@
           executive_viewer: [],
         },
       });
-      document.getElementById("projectStudioTitle").textContent = "Create Project";
-      document.getElementById("projectStudioLead").textContent = "Guide a project from metadata setup to publication without touching code or seed files.";
-      document.getElementById("projectStudioState").textContent = "Start with project details, then move through coverage, team, review, and publish.";
-      document.getElementById("saveProjectBtn").textContent = "Save Project";
+      renderProjectStudioModeChrome();
       document.getElementById("publishProjectBtn").textContent = projectStudioPublishLabel("draft");
       setProjectStudioStep("details");
     }
@@ -21649,11 +23252,9 @@
       if (!project) return;
       state.projectStudioMode = "edit";
       state.selectedRegistryProjectId = project.project_id || project.id;
+      state.logicalFrameworkProjectId = state.selectedRegistryProjectId;
       hydrateProjectStudioForm(projectStudioDraftFromProject(project));
-      document.getElementById("projectStudioTitle").textContent = "Edit Project";
-      document.getElementById("projectStudioLead").textContent = "Update metadata, coverage, team assignment, and lifecycle readiness for the selected project.";
-      document.getElementById("projectStudioState").textContent = `Editing ${project.project_name || "selected project"}. Save changes before using lifecycle actions.`;
-      document.getElementById("saveProjectBtn").textContent = "Update Project";
+      renderProjectStudioModeChrome();
       document.getElementById("publishProjectBtn").textContent = projectStudioPublishLabel(project.status || "draft");
       setProjectStudioStep("details");
     }
@@ -21671,7 +23272,7 @@
       if (!hasRequestPermission("MANAGE_PROJECTS")) {
         showMessage(localizedCopy({
           EN: "Project configuration is not part of this account's responsibilities.",
-          PT: "A configuracao de projetos nao faz parte das responsabilidades desta conta.",
+          PT: "A configuração de projetos não faz parte das responsabilidades desta conta.",
           FR: "La configuration de projet ne fait pas partie des responsabilites de ce compte.",
         }), "warn");
         return null;
@@ -22352,6 +23953,13 @@
       state.selectedRegistryProjectId = "";
       state.projectStudioMode = "create";
       state.projectStudioStep = "details";
+      state.logicalFramework = null;
+      state.logicalFrameworkProjectId = "";
+      state.logicalFrameworkLoadState = "idle";
+      state.logicalFrameworkError = "";
+      state.logicalFrameworkCollapsedGoals = [];
+      state.logicalFrameworkCollapsedOutcomes = [];
+      closeLogicalFrameworkDrawer();
       renderOrganizationProfile(null, presentText(localizedCopy({
         EN: "Sign in with an organization governance account to manage the organization profile.",
         PT: "Inicie sessao com uma conta de governanca da organizacao para gerir o perfil da organizacao.",
@@ -22487,7 +24095,7 @@
         resetProjectStudioForm();
         document.getElementById("projectStudioState").textContent = localizedCopy({
           EN: "Project configuration becomes available when project management is part of this account's responsibilities.",
-          PT: "A configuracao de projetos fica disponivel quando a gestao de projetos faz parte das responsabilidades desta conta.",
+          PT: "A configuração de projetos fica disponível quando a gestão de projetos faz parte das responsabilidades desta conta.",
           FR: "La configuration de projet devient disponible lorsque la gestion de projet fait partie des responsabilites de ce compte.",
         });
         return;
@@ -22511,10 +24119,12 @@
           resetProjectStudioForm();
         } else if (state.projectStudioMode === "create" && projectStudioDraftHasContent(preservedDraft)) {
           hydrateProjectStudioForm(preservedDraft);
-          document.getElementById("projectStudioTitle").textContent = "Create Project";
-          document.getElementById("projectStudioLead").textContent = "Guide a project from metadata setup to publication without touching code or seed files.";
-          document.getElementById("projectStudioState").textContent = "Draft changes are staged locally. Save the registry record when the configuration is ready.";
-          document.getElementById("saveProjectBtn").textContent = "Save Project";
+          renderProjectStudioModeChrome();
+          document.getElementById("projectStudioState").textContent = localizedCopy({
+            EN: "Draft changes are staged locally. Save the registry record when the configuration is ready.",
+            PT: "As alterações do rascunho estão guardadas localmente. Guarde o registo quando a configuração estiver pronta.",
+            FR: "Les modifications du brouillon sont conservées localement. Enregistrez le projet lorsque la configuration est prête.",
+          });
           document.getElementById("publishProjectBtn").textContent = projectStudioPublishLabel(preservedDraft?.status || "draft");
           renderProjectStudioStepper();
         } else if (!state.selectedRegistryProjectId) {
@@ -22533,7 +24143,7 @@
         if (error.status === 401 || error.status === 403) {
           document.getElementById("projectStudioState").textContent = localizedCopy({
             EN: "Project configuration is reserved for governance and project management responsibilities in this organization.",
-            PT: "A configuracao de projetos esta reservada a responsabilidades de governanca e gestao de projetos nesta organizacao.",
+            PT: "A configuração de projetos está reservada a responsabilidades de governação e gestão de projetos nesta organização.",
             FR: "La configuration de projet est reservee aux responsabilites de gouvernance et de gestion de projet dans cette organisation.",
           });
           return;
@@ -22554,7 +24164,9 @@
       const plan = {
         viewId: normalizedView,
         roleId,
-        loadWorkspace: roleId !== "organization_admin" && normalizedView !== "project-config",
+        loadWorkspace: roleId !== "organization_admin" && (
+          normalizedView !== "project-config" || !hasRequestPermission("MANAGE_PROJECTS")
+        ),
         loadProjectSnapshot: false,
         loadProjectRisks: false,
         loadProjectWorkplan: false,
@@ -22654,6 +24266,12 @@
       }
       if (options.includeProjectRegistry !== false) {
         await loadProjectRegistryStudio(targetView);
+      }
+      if (targetView === "project-config") {
+        renderProjectConfigWorkspaceNavigation();
+        if (state.projectConfigWorkspace === "logical-framework") {
+          await loadLogicalFramework(state.logicalFrameworkProjectId);
+        }
       }
       if (options.includeRules !== false) {
         await loadRules(targetView);
@@ -23306,6 +24924,10 @@
       state.audit = [];
       state.rules = [];
       state.taskDrawerTaskId = "";
+      state.logicalFramework = null;
+      state.logicalFrameworkProjectId = "";
+      state.logicalFrameworkLoadState = "idle";
+      closeLogicalFrameworkDrawer();
       state.programmePortfolioWorkplans = [];
       state.programmePortfolioLoadState = "idle";
       authTokenInput.value = "";
@@ -23438,6 +25060,68 @@
       if (!button) return;
       event.preventDefault();
       setDemoRoleOverride(button.dataset.demoRole || "");
+    });
+    document.getElementById("projectConfigWorkspaceNav").addEventListener("click", async event => {
+      const button = event.target.closest("[data-project-config-workspace]");
+      if (!button) return;
+      event.preventDefault();
+      try {
+        await setProjectConfigWorkspace(button.dataset.projectConfigWorkspace || "");
+      } catch (error) {
+        showMessage(error.message || logicalFrameworkCopy("load_error"), "bad");
+      }
+    });
+    document.getElementById("projectWorkspaceShellBox").addEventListener("click", async event => {
+      const button = event.target.closest("[data-project-module='logical-framework']");
+      if (!button) return;
+      event.preventDefault();
+      await setProjectConfigWorkspace("logical-framework");
+    });
+    document.getElementById("logicalFrameworkProjectSelect").addEventListener("change", async event => {
+      state.logicalFrameworkProjectId = event.target.value || "";
+      state.logicalFramework = null;
+      state.logicalFrameworkCollapsedGoals = [];
+      state.logicalFrameworkCollapsedOutcomes = [];
+      closeLogicalFrameworkDrawer();
+      await loadLogicalFramework(state.logicalFrameworkProjectId);
+    });
+    document.getElementById("logicalFrameworkAddGoalBtn").addEventListener("click", () => {
+      if (logicalFrameworkCanManage()) openLogicalFrameworkDrawer("create", { resultType: "goal" });
+    });
+    ["logicalFrameworkTree", "logicalFrameworkUnassignedTable"].forEach(id => {
+      document.getElementById(id).addEventListener("click", async event => {
+        const trigger = event.target.closest("[data-lf-action]");
+        if (!trigger) return;
+        event.preventDefault();
+        try {
+          await runLogicalFrameworkAction(trigger.dataset.lfAction || "", trigger);
+        } catch (error) {
+          showMessage(error.message || logicalFrameworkCopy("load_error"), "bad");
+        }
+      });
+    });
+    document.getElementById("logicalFrameworkDrawerCloseBtn").addEventListener("click", closeLogicalFrameworkDrawer);
+    document.getElementById("logicalFrameworkDrawerBackdrop").addEventListener("click", closeLogicalFrameworkDrawer);
+    document.getElementById("logicalFrameworkDrawerContent").addEventListener("click", event => {
+      if (event.target.closest("[data-lf-drawer-action='cancel']")) {
+        event.preventDefault();
+        closeLogicalFrameworkDrawer();
+      }
+    });
+    document.getElementById("logicalFrameworkDrawerContent").addEventListener("input", event => {
+      if (event.target.id !== "lfIndicatorSearch" || !state.logicalFrameworkDrawer) return;
+      state.logicalFrameworkDrawer.search = event.target.value || "";
+      const options = document.getElementById("lfIndicatorOptions");
+      if (options) options.innerHTML = logicalFrameworkIndicatorOptionsHtml(state.logicalFrameworkDrawer.search);
+    });
+    document.getElementById("logicalFrameworkDrawerContent").addEventListener("submit", async event => {
+      if (!event.target.matches("#logicalFrameworkResultForm, #logicalFrameworkLinkForm")) return;
+      event.preventDefault();
+      try {
+        await submitLogicalFrameworkDrawer();
+      } catch (error) {
+        showMessage(error.message || logicalFrameworkCopy("load_error"), "bad");
+      }
     });
     document.getElementById("projectRegistryNewBtn").addEventListener("click", () => {
       resetProjectStudioForm();
@@ -24086,6 +25770,20 @@
     splashScreen.addEventListener("click", dismissSplash);
     window.setTimeout(dismissSplash, 3200);
     window.addEventListener("keydown", event => {
+      if (event.key === "Escape" && state.logicalFrameworkDrawer) {
+        event.preventDefault();
+        closeLogicalFrameworkDrawer();
+        return;
+      }
+      if (event.key === "Escape") {
+        const openLogicalFrameworkMenu = document.querySelector(".lf-menu[open]");
+        if (openLogicalFrameworkMenu) {
+          event.preventDefault();
+          openLogicalFrameworkMenu.open = false;
+          openLogicalFrameworkMenu.querySelector("summary")?.focus();
+          return;
+        }
+      }
       if (event.key === "Escape" && state.taskDrawerTaskId) {
         event.preventDefault();
         closeTaskDrawer();

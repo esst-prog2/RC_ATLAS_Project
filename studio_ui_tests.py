@@ -776,5 +776,188 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn('await callApi(`/v1/admin/audit?${query.toString()}`', self.html)
 
 
+    def test_logical_framework_builder_has_stable_project_configuration_boundaries(self):
+        for marker in (
+            'id="projectConfigWorkspaceNav"',
+            'data-project-config-workspace="logical-framework"',
+            'id="logicalFrameworkWorkspace"',
+            'id="logicalFrameworkProjectSelect"',
+            'id="logicalFrameworkTree"',
+            'id="logicalFrameworkUnassignedTable"',
+            'id="logicalFrameworkDrawerShell"',
+        ):
+            self.assertIn(marker, self.html)
+        self.assertIn('data-project-module="logical-framework"', self.html)
+        self.assertIn("function setProjectConfigWorkspace", self.html)
+
+    def test_logical_framework_navigation_and_permissions_match_backend_contract(self):
+        permission_block = self.html.split("const PERMISSION_CATALOG", 1)[1].split("const PERMISSION_ALIAS_MAP", 1)[0]
+        role_block = self.html.split("const ROLE_PERMISSION_TEMPLATES", 1)[1].split("const NAV_VIEW_CONFIG", 1)[0]
+        nav_block = self.html.split("function roleNavigationBlueprint", 1)[1].split("function adaptiveNavigationItems", 1)[0]
+
+        for permission in (
+            "VIEW_LOGICAL_FRAMEWORK",
+            "MANAGE_LOGICAL_FRAMEWORK",
+            "LINK_RESULT_INDICATORS",
+        ):
+            self.assertIn(permission, permission_block)
+        self.assertIn('"MANAGE_LOGICAL_FRAMEWORK"', role_block)
+        self.assertIn('"LINK_RESULT_INDICATORS"', role_block)
+        self.assertIn('anyPermissions: ["MANAGE_PROJECTS", "VIEW_LOGICAL_FRAMEWORK"]', self.html)
+        self.assertGreaterEqual(nav_block.count('view: "project-config"'), 5)
+
+    def test_logical_framework_reads_canonical_api_and_preserves_real_empty_state(self):
+        loader = self.html.split("async function loadLogicalFramework", 1)[1].split("function logicalFrameworkAllResults", 1)[0]
+        renderer = self.html.split("function renderLogicalFrameworkWorkspace", 1)[1].split("function closeLogicalFrameworkDrawer", 1)[0]
+
+        self.assertIn('"/v1/projects/" + encodeURIComponent(selectedProjectId) + "/logical-framework"', loader)
+        self.assertIn('module: "logical_framework"', loader)
+        self.assertIn("state.logicalFramework?.goals", self.html)
+        self.assertIn("state.logicalFramework?.unassigned_indicators", self.html)
+        self.assertIn('logicalFrameworkCopy("empty_title")', self.html)
+        self.assertIn('logicalFrameworkCopy("loading")', renderer)
+        self.assertIn('logicalFrameworkCopy("load_error")', renderer)
+        self.assertIn('data-lf-action="retry"', renderer)
+
+    def test_logical_framework_tree_supports_hierarchy_collapse_and_context_actions(self):
+        tree_helpers = self.html.split("function logicalFrameworkAllResults", 1)[1].split("function renderLogicalFrameworkWorkspace", 1)[0]
+
+        self.assertIn("toArray(goal.outcomes)", tree_helpers)
+        self.assertIn("toArray(outcome.outputs)", tree_helpers)
+        self.assertIn("logicalFrameworkCollapsedGoals", tree_helpers)
+        self.assertIn("logicalFrameworkCollapsedOutcomes", tree_helpers)
+        self.assertIn('data-lf-action="toggle"', tree_helpers)
+        self.assertIn('class="lf-menu"', tree_helpers)
+        for action in ("add-outcome", "add-output", "edit", "move-up", "move-down", "archive", "link-result"):
+            self.assertIn(action, tree_helpers)
+
+    def test_logical_framework_drawer_uses_canonical_create_edit_and_link_flows(self):
+        drawer = self.html.split("function openLogicalFrameworkDrawer", 1)[1].split("async function logicalFrameworkMutation", 1)[0]
+        mutations = self.html.split("async function logicalFrameworkMutation", 1)[1].split("function projectRegistryActiveProject", 1)[0]
+
+        self.assertIn('id="logicalFrameworkResultForm"', drawer)
+        self.assertIn('id="logicalFrameworkLinkForm"', drawer)
+        self.assertIn('name="lfLinkIndicator"', drawer)
+        self.assertIn('name="lfLinkResult"', drawer)
+        self.assertIn("payload.result_type = drawer.resultType", mutations)
+        self.assertIn("payload.parent_id = drawer.parentId", mutations)
+        self.assertIn('method: "PATCH"', mutations)
+        self.assertIn('method: "PUT"', mutations)
+        self.assertIn('method: "DELETE"', mutations)
+        self.assertIn("ordered_result_ids: ordered", mutations)
+
+    def test_logical_framework_ui_does_not_offer_delete_reparent_or_drag_drop(self):
+        builder = self.html.split("function logicalFrameworkCopy", 1)[1].split("function projectRegistryActiveProject", 1)[0]
+
+        self.assertNotIn('data-lf-action="delete"', builder)
+        self.assertNotIn('data-lf-action="reparent"', builder)
+        self.assertNotIn("draggable=", builder)
+        self.assertNotIn("dragstart", builder)
+        self.assertIn('"/archive"', builder)
+        self.assertIn('window.confirm(logicalFrameworkCopy("archive_confirm"', builder)
+
+    def test_logical_framework_control_visibility_is_capability_and_archive_aware(self):
+        access = self.html.split("function logicalFrameworkCanManage", 1)[1].split("async function loadLogicalFramework", 1)[0]
+        menu = self.html.split("function logicalFrameworkMenuHtml", 1)[1].split("function logicalFrameworkIndicatorsHtml", 1)[0]
+
+        self.assertIn('hasRequestPermission("MANAGE_LOGICAL_FRAMEWORK")', access)
+        self.assertIn('hasRequestPermission("LINK_RESULT_INDICATORS")', access)
+        self.assertIn("!logicalFrameworkIsArchived()", access)
+        self.assertIn("logicalFrameworkCanManage()", menu)
+        self.assertIn("logicalFrameworkCanLink()", menu)
+        self.assertIn('result.status !== "archived"', menu)
+        self.assertIn("logicalFrameworkIsArchived()", access)
+
+    def test_logical_framework_localization_and_accessible_controls_are_present(self):
+        copy = self.html.split("function logicalFrameworkCopy", 1)[1].split("function logicalFrameworkProjectOptions", 1)[0]
+
+        self.assertIn('PT: "Quadro Lógico"', copy)
+        self.assertIn('FR: "Cadre Logique"', copy)
+        self.assertIn('FR: "Ajouter un Objectif"', copy)
+        self.assertIn("aux Effets et aux Produits", copy)
+        self.assertNotIn('FR: "Ajouter un Goal"', copy)
+        self.assertIn("function renderLogicalFrameworkChrome", self.html)
+        self.assertIn('aria-live="polite"', self.html)
+        self.assertIn('aria-expanded="', self.html)
+        self.assertIn('role="menu"', self.html)
+        self.assertIn('role="dialog"', self.html)
+        self.assertIn("state.logicalFrameworkDrawer", self.html)
+        self.assertIn('event.key === "Escape" && state.logicalFrameworkDrawer', self.html)
+        self.assertIn('document.querySelector(".lf-menu[open]")', self.html)
+        self.assertIn('openLogicalFrameworkMenu.querySelector("summary")?.focus()', self.html)
+
+    def test_logical_framework_polish_flattens_workspace_and_removes_manual_refresh(self):
+        markup = self.html.split('id="logicalFrameworkWorkspace"', 1)[1].split('id="logicalFrameworkDrawerShell"', 1)[0]
+        renderer = self.html.split("function logicalFrameworkTreeHtml", 1)[1].split("function logicalFrameworkUnassignedHtml", 1)[0]
+        css = self.html.split("/* Logical Framework builder */", 1)[1].split("/* Programme Manager analytical workspace */", 1)[0]
+
+        self.assertNotIn('id="logicalFrameworkRefreshBtn"', markup)
+        self.assertNotIn('logicalFrameworkRefreshBtn', self.html)
+        self.assertIn('class="lf-project-field"', markup)
+        self.assertIn('id="logicalFrameworkAddGoalBtn"', markup.split("</header>", 1)[0])
+        self.assertNotIn('data-lf-action="add-goal"', renderer)
+        self.assertIn("border-bottom: 1px solid var(--lf-border);", css)
+        self.assertIn(".lf-panel {", css)
+        self.assertIn("padding: 0;", css)
+        self.assertIn("background: transparent;", css)
+        self.assertIn("await loadLogicalFramework(state.logicalFrameworkProjectId);", self.html)
+        self.assertIn(".app-shell.role-programme-manager .lf-drawer-backdrop", css)
+        self.assertIn(".app-shell.role-programme-manager .lf-menu-popover button", css)
+        self.assertIn("background: rgba(8, 25, 47, 0.24);", css)
+
+    def test_project_configuration_localization_is_live_and_uses_correct_orthography(self):
+        copy = self.html.split("function projectConfigurationCopy", 1)[1].split("function renderProjectStudioModeChrome", 1)[0]
+        chrome = self.html.split("function renderProjectConfigurationChrome", 1)[1].split("function logicalFrameworkCopy", 1)[0]
+
+        self.assertIn('PT: "Configuração de Projetos"', copy)
+        self.assertIn('PT: "Cobertura Geográfica"', copy)
+        self.assertIn('PT: "Indicadores Não Atribuídos"', self.html)
+        self.assertIn('PT: "Quadro Lógico"', self.html)
+        self.assertIn('FR: "Récemment mis à jour"', copy)
+        self.assertIn('PT: "Geração da estrutura do espaço de trabalho"', copy)
+        self.assertIn('FR: "Génération de la structure de l’espace de travail"', copy)
+        self.assertIn('FR: "Observateur Exécutif"', self.html)
+        self.assertIn("renderProjectRegistrySummary();", chrome)
+        self.assertIn("renderProjectRegistry();", chrome)
+        self.assertIn("renderProjectStudioStepper();", chrome)
+        self.assertIn('setStaticPlaceholder("#projectRegistrySearchInput"', chrome)
+        self.assertIn("projectLifecycleLabel(item.status)", self.html)
+        self.assertIn("function projectRegistryRoleLabel", self.html)
+
+    def test_project_registry_owns_its_horizontal_scroll(self):
+        css = self.html.split("/* Logical Framework builder */", 1)[1].split("/* Programme Manager analytical workspace */", 1)[0]
+        registry_rule = css.split("#projectRegistryTable > .admin-table {", 1)[1].split("}", 1)[0]
+
+        self.assertIn(".project-config-grid > *,", css)
+        self.assertIn("#projectRegistryTable {", css)
+        self.assertIn("min-width: 0;", registry_rule)
+        self.assertIn("max-width: 100%;", registry_rule)
+        self.assertIn("overflow-x: auto;", registry_rule)
+        self.assertNotIn("body { overflow-x: hidden;", css)
+
+    def test_logical_framework_width_and_responsive_rules_are_scoped(self):
+        css = self.html.split("/* Logical Framework builder */", 1)[1].split("/* Programme Manager analytical workspace */", 1)[0]
+
+        self.assertIn(".lf-workspace {", css)
+        self.assertIn("min-width: 0;", css)
+        self.assertIn("max-width: 100%;", css)
+        self.assertIn(".lf-table-scroll {", css)
+        self.assertIn("overflow-x: auto;", css)
+        self.assertIn("min-width: 760px;", css)
+        self.assertIn("@media (max-width: 900px)", css)
+        self.assertIn("@media (max-width: 600px)", css)
+        self.assertNotIn("body { overflow-x: hidden;", css)
+        self.assertNotIn("100vw", css)
+
+    def test_logical_framework_does_not_change_protected_pm_render_contracts(self):
+        self.assertIn("function renderProgrammeManagerWorkspace", self.html)
+        self.assertIn("function renderProgrammeManagerWorkplan", self.html)
+        self.assertIn("function programmeManagerTaskDrawerHtml", self.html)
+        self.assertIn('id="pmDeliveryChart"', self.html)
+        self.assertIn('id="pmWorkplanTable"', self.html)
+        self.assertIn('class="task-drawer-shell hidden"', self.html)
+        self.assertNotIn("progress_weighted_pct =", self.html)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,8 @@
+2026-09-22 | Adopt the append-only planning-log requirement in AGENTS.md; logging begins with this requirement, with no fabricated or backdated historical entries. | Decided by the user.
+2026-09-22 | Create CLAUDE.md in the repository root containing @AGENTS.md so Claude-compatible agents follow the shared AGENTS.md guidance. | Decided by the user.
+2026-09-22 | Install the official user-scoped Node.js LTS 24.19.0 runtime as the OpenSpec prerequisite. | Decided by the assistant to fulfill the user's installation request without requiring administrator elevation.
+2026-09-22 | Adopt OpenSpec 1.13.0 and initialize it in RC Atlas for Codex only using the core profile. | Decided by the user.
+2026-09-22 | Define the RC Atlas course MVP through OpenSpec Explore, grounded in the existing README and repository before creating any change request or implementation. | Decided by the user.
+2026-09-22 | Preserve the two-step RC Atlas closure model: Field submits, MEAL validates or returns, and Programme Manager gives final approval; after MEAL validation Teresa must see that approval is pending, without adding a validated task status. | Decided by the user.
+2026-09-22 | Create the OpenSpec change course-mvp-workflow-alignment with resolved proposal, specification, design, and implementation tasks, stopping before apply. | Decided by the user.
+2026-09-22 | Create a local Git safety checkpoint of the current RC Atlas state before OpenSpec Apply, excluding Site.txt and without pushing. | Decided by the user.

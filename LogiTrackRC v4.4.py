@@ -32,8 +32,10 @@ from urllib import error as urlerror
 from urllib import parse as urlparse
 from urllib import request as urlrequest
 from api import (
+    LogicalFrameworkRouteDependencies,
     register_dashboard_template_routes,
     register_demo_routes,
+    register_logical_framework_routes,
     register_notification_routes,
     register_reporting_routes,
 )
@@ -49,6 +51,7 @@ from migration.sync_helpers import (
     safe_get_repository_sync_status,
     sync_repository_backed_domains_from_snapshot,
 )
+from repositories.logical_framework_repository import LogicalFrameworkRepository
 from services import (
     DashboardTemplateService,
     DashboardTemplateServiceDependencies,
@@ -56,6 +59,8 @@ from services import (
     DemoWorkspaceServiceDependencies,
     NotificationService,
     NotificationServiceDependencies,
+    LogicalFrameworkService,
+    LogicalFrameworkValidationError,
     ReportingService,
     ReportingServiceDependencies,
 )
@@ -63,9 +68,11 @@ try:
     from shared import (
         AuditEvent,
         DashboardTemplate,
+        IndicatorResultLink,
         NotificationRule,
         OrganizationAccount,
         ReportingPeriodRecord,
+        ResultNode,
         SemanticMapping,
         TeamAccount,
         TidyDataset,
@@ -75,9 +82,11 @@ except ImportError:
     from shared import (
         AuditEvent,
         DashboardTemplate,
+        IndicatorResultLink,
         NotificationRule,
         OrganizationAccount,
         ReportingPeriodRecord,
+        ResultNode,
         SemanticMapping,
         TidyDataset,
         UserAccount,
@@ -543,10 +552,12 @@ class Indicator:
     unit: str
     frequency: str
     direction: str            # up/down
-    level: str                # output/outcome/impact
+    level: str                # Legacy metadata only; canonical hierarchy uses IndicatorResultLink.
     target: Optional[float]
     baseline: Optional[float]
     locations: List[LocationEntry] = field(default_factory=list)
+    organization_id: str = ""
+    project_id: str = ""
 
     def progress_for(self, actual: Optional[float], target: Optional[float]) -> Optional[float]:
         if actual is None or target is None:
@@ -677,6 +688,8 @@ class LogiTrackData:
     organizations: List[OrganizationAccount] = field(default_factory=list)
     teams: List[TeamAccount] = field(default_factory=list)
     projects: List[Project] = field(default_factory=list)
+    logical_framework_results: List[ResultNode] = field(default_factory=list)
+    indicator_result_links: List[IndicatorResultLink] = field(default_factory=list)
     ops_by_project: Dict[str, OpsLite] = field(default_factory=dict)
     tidy_datasets: List[TidyDataset] = field(default_factory=list)
     reporting_records: List[ReportingPeriodRecord] = field(default_factory=list)
@@ -753,6 +766,14 @@ def from_serializable(d: dict) -> LogiTrackData:
     for p in d.get("projects", []):
         inds: List[Indicator] = []
         for i in p.get("indicators", []):
+            declared_organization_id = str(i.get("organization_id", "") or "")
+            declared_project_id = str(i.get("project_id", "") or "")
+            project_organization_id = str(p.get("organization_id", "") or "")
+            project_id = str(p.get("id", "") or "")
+            if declared_organization_id and project_organization_id and declared_organization_id != project_organization_id:
+                raise ValueError(f"Indicator '{i.get('id', '')}' organization ownership conflicts with its project.")
+            if declared_project_id and declared_project_id != project_id:
+                raise ValueError(f"Indicator '{i.get('id', '')}' project ownership conflicts with its containing project.")
             locs: List[LocationEntry] = []
             for loc in i.get("locations", []):
                 locs.append(LocationEntry(
@@ -775,7 +796,9 @@ def from_serializable(d: dict) -> LogiTrackData:
                 level=i.get("level", "output"),
                 target=i.get("target"),
                 baseline=i.get("baseline"),
-                locations=locs
+                locations=locs,
+                organization_id=declared_organization_id or project_organization_id,
+                project_id=declared_project_id or project_id,
             ))
         assignments: List[ProjectTeamAssignment] = []
         for assignment in p.get("team_assignments", []) or []:
@@ -820,6 +843,39 @@ def from_serializable(d: dict) -> LogiTrackData:
             workspace_shell=p.get("workspace_shell", {}) if isinstance(p.get("workspace_shell", {}), dict) else {},
             cloned_from_project_id=str(p.get("cloned_from_project_id", "")),
             indicators=inds
+        ))
+
+    logical_framework_results: List[ResultNode] = []
+    for item in d.get("logical_framework_results", []) or []:
+        if not isinstance(item, dict):
+            continue
+        logical_framework_results.append(ResultNode(
+            id=str(item.get("id", "")),
+            organization_id=str(item.get("organization_id", "")),
+            project_id=str(item.get("project_id", "")),
+            result_type=str(item.get("result_type", "")),
+            title=str(item.get("title", "")),
+            description=str(item.get("description", "")),
+            parent_id=str(item.get("parent_id", "")),
+            display_order=int(item.get("display_order", 0) or 0),
+            status=str(item.get("status", "active") or "active"),
+            created_at=str(item.get("created_at", "")),
+            updated_at=str(item.get("updated_at", "")),
+        ))
+
+    indicator_result_links: List[IndicatorResultLink] = []
+    for item in d.get("indicator_result_links", []) or []:
+        if not isinstance(item, dict):
+            continue
+        indicator_result_links.append(IndicatorResultLink(
+            id=str(item.get("id", "")),
+            organization_id=str(item.get("organization_id", "")),
+            project_id=str(item.get("project_id", "")),
+            indicator_id=str(item.get("indicator_id", "")),
+            result_id=str(item.get("result_id", "")),
+            result_type=str(item.get("result_type", "")),
+            created_at=str(item.get("created_at", "")),
+            updated_at=str(item.get("updated_at", "")),
         ))
 
     ops_by_project: Dict[str, OpsLite] = {}
@@ -1008,10 +1064,12 @@ def from_serializable(d: dict) -> LogiTrackData:
             details=details if isinstance(details, dict) else {},
         ))
 
-    return LogiTrackData(
+    loaded = LogiTrackData(
         organizations=organizations,
         teams=teams,
         projects=projects,
+        logical_framework_results=logical_framework_results,
+        indicator_result_links=indicator_result_links,
         ops_by_project=ops_by_project,
         tidy_datasets=tidy_datasets,
         reporting_records=reporting_records,
@@ -1021,6 +1079,9 @@ def from_serializable(d: dict) -> LogiTrackData:
         users=users,
         audit_events=audit_events,
     )
+    if loaded.logical_framework_results or loaded.indicator_result_links:
+        LogicalFrameworkService(LogicalFrameworkRepository(loaded)).validate_integrity()
+    return loaded
 
 def get_storage_backend() -> str:
     raw = (os.getenv("LOGITRACK_STORAGE_BACKEND", "") or "").strip().lower()
@@ -1530,6 +1591,18 @@ PERMISSION_CATALOG = {
         "label": "Edit indicator intelligence",
         "scope": "analytics",
     },
+    "VIEW_LOGICAL_FRAMEWORK": {
+        "label": "View Logical Framework",
+        "scope": "results",
+    },
+    "MANAGE_LOGICAL_FRAMEWORK": {
+        "label": "Manage Logical Framework structure",
+        "scope": "results",
+    },
+    "LINK_RESULT_INDICATORS": {
+        "label": "Link indicators to results",
+        "scope": "results",
+    },
     "VIEW_DATA_QUALITY": {
         "label": "Data quality review",
         "scope": "analytics",
@@ -1609,6 +1682,9 @@ PERMISSION_ALIAS_MAP = {
     "projects.view": "VIEW_EXECUTIVE_SNAPSHOT",
     "projects.manage": "MANAGE_WORKPLAN",
     "indicators.view": "VIEW_INDICATORS",
+    "logical_framework.view": "VIEW_LOGICAL_FRAMEWORK",
+    "logical_framework.manage": "MANAGE_LOGICAL_FRAMEWORK",
+    "logical_framework.link_indicators": "LINK_RESULT_INDICATORS",
     "reporting.view": "VIEW_REPORTS",
     "data_quality.view": "VIEW_DATA_QUALITY",
     "tasks.view_assigned": "VIEW_WORKPLAN",
@@ -1667,6 +1743,9 @@ ROLE_PERMISSION_TEMPLATES = {
         "WORKSPACE_VIEW",
         "VIEW_PORTFOLIO",
         "VIEW_EXECUTIVE_SNAPSHOT",
+        "VIEW_LOGICAL_FRAMEWORK",
+        "MANAGE_LOGICAL_FRAMEWORK",
+        "LINK_RESULT_INDICATORS",
         "VIEW_WORKPLAN",
         "MANAGE_WORKPLAN",
         "MANAGE_PROJECTS",
@@ -1683,6 +1762,8 @@ ROLE_PERMISSION_TEMPLATES = {
         "VIEW_EXECUTIVE_SNAPSHOT",
         "VIEW_INDICATORS",
         "EDIT_INDICATORS",
+        "VIEW_LOGICAL_FRAMEWORK",
+        "LINK_RESULT_INDICATORS",
         "VIEW_DATA_QUALITY",
         "VIEW_WORKPLAN",
         "UPDATE_TASK_PROGRESS",
@@ -1694,6 +1775,7 @@ ROLE_PERMISSION_TEMPLATES = {
         "WORKSPACE_VIEW",
         "VIEW_PORTFOLIO",
         "VIEW_EXECUTIVE_SNAPSHOT",
+        "VIEW_LOGICAL_FRAMEWORK",
         "VIEW_WORKPLAN",
         "UPDATE_TASK_PROGRESS",
         "SUBMIT_EVIDENCE",
@@ -1703,6 +1785,7 @@ ROLE_PERMISSION_TEMPLATES = {
         "WORKSPACE_VIEW",
         "VIEW_PORTFOLIO",
         "VIEW_EXECUTIVE_SNAPSHOT",
+        "VIEW_LOGICAL_FRAMEWORK",
         "VIEW_NOTIFICATIONS",
         "VIEW_RISKS",
         "VIEW_REPORTS",
@@ -1713,6 +1796,7 @@ ADMIN_PERMISSION_GROUPS = {
     "Portfolio": ["WORKSPACE_VIEW", "VIEW_PORTFOLIO"],
     "Projects": ["VIEW_EXECUTIVE_SNAPSHOT", "MANAGE_PROJECTS", "VIEW_RISKS"],
     "Indicators": ["VIEW_INDICATORS", "EDIT_INDICATORS"],
+    "Logical Framework": ["VIEW_LOGICAL_FRAMEWORK", "MANAGE_LOGICAL_FRAMEWORK", "LINK_RESULT_INDICATORS"],
     "Workplan": ["VIEW_WORKPLAN", "MANAGE_WORKPLAN"],
     "Tasks": ["ASSIGN_TASKS", "UPDATE_TASK_PROGRESS", "SUBMIT_EVIDENCE", "APPROVE_TASKS", "VALIDATE_EVIDENCE"],
     "Reporting": ["VIEW_REPORTS", "GENERATE_REPORTS"],
@@ -5383,7 +5467,11 @@ def build_task_from_payload(payload: Dict[str, Any]) -> Task:
         approved_at=optional_text_field(payload, "approved_at"),
     )
 
-def build_indicator_from_payload(payload: Dict[str, Any]) -> Indicator:
+def build_indicator_from_payload(
+    payload: Dict[str, Any],
+    organization_id: str = "",
+    project_id: str = "",
+) -> Indicator:
     locations_payload = payload.get("locations") or []
     if not isinstance(locations_payload, list):
         raise ValueError("'locations' must be a list.")
@@ -5397,6 +5485,8 @@ def build_indicator_from_payload(payload: Dict[str, Any]) -> Indicator:
         level=normalize_level(optional_text_field(payload, "level", "output")),
         target=num(payload.get("target")),
         baseline=num(payload.get("baseline")),
+        organization_id=organization_id or optional_text_field(payload, "organization_id"),
+        project_id=project_id or optional_text_field(payload, "project_id"),
     )
     for location_payload in locations_payload:
         if not isinstance(location_payload, dict):
@@ -5771,7 +5861,7 @@ if FastAPI is not None:
             CORSMiddleware,
             allow_origins=cors_origins,
             allow_credentials=allow_credentials,
-            allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+            allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             allow_headers=["*"],
         )
 
@@ -6815,6 +6905,20 @@ if FastAPI is not None:
             indicators=[],
         )
         data.projects.append(cloned)
+        try:
+            logical_framework_clone = LogicalFrameworkService(
+                LogicalFrameworkRepository(data)
+            ).clone_hierarchy(
+                source.organization_id,
+                source.id,
+                cloned.organization_id,
+                cloned.id,
+            )
+        except LogicalFrameworkValidationError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Project clone could not copy the Logical Framework: {exc}",
+            ) from exc
         append_audit_event(
             data,
             action="project.cloned",
@@ -6822,7 +6926,12 @@ if FastAPI is not None:
             target_id=cloned.id,
             actor=actor,
             endpoint=f"/v1/admin/projects/{source.id}/clone",
-            details={"source_project_id": source.id, "project_code": cloned.project_code},
+            details={
+                "source_project_id": source.id,
+                "project_code": cloned.project_code,
+                "logical_framework_results_cloned": len(logical_framework_clone["results"]),
+                "logical_framework_indicator_links_cloned": logical_framework_clone["indicator_links_cloned"],
+            },
         )
         saved_path = _save_for_api(data)
         return {"ok": True, "saved_to": saved_path, "project": sanitize_project(data, cloned)}
@@ -7016,6 +7125,20 @@ if FastAPI is not None:
         header_factory=Header,
         http_exception_cls=HTTPException,
     )
+    register_logical_framework_routes(
+        app,
+        LogicalFrameworkRouteDependencies(
+            load_data=_load_for_api,
+            save_data=_save_for_api,
+            authorize_request=_authorize_request,
+            append_audit_event=append_audit_event,
+            find_project=find_project,
+            ensure_project_scope=ensure_project_scope,
+            normalize_project_status=normalize_project_status,
+        ),
+        header_factory=Header,
+        http_exception_cls=HTTPException,
+    )
     register_dashboard_template_routes(
         app,
         dashboard_template_service,
@@ -7196,7 +7319,11 @@ if FastAPI is not None:
             for indicator_payload in indicators_payload:
                 if not isinstance(indicator_payload, dict):
                     raise ValueError("Each indicator must be a JSON object.")
-                indicator = build_indicator_from_payload(indicator_payload)
+                indicator = build_indicator_from_payload(
+                    indicator_payload,
+                    organization_id=project.organization_id,
+                    project_id=project.id,
+                )
                 if find_indicator(project, indicator.id) is not None:
                     raise ValueError(f"Indicator id '{indicator.id}' is duplicated in the project payload.")
                 project.indicators.append(indicator)
@@ -7246,7 +7373,11 @@ if FastAPI is not None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 
         try:
-            indicator = build_indicator_from_payload(payload)
+            indicator = build_indicator_from_payload(
+                payload,
+                organization_id=project.organization_id,
+                project_id=project.id,
+            )
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 

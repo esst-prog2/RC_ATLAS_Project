@@ -1,9 +1,11 @@
 from .domain_models import (
     AuditEvent,
     DashboardTemplate,
+    IndicatorResultLink,
     NotificationRule,
     OrganizationAccount,
     ReportingPeriodRecord,
+    ResultNode,
     SemanticMapping,
     TeamAccount,
     TidyDataset,
@@ -13,9 +15,11 @@ from .domain_models import (
 __all__ = [
     "AuditEvent",
     "DashboardTemplate",
+    "IndicatorResultLink",
     "NotificationRule",
     "OrganizationAccount",
     "ReportingPeriodRecord",
+    "ResultNode",
     "SemanticMapping",
     "TeamAccount",
     "TidyDataset",

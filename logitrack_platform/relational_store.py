@@ -37,6 +37,7 @@ DDL_STATEMENTS = [
     """
     CREATE TABLE IF NOT EXISTS indicators (
         indicator_id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL DEFAULT '',
         project_id TEXT NOT NULL,
         name TEXT NOT NULL,
         unit TEXT,
@@ -47,6 +48,38 @@ DDL_STATEMENTS = [
         baseline REAL,
         location_count INTEGER NOT NULL DEFAULT 0,
         synced_at TEXT NOT NULL
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS logical_framework_results (
+        result_id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        project_id TEXT NOT NULL,
+        result_type TEXT NOT NULL CHECK (result_type IN ('goal', 'outcome', 'output')),
+        parent_result_id TEXT,
+        title TEXT NOT NULL,
+        description TEXT,
+        display_order INTEGER NOT NULL DEFAULT 0,
+        status TEXT NOT NULL,
+        created_at TEXT,
+        updated_at TEXT,
+        synced_at TEXT NOT NULL,
+        FOREIGN KEY (parent_result_id) REFERENCES logical_framework_results(result_id) ON DELETE CASCADE
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS indicator_result_links (
+        link_id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        project_id TEXT NOT NULL,
+        indicator_id TEXT NOT NULL UNIQUE,
+        result_id TEXT NOT NULL,
+        result_type TEXT NOT NULL CHECK (result_type IN ('outcome', 'output')),
+        created_at TEXT,
+        updated_at TEXT,
+        synced_at TEXT NOT NULL,
+        FOREIGN KEY (indicator_id) REFERENCES indicators(indicator_id) ON DELETE CASCADE,
+        FOREIGN KEY (result_id) REFERENCES logical_framework_results(result_id) ON DELETE CASCADE
     )
     """,
     """
@@ -225,9 +258,11 @@ DDL_STATEMENTS = [
 ]
 
 CONTENT_TABLES = [
-    "projects",
-    "indicators",
+    "indicator_result_links",
+    "logical_framework_results",
     "indicator_locations",
+    "indicators",
+    "projects",
     "operational_activities",
     "tasks",
     "tidy_datasets",
@@ -274,7 +309,7 @@ def _connect(path: str) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA synchronous=NORMAL;")
-    conn.execute("PRAGMA foreign_keys=OFF;")
+    conn.execute("PRAGMA foreign_keys=ON;")
     conn.execute("PRAGMA busy_timeout=5000;")
     return conn
 
@@ -289,6 +324,12 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     for column_name in ("organization_id", "team_id", "status", "permissions_json", "password_salt", "password_hash", "api_token_hash"):
         if column_name not in existing_user_columns:
             conn.execute(f"ALTER TABLE users ADD COLUMN {column_name} TEXT")
+    existing_indicator_columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(indicators)").fetchall()
+    }
+    if "organization_id" not in existing_indicator_columns:
+        conn.execute("ALTER TABLE indicators ADD COLUMN organization_id TEXT NOT NULL DEFAULT ''")
 
 
 def _delete_existing_content(conn: sqlite3.Connection) -> None:
@@ -325,6 +366,8 @@ def sync_snapshot_to_relational_store(
         location_rows = 0
         activity_rows = 0
         task_rows = 0
+        result_rows = 0
+        indicator_result_link_rows = 0
         dataset_rows = 0
         reporting_rows = 0
         mapping_rows = 0
@@ -353,11 +396,12 @@ def sync_snapshot_to_relational_store(
                 conn.execute(
                     """
                     INSERT INTO indicators
-                    (indicator_id, project_id, name, unit, frequency, direction, level, target, baseline, location_count, synced_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (indicator_id, organization_id, project_id, name, unit, frequency, direction, level, target, baseline, location_count, synced_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         str(indicator.get("id", "")),
+                        str(indicator.get("organization_id") or project.get("organization_id", "")),
                         str(project.get("id", "")),
                         str(indicator.get("name", "")),
                         str(indicator.get("unit", "")),
@@ -402,6 +446,63 @@ def sync_snapshot_to_relational_store(
                         ),
                     )
                     location_rows += 1
+
+        result_type_order = {"goal": 0, "outcome": 1, "output": 2}
+        result_items = [
+            item for item in (snapshot.get("logical_framework_results") or [])
+            if isinstance(item, dict)
+        ]
+        result_items.sort(key=lambda item: (
+            result_type_order.get(str(item.get("result_type", "")).lower(), 99),
+            int(item.get("display_order", 0) or 0),
+            str(item.get("id", "")),
+        ))
+        for result in result_items:
+            conn.execute(
+                """
+                INSERT INTO logical_framework_results
+                (result_id, organization_id, project_id, result_type, parent_result_id, title, description, display_order, status, created_at, updated_at, synced_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    str(result.get("id", "")),
+                    str(result.get("organization_id", "")),
+                    str(result.get("project_id", "")),
+                    str(result.get("result_type", "")),
+                    str(result.get("parent_id", "")) or None,
+                    str(result.get("title", "")),
+                    str(result.get("description", "")),
+                    int(result.get("display_order", 0) or 0),
+                    str(result.get("status", "active") or "active"),
+                    str(result.get("created_at", "")),
+                    str(result.get("updated_at", "")),
+                    synced_at,
+                ),
+            )
+            result_rows += 1
+
+        for link in snapshot.get("indicator_result_links", []) or []:
+            if not isinstance(link, dict):
+                continue
+            conn.execute(
+                """
+                INSERT INTO indicator_result_links
+                (link_id, organization_id, project_id, indicator_id, result_id, result_type, created_at, updated_at, synced_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    str(link.get("id", "")),
+                    str(link.get("organization_id", "")),
+                    str(link.get("project_id", "")),
+                    str(link.get("indicator_id", "")),
+                    str(link.get("result_id", "")),
+                    str(link.get("result_type", "")),
+                    str(link.get("created_at", "")),
+                    str(link.get("updated_at", "")),
+                    synced_at,
+                ),
+            )
+            indicator_result_link_rows += 1
 
         for project_id, ops in (snapshot.get("ops_by_project", {}) or {}).items():
             if not isinstance(ops, dict):
@@ -656,6 +757,8 @@ def sync_snapshot_to_relational_store(
             "projects": project_rows,
             "indicators": indicator_rows,
             "indicator_locations": location_rows,
+            "logical_framework_results": result_rows,
+            "indicator_result_links": indicator_result_link_rows,
             "activities": activity_rows,
             "tasks": task_rows,
             "tidy_datasets": dataset_rows,
