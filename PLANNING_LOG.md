@@ -8,3 +8,5 @@
 2026-09-22 | Create a local Git safety checkpoint of the current RC Atlas state before OpenSpec Apply, excluding Site.txt and without pushing. | Decided by the user.
 2026-09-22 | Apply the approved OpenSpec change course-mvp-workflow-alignment completely, verify it with targeted and full tests, and stop without staging, committing, or pushing. | Decided by the user.
 2026-09-22 | Commit and publish the verified final RC Atlas course MVP state, including the completed OpenSpec course-mvp-workflow-alignment change, to the existing GitHub main branch while excluding Site.txt and local/runtime artifacts. | Decided by the user.
+2026-09-23 | Create the OpenSpec change logical-framework-persistence-boundary for a storage-neutral Logical Framework repository and unit-of-work boundary backed initially by the current snapshot compatibility adapter, without implementing PostgreSQL or changing application behavior. | Decided by the user.
+2026-09-23 | Treat RC Atlas HTTP APIs used by migrated capabilities as client-independent contracts so the current Studio and future parallel clients receive the same backend behavior. | Decided by the user.
