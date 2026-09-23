@@ -54,6 +54,15 @@ class LogicalFrameworkService:
         self.now = now
         self.id_factory = id_factory
 
+    def _validate_scope(self, organization_id: str, project_id: str) -> None:
+        if (
+            organization_id != self.repository.scope.organization_id
+            or project_id != self.repository.scope.project_id
+        ):
+            raise LogicalFrameworkScopeValidationError(
+                "Logical Framework operation is outside the repository scope."
+            )
+
     def _repository_call(self, operation: Callable[[], Any]) -> Any:
         try:
             return operation()
@@ -74,6 +83,7 @@ class LogicalFrameworkService:
         result_type: str,
         parent_id: str,
     ) -> Optional[ResultNode]:
+        self._validate_scope(organization_id, project_id)
         if parent_id and parent_id == result_id:
             raise LogicalFrameworkValidationError("A result cannot parent itself.")
         if result_type == "goal":
@@ -88,7 +98,7 @@ class LogicalFrameworkService:
         if not parent_id:
             raise LogicalFrameworkValidationError(f"A {result_type.title()} requires a parent result.")
         parent = self._repository_call(
-            lambda: self.repository.require_result(organization_id, project_id, parent_id)
+            lambda: self.repository.require_result(parent_id)
         )
         if parent.result_type != expected_parent_type:
             raise LogicalFrameworkValidationError(
@@ -109,11 +119,12 @@ class LogicalFrameworkService:
         status: str = "active",
         result_id: Optional[str] = None,
     ) -> ResultNode:
+        self._validate_scope(organization_id, project_id)
         result_type = str(result_type or "").strip().lower()
         result_id = str(result_id or self.id_factory(result_type or "result")).strip()
-        self._repository_call(lambda: self.repository.require_project(organization_id, project_id))
+        self._repository_call(self.repository.ensure_project)
         existing = self._repository_call(
-            lambda: self.repository.get_result(organization_id, project_id, result_id)
+            lambda: self.repository.get_result(result_id)
         )
         if existing is not None:
             raise LogicalFrameworkValidationError(f"Result ID '{result_id}' already exists.")
@@ -169,8 +180,9 @@ class LogicalFrameworkService:
         status: Optional[str] = None,
         result_type: Optional[str] = None,
     ) -> ResultNode:
+        self._validate_scope(organization_id, project_id)
         current = self._repository_call(
-            lambda: self.repository.require_result(organization_id, project_id, result_id)
+            lambda: self.repository.require_result(result_id)
         )
         if result_type is not None and str(result_type).strip().lower() != current.result_type:
             raise LogicalFrameworkValidationError("Changing a result's level is not supported.")
@@ -205,6 +217,7 @@ class LogicalFrameworkService:
         project_id: str,
         ordered_result_ids: List[str],
     ) -> List[ResultNode]:
+        self._validate_scope(organization_id, project_id)
         ordered_ids = [str(result_id or "").strip() for result_id in ordered_result_ids]
         if not ordered_ids or any(not result_id for result_id in ordered_ids):
             raise LogicalFrameworkValidationError("ordered_result_ids must contain result IDs.")
@@ -214,7 +227,7 @@ class LogicalFrameworkService:
         requested = [
             self._repository_call(
                 lambda result_id=result_id: self.repository.require_result(
-                    organization_id, project_id, result_id
+                    result_id
                 )
             )
             for result_id in ordered_ids
@@ -232,7 +245,7 @@ class LogicalFrameworkService:
         siblings = [
             node
             for node in self._repository_call(
-                lambda: self.repository.list_results(organization_id, project_id)
+                self.repository.list_results
             )
             if node.result_type == branch_type and node.parent_id == branch_parent_id
         ]
@@ -254,30 +267,33 @@ class LogicalFrameworkService:
         return self.update_result(organization_id, project_id, result_id, status="archived")
 
     def delete_result(self, organization_id: str, project_id: str, result_id: str) -> None:
+        self._validate_scope(organization_id, project_id)
         self._repository_call(
-            lambda: self.repository.delete_result(organization_id, project_id, result_id)
+            lambda: self.repository.delete_result(result_id)
         )
 
     def get_result(
         self, organization_id: str, project_id: str, result_id: str
     ) -> ResultNode:
+        self._validate_scope(organization_id, project_id)
         return self._repository_call(
-            lambda: self.repository.require_result(organization_id, project_id, result_id)
+            lambda: self.repository.require_result(result_id)
         )
 
     def link_indicator(
         self, organization_id: str, project_id: str, indicator_id: str, result_id: str
     ) -> IndicatorResultLink:
+        self._validate_scope(organization_id, project_id)
         self._repository_call(
-            lambda: self.repository.require_indicator(organization_id, project_id, indicator_id)
+            lambda: self.repository.require_indicator(indicator_id)
         )
         result = self._repository_call(
-            lambda: self.repository.require_result(organization_id, project_id, result_id)
+            lambda: self.repository.require_result(result_id)
         )
         if result.result_type not in {"outcome", "output"}:
             raise LogicalFrameworkValidationError("Indicators may link only to an Outcome or Output.")
         existing = self._repository_call(
-            lambda: self.repository.get_indicator_link(organization_id, project_id, indicator_id)
+            lambda: self.repository.get_indicator_link(indicator_id)
         )
         timestamp = self.now()
         link = IndicatorResultLink(
@@ -295,50 +311,40 @@ class LogicalFrameworkService:
     def unlink_indicator(
         self, organization_id: str, project_id: str, indicator_id: str
     ) -> IndicatorResultLink:
+        self._validate_scope(organization_id, project_id)
         existing = self._repository_call(
-            lambda: self.repository.get_indicator_link(
-                organization_id, project_id, indicator_id
-            )
+            lambda: self.repository.get_indicator_link(indicator_id)
         )
         if existing is None:
             raise LogicalFrameworkNotFoundValidationError(
                 f"Indicator '{indicator_id}' does not have a canonical result link."
             )
         self._repository_call(
-            lambda: self.repository.delete_indicator_link(organization_id, project_id, indicator_id)
+            lambda: self.repository.delete_indicator_link(indicator_id)
         )
         return existing
 
     def clone_hierarchy(
         self,
-        source_organization_id: str,
-        source_project_id: str,
-        destination_organization_id: str,
-        destination_project_id: str,
+        source_repository: LogicalFrameworkRepository,
     ) -> Dict[str, Any]:
+        source_scope = source_repository.scope
+        destination_scope = self.repository.scope
         self._repository_call(
-            lambda: self.repository.require_project(source_organization_id, source_project_id)
+            source_repository.ensure_project
         )
-        self._repository_call(
-            lambda: self.repository.require_project(
-                destination_organization_id, destination_project_id
-            )
-        )
-        if source_organization_id != destination_organization_id:
+        self._repository_call(self.repository.ensure_project)
+        if source_scope.organization_id != destination_scope.organization_id:
             raise LogicalFrameworkScopeValidationError(
                 "Logical Framework cloning across organizations is not supported."
             )
-        if self._repository_call(
-            lambda: self.repository.list_results(
-                destination_organization_id, destination_project_id
-            )
-        ):
+        if self._repository_call(self.repository.list_results):
             raise LogicalFrameworkConflictValidationError(
                 "The destination project already has a Logical Framework."
             )
 
         source_nodes = self._repository_call(
-            lambda: self.repository.list_results(source_organization_id, source_project_id)
+            source_repository.list_results
         )
         id_map: Dict[str, str] = {}
         cloned_nodes: List[ResultNode] = []
@@ -350,8 +356,8 @@ class LogicalFrameworkService:
                         f"Cannot clone result '{source.id}' because its parent was not cloned."
                     )
                 clone = self.create_result(
-                    destination_organization_id,
-                    destination_project_id,
+                    destination_scope.organization_id,
+                    destination_scope.project_id,
                     result_type,
                     source.title,
                     description=source.description,
@@ -368,14 +374,13 @@ class LogicalFrameworkService:
         }
 
     def validate_integrity(self) -> None:
+        self._repository_call(self.repository.ensure_project)
+        nodes = self._repository_call(self.repository.list_results)
         seen_result_ids = set()
-        for node in self.repository.state.logical_framework_results:
+        for node in nodes:
             if node.id in seen_result_ids:
                 raise LogicalFrameworkValidationError(f"Duplicate result ID: '{node.id}'.")
             seen_result_ids.add(node.id)
-            self._repository_call(
-                lambda node=node: self.repository.require_project(node.organization_id, node.project_id)
-            )
             self._validate_parent(
                 node.organization_id,
                 node.project_id,
@@ -385,21 +390,18 @@ class LogicalFrameworkService:
             )
 
         seen_indicator_ids = set()
-        for link in self.repository.state.indicator_result_links:
+        links = self._repository_call(self.repository.list_indicator_links)
+        for link in links:
             if link.indicator_id in seen_indicator_ids:
                 raise LogicalFrameworkValidationError(
                     f"Indicator '{link.indicator_id}' has more than one canonical result link."
                 )
             seen_indicator_ids.add(link.indicator_id)
             self._repository_call(
-                lambda link=link: self.repository.require_indicator(
-                    link.organization_id, link.project_id, link.indicator_id
-                )
+                lambda link=link: self.repository.require_indicator(link.indicator_id)
             )
             result = self._repository_call(
-                lambda link=link: self.repository.require_result(
-                    link.organization_id, link.project_id, link.result_id
-                )
+                lambda link=link: self.repository.require_result(link.result_id)
             )
             if result.result_type not in {"outcome", "output"} or link.result_type != result.result_type:
                 raise LogicalFrameworkValidationError(
@@ -407,9 +409,8 @@ class LogicalFrameworkService:
                 )
 
     def get_hierarchy(self, organization_id: str, project_id: str) -> List[Dict[str, Any]]:
-        nodes = self._repository_call(
-            lambda: self.repository.list_results(organization_id, project_id)
-        )
+        self._validate_scope(organization_id, project_id)
+        nodes = self._repository_call(self.repository.list_results)
         outcomes_by_goal: Dict[str, List[ResultNode]] = {}
         outputs_by_outcome: Dict[str, List[ResultNode]] = {}
         for node in nodes:
@@ -466,20 +467,17 @@ class LogicalFrameworkService:
     def get_project_logical_framework(
         self, organization_id: str, project_id: str
     ) -> Dict[str, Any]:
-        project = self._repository_call(
-            lambda: self.repository.require_project(organization_id, project_id)
-        )
+        self._validate_scope(organization_id, project_id)
+        self._repository_call(self.repository.ensure_project)
         hierarchy = self.get_hierarchy(organization_id, project_id)
-        links = self._repository_call(
-            lambda: self.repository.list_indicator_links(organization_id, project_id)
-        )
+        links = self._repository_call(self.repository.list_indicator_links)
         links_by_result: Dict[str, List[IndicatorResultLink]] = {}
         links_by_indicator = {link.indicator_id: link for link in links}
         for link in links:
             links_by_result.setdefault(link.result_id, []).append(link)
         indicators = {
             str(getattr(indicator, "id", "")): indicator
-            for indicator in getattr(project, "indicators", []) or []
+            for indicator in self._repository_call(self.repository.list_indicators)
         }
 
         def attached_indicators(result_id: str) -> List[Dict[str, Any]]:

@@ -51,7 +51,12 @@ from migration.sync_helpers import (
     safe_get_repository_sync_status,
     sync_repository_backed_domains_from_snapshot,
 )
-from repositories.logical_framework_repository import LogicalFrameworkRepository
+from repositories.logical_framework_repository import LogicalFrameworkScope
+from repositories.logical_framework_snapshot import (
+    SnapshotLogicalFrameworkRepository,
+    SnapshotLogicalFrameworkUnitOfWork,
+    validate_snapshot_logical_framework,
+)
 from services import (
     DashboardTemplateService,
     DashboardTemplateServiceDependencies,
@@ -59,6 +64,9 @@ from services import (
     DemoWorkspaceServiceDependencies,
     NotificationService,
     NotificationServiceDependencies,
+    LogicalFrameworkActorContext,
+    LogicalFrameworkApplication,
+    LogicalFrameworkAuditRequest,
     LogicalFrameworkService,
     LogicalFrameworkValidationError,
     ReportingService,
@@ -1080,7 +1088,7 @@ def from_serializable(d: dict) -> LogiTrackData:
         audit_events=audit_events,
     )
     if loaded.logical_framework_results or loaded.indicator_result_links:
-        LogicalFrameworkService(LogicalFrameworkRepository(loaded)).validate_integrity()
+        validate_snapshot_logical_framework(loaded)
     return loaded
 
 def get_storage_backend() -> str:
@@ -1292,13 +1300,17 @@ def get_cors_origins() -> List[str]:
     origins = [item.strip() for item in raw.split(",") if item.strip()]
     return origins or ["*"]
 
-def save_data_to_path(data: LogiTrackData, path: Optional[str] = None) -> str:
+def save_canonical_data_to_path(data: LogiTrackData, path: Optional[str] = None) -> str:
     backend = get_storage_backend()
     target = get_storage_target_path(path, backend=backend)
     if backend == "sqlite":
         save_sqlite(data, target)
     else:
         save_json(data, target)
+    return target
+
+def save_data_to_path(data: LogiTrackData, path: Optional[str] = None) -> str:
+    target = save_canonical_data_to_path(data, path)
     update_relational_store_from_data(data, source_path=target)
     return target
 
@@ -5960,6 +5972,65 @@ if FastAPI is not None:
             raise HTTPException(status_code=401, detail="Provide a valid X-Auth-Token.")
         return None
 
+    def _authorize_logical_framework_scope(
+        *,
+        project_id: str,
+        permission: str,
+        x_api_key: Optional[str],
+        x_auth_token: Optional[str],
+    ) -> LogicalFrameworkActorContext:
+        data = _load_for_api()
+        actor = _authorize_request(
+            data,
+            x_api_key,
+            x_auth_token,
+            required_permission=permission,
+        )
+        if actor is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Logical Framework endpoints require an authenticated user.",
+            )
+        project = find_project(data, project_id)
+        if project is None:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        ensure_project_scope(actor, project)
+        return LogicalFrameworkActorContext(
+            id=actor.id,
+            username=actor.username,
+            role=actor.role,
+            organization_id=actor.organization_id,
+        )
+
+    def _append_logical_framework_audit(
+        data: LogiTrackData,
+        request: LogicalFrameworkAuditRequest,
+    ) -> AuditEvent:
+        return append_audit_event(
+            data,
+            action=request.action,
+            target_type=request.target_type,
+            target_id=request.target_id,
+            actor=request.actor,
+            endpoint=request.endpoint,
+            details=request.details,
+        )
+
+    def _logical_framework_unit_of_work() -> SnapshotLogicalFrameworkUnitOfWork:
+        return SnapshotLogicalFrameworkUnitOfWork(
+            load_snapshot=_load_for_api,
+            save_canonical=save_canonical_data_to_path,
+            synchronize_projection=lambda data, path: update_relational_store_from_data(
+                data, source_path=path
+            ),
+            append_audit=_append_logical_framework_audit,
+        )
+
+    logical_framework_application = LogicalFrameworkApplication(
+        _logical_framework_unit_of_work,
+        normalize_project_status=normalize_project_status,
+    )
+
     # Notification execution and dispatch orchestration now live in services/notifications.py.
 
     def _scheduler_job() -> Dict[str, Any]:
@@ -6906,14 +6977,17 @@ if FastAPI is not None:
         )
         data.projects.append(cloned)
         try:
-            logical_framework_clone = LogicalFrameworkService(
-                LogicalFrameworkRepository(data)
-            ).clone_hierarchy(
-                source.organization_id,
-                source.id,
-                cloned.organization_id,
-                cloned.id,
+            source_repository = SnapshotLogicalFrameworkRepository(
+                data,
+                LogicalFrameworkScope(source.organization_id, source.id),
             )
+            destination_repository = SnapshotLogicalFrameworkRepository(
+                data,
+                LogicalFrameworkScope(cloned.organization_id, cloned.id),
+            )
+            logical_framework_clone = LogicalFrameworkService(
+                destination_repository
+            ).clone_hierarchy(source_repository)
         except LogicalFrameworkValidationError as exc:
             raise HTTPException(
                 status_code=400,
@@ -7128,13 +7202,8 @@ if FastAPI is not None:
     register_logical_framework_routes(
         app,
         LogicalFrameworkRouteDependencies(
-            load_data=_load_for_api,
-            save_data=_save_for_api,
-            authorize_request=_authorize_request,
-            append_audit_event=append_audit_event,
-            find_project=find_project,
-            ensure_project_scope=ensure_project_scope,
-            normalize_project_status=normalize_project_status,
+            authorize_scope=_authorize_logical_framework_scope,
+            application=logical_framework_application,
         ),
         header_factory=Header,
         http_exception_cls=HTTPException,

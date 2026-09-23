@@ -10,6 +10,12 @@ from .logical_framework_service import (
     LogicalFrameworkService,
     LogicalFrameworkValidationError,
 )
+from .logical_framework_application import (
+    LogicalFrameworkActorContext,
+    LogicalFrameworkApplication,
+    LogicalFrameworkAuditRequest,
+    LogicalFrameworkUnitOfWork,
+)
 
 __all__ = [
     "DashboardTemplateService",
@@ -25,5 +31,9 @@ __all__ = [
     "LogicalFrameworkNotFoundValidationError",
     "LogicalFrameworkScopeValidationError",
     "LogicalFrameworkConflictValidationError",
+    "LogicalFrameworkActorContext",
+    "LogicalFrameworkApplication",
+    "LogicalFrameworkAuditRequest",
+    "LogicalFrameworkUnitOfWork",
     "ServiceError",
 ]

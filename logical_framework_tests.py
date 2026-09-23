@@ -7,7 +7,8 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 from logitrack_platform.relational_store import sync_snapshot_to_relational_store
-from repositories.logical_framework_repository import LogicalFrameworkRepository
+from repositories.logical_framework_repository import LogicalFrameworkScope
+from repositories.logical_framework_snapshot import SnapshotLogicalFrameworkRepository
 from services.demo_seed import build_demo_seed_bundle
 from services.logical_framework_service import (
     LogicalFrameworkService,
@@ -134,7 +135,10 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
             ),
         ]
         self.data = MODULE.LogiTrackData(projects=projects)
-        self.repository = LogicalFrameworkRepository(self.data)
+        self.repository = SnapshotLogicalFrameworkRepository(
+            self.data,
+            LogicalFrameworkScope(self.organization_id, self.project_id),
+        )
         self.service = LogicalFrameworkService(
             self.repository,
             now=lambda: self.timestamp,
@@ -172,7 +176,7 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
         self.assertEqual(outcome.parent_id, goal.id)
         self.assertEqual(output.parent_id, outcome.id)
         self.assertEqual(
-            [node.result_type for node in self.repository.list_results(self.organization_id, self.project_id)],
+            [node.result_type for node in self.repository.list_results()],
             ["goal", "outcome", "output"],
         )
         tree = self.service.get_hierarchy(self.organization_id, self.project_id)
@@ -186,7 +190,7 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
             self.organization_id, self.project_id, "Second Goal", result_id="goal_2"
         )
         self.assertNotEqual(first.id, second.id)
-        self.assertEqual(len(self.repository.list_results(self.organization_id, self.project_id)), 2)
+        self.assertEqual(len(self.repository.list_results()), 2)
 
     def test_duplicate_result_id_is_rejected(self):
         self.service.create_goal(
@@ -311,14 +315,14 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
         )
         self.assertEqual(relinked.id, outcome_link.id)
         self.assertEqual(relinked.result_id, output.id)
-        self.assertEqual(len(self.repository.list_indicator_links(self.organization_id, self.project_id)), 2)
+        self.assertEqual(len(self.repository.list_indicator_links()), 2)
 
     def test_indicator_may_remain_unassigned_and_cannot_link_to_goal(self):
         goal = self.service.create_goal(
             self.organization_id, self.project_id, "Goal", result_id="goal_unassigned"
         )
         self.assertIsNone(
-            self.repository.get_indicator_link(self.organization_id, self.project_id, "indicator_a")
+            self.repository.get_indicator_link("indicator_a")
         )
         with self.assertRaises(LogicalFrameworkValidationError):
             self.service.link_indicator(
@@ -326,10 +330,20 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
             )
 
     def test_cross_project_indicator_link_is_rejected(self):
-        goal = self.service.create_goal(
+        other_service = LogicalFrameworkService(
+            SnapshotLogicalFrameworkRepository(
+                self.data,
+                LogicalFrameworkScope(
+                    self.organization_id, self.other_project_id
+                ),
+            ),
+            now=lambda: self.timestamp,
+            id_factory=StableIdFactory(),
+        )
+        goal = other_service.create_goal(
             self.organization_id, self.other_project_id, "Project B Goal", result_id="goal_b"
         )
-        outcome = self.service.create_outcome(
+        outcome = other_service.create_outcome(
             self.organization_id,
             self.other_project_id,
             goal.id,
@@ -337,18 +351,28 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
             result_id="outcome_b",
         )
         with self.assertRaises(LogicalFrameworkValidationError):
-            self.service.link_indicator(
+            other_service.link_indicator(
                 self.organization_id, self.other_project_id, "indicator_a", outcome.id
             )
 
     def test_cross_organization_indicator_link_is_rejected(self):
-        goal = self.service.create_goal(
+        external_service = LogicalFrameworkService(
+            SnapshotLogicalFrameworkRepository(
+                self.data,
+                LogicalFrameworkScope(
+                    self.other_organization_id, self.external_project_id
+                ),
+            ),
+            now=lambda: self.timestamp,
+            id_factory=StableIdFactory(),
+        )
+        goal = external_service.create_goal(
             self.other_organization_id,
             self.external_project_id,
             "Organization B Goal",
             result_id="goal_c",
         )
-        outcome = self.service.create_outcome(
+        outcome = external_service.create_outcome(
             self.other_organization_id,
             self.external_project_id,
             goal.id,
@@ -356,7 +380,7 @@ class LogicalFrameworkFoundationTests(unittest.TestCase):
             result_id="outcome_c",
         )
         with self.assertRaises(LogicalFrameworkValidationError):
-            self.service.link_indicator(
+            external_service.link_indicator(
                 self.other_organization_id,
                 self.external_project_id,
                 "indicator_a",
