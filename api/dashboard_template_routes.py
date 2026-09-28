@@ -11,9 +11,13 @@ def register_dashboard_template_routes(
     http_exception_cls: Optional[type[Exception]] = None,
 ) -> None:
     @app.get("/v1/dashboard_templates")
-    def v1_dashboard_templates(dataset_id: Optional[str] = None):
+    def v1_dashboard_templates(
+        dataset_id: Optional[str] = None,
+        x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"),
+        x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token"),
+    ):
         try:
-            return service.list_templates(dataset_id=dataset_id)
+            return service.list_templates(dataset_id=dataset_id, x_api_key=x_api_key, x_auth_token=x_auth_token)
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 

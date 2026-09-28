@@ -71,6 +71,16 @@ from services import (
     LogicalFrameworkValidationError,
     ReportingService,
     ReportingServiceDependencies,
+    AuthenticatedTenantContext,
+    audit_event_organization_id,
+    dataset_organization_id,
+    find_scoped_project,
+    find_scoped_team,
+    find_scoped_user,
+    reporting_record_organization_id,
+    semantic_mapping_organization_id,
+    scope_snapshot_for_tenant,
+    workspace_is_uninitialized,
 )
 try:
     from shared import (
@@ -1966,7 +1976,7 @@ def sanitize_organization(organization: OrganizationAccount) -> Dict[str, Any]:
     }
 
 def sanitize_team(data: LogiTrackData, team: TeamAccount) -> Dict[str, Any]:
-    lead = find_user_by_id(data, team.team_lead_user_id) if team.team_lead_user_id else None
+    lead = find_scoped_user(data, team.organization_id, team.team_lead_user_id) if team.team_lead_user_id else None
     member_count = len([
         user for user in data.users
         if user.organization_id == team.organization_id and user.team_id == team.id and user.status != "archived"
@@ -2070,8 +2080,8 @@ def project_lifecycle_actions(status: str) -> List[str]:
     return actions
 
 def sanitize_project_team_assignment(data: LogiTrackData, assignment: ProjectTeamAssignment) -> Dict[str, Any]:
-    user = find_user_by_id(data, assignment.user_id)
-    team = find_team_by_id(data, assignment.team_id) if assignment.team_id else None
+    user = find_scoped_user(data, assignment.organization_id, assignment.user_id)
+    team = find_scoped_team(data, assignment.organization_id, assignment.team_id) if assignment.team_id else None
     return {
         "id": assignment.id,
         "project_id": assignment.project_id,
@@ -2181,7 +2191,7 @@ def organization_for_user(data: LogiTrackData, user: Optional[UserAccount]) -> O
 
 def build_user_session_payload(data: LogiTrackData, user: UserAccount) -> Dict[str, Any]:
     organization = organization_for_user(data, user)
-    team = find_team_by_id(data, user.team_id)
+    team = find_scoped_team(data, user.organization_id, user.team_id)
     payload = sanitize_user(user)
     payload["organization"] = sanitize_organization(organization) if organization else None
     payload["organization_name"] = organization.organization_name if organization else ""
@@ -2247,12 +2257,23 @@ def ensure_team_scope(actor: Optional[UserAccount], team: Optional[TeamAccount])
     ensure_organization_scope(actor, team.organization_id, detail="Access denied for this team.")
 
 def find_audit_actor(data: LogiTrackData, item: AuditEvent) -> Optional[UserAccount]:
+    organization_id = audit_event_organization_id(data, item)
+    if not organization_id:
+        return None
     if item.actor_id:
-        match = find_user_by_id(data, item.actor_id)
+        match = find_scoped_user(data, organization_id, item.actor_id)
         if match is not None:
             return match
     if item.actor_username:
-        return find_user_by_username(data, item.actor_username)
+        target = str(item.actor_username or '').strip().lower()
+        return next(
+            (
+                user for user in data.users
+                if user.organization_id == organization_id
+                and str(user.username or '').strip().lower() == target
+            ),
+            None,
+        )
     return None
 
 def build_team_account_from_payload(payload: Dict[str, Any], existing: Optional[TeamAccount] = None) -> TeamAccount:
@@ -2272,7 +2293,7 @@ def build_team_account_from_payload(payload: Dict[str, Any], existing: Optional[
 
 def upsert_team_account(data: LogiTrackData, team: TeamAccount) -> str:
     for idx, existing in enumerate(data.teams):
-        if existing.id == team.id:
+        if existing.id == team.id and existing.organization_id == team.organization_id:
             data.teams[idx] = team
             return "updated"
     data.teams.append(team)
@@ -2417,7 +2438,7 @@ def build_user_account_from_payload(payload: Dict[str, Any], existing: Optional[
 
 def upsert_user_account(data: LogiTrackData, user: UserAccount) -> str:
     for idx, existing in enumerate(data.users):
-        if existing.id == user.id:
+        if existing.id == user.id and existing.organization_id == user.organization_id:
             data.users[idx] = user
             return "updated"
     data.users.append(user)
@@ -2954,14 +2975,24 @@ def build_tidy_dataset_from_payload(payload: Dict[str, Any], existing: Optional[
 
 def upsert_tidy_dataset(data: LogiTrackData, dataset: TidyDataset) -> str:
     for idx, existing in enumerate(data.tidy_datasets):
-        if existing.id == dataset.id:
+        if existing.id == dataset.id and existing.organization_id == dataset.organization_id:
             data.tidy_datasets[idx] = dataset
             return "updated"
     data.tidy_datasets.append(dataset)
     return "created"
 
-def find_semantic_mapping(data: LogiTrackData, dataset_id: str) -> Optional[SemanticMapping]:
+def find_semantic_mapping(
+    data: LogiTrackData,
+    dataset_id: str,
+    organization_id: Optional[str] = None,
+) -> Optional[SemanticMapping]:
     candidates = [item for item in data.semantic_mappings if item.dataset_id == dataset_id]
+    if organization_id is not None:
+        candidates = [
+            item
+            for item in candidates
+            if semantic_mapping_organization_id(data, item) == organization_id
+        ]
     if not candidates:
         return None
     return max(candidates, key=lambda item: (item.status == "confirmed", item.updated_at or ""))
@@ -3020,14 +3051,16 @@ def build_semantic_mapping_from_payload(payload: Dict[str, Any], dataset_id: str
 
 def upsert_semantic_mapping(data: LogiTrackData, mapping: SemanticMapping) -> str:
     for idx, existing in enumerate(data.semantic_mappings):
-        if existing.id == mapping.id or (existing.dataset_id == mapping.dataset_id and existing.name == mapping.name):
+        if existing.organization_id == mapping.organization_id and (
+            existing.id == mapping.id or (existing.dataset_id == mapping.dataset_id and existing.name == mapping.name)
+        ):
             data.semantic_mappings[idx] = mapping
             return "updated"
     data.semantic_mappings.append(mapping)
     return "created"
 
 def effective_semantic_mapping(data: LogiTrackData, dataset: TidyDataset) -> SemanticMapping:
-    existing = find_semantic_mapping(data, dataset.id)
+    existing = find_semantic_mapping(data, dataset.id, dataset_organization_id(data, dataset))
     if existing is not None:
         suggestion = build_semantic_mapping_suggestion(dataset)
         merged_fields = dict(suggestion.fields)
@@ -3315,7 +3348,7 @@ def build_dashboard_template_from_payload(payload: Dict[str, Any], existing: Opt
 
 def upsert_dashboard_template(data: LogiTrackData, template: DashboardTemplate) -> str:
     for idx, existing in enumerate(data.dashboard_templates):
-        if existing.id == template.id:
+        if existing.id == template.id and existing.organization_id == template.organization_id:
             data.dashboard_templates[idx] = template
             return "updated"
     data.dashboard_templates.append(template)
@@ -3384,7 +3417,7 @@ def build_notification_rule_from_payload(payload: Dict[str, Any], existing: Opti
 
 def upsert_notification_rule(data: LogiTrackData, rule: NotificationRule) -> str:
     for idx, existing in enumerate(data.notification_rules):
-        if existing.id == rule.id:
+        if existing.id == rule.id and existing.organization_id == rule.organization_id:
             data.notification_rules[idx] = rule
             return "updated"
     data.notification_rules.append(rule)
@@ -3512,32 +3545,53 @@ def normalize_progress_number(value: Any, column_name: str = "") -> Optional[flo
         return float(progress * 100.0)
     return float(progress)
 
-def find_project_by_name(data: LogiTrackData, project_name: str) -> Optional[Project]:
+def find_project_by_name(
+    data: LogiTrackData,
+    project_name: str,
+    organization_id: Optional[str] = None,
+) -> Optional[Project]:
     target = str(project_name or "").strip().lower()
     if not target:
         return None
     for project in data.projects:
-        if project.name.strip().lower() == target:
+        if project.name.strip().lower() == target and (
+            organization_id is None or project.organization_id == organization_id
+        ):
             return project
     return None
 
-def find_indicator_global_by_name(data: LogiTrackData, indicator_name: str) -> Optional[Tuple[Project, Indicator]]:
+def find_indicator_global_by_name(
+    data: LogiTrackData,
+    indicator_name: str,
+    organization_id: Optional[str] = None,
+) -> Optional[Tuple[Project, Indicator]]:
     target = str(indicator_name or "").strip().lower()
     if not target:
         return None
     for project in data.projects:
+        if organization_id is not None and project.organization_id != organization_id:
+            continue
         for indicator in project.indicators:
             if indicator.name.strip().lower() == target:
                 return project, indicator
     return None
 
-def resolve_project_from_reference(data: LogiTrackData, project_id: str = "", project_name: str = "") -> Optional[Project]:
+def resolve_project_from_reference(
+    data: LogiTrackData,
+    project_id: str = "",
+    project_name: str = "",
+    organization_id: Optional[str] = None,
+) -> Optional[Project]:
     if project_id:
-        project = find_project(data, project_id)
+        project = (
+            find_scoped_project(data, organization_id, project_id)
+            if organization_id is not None
+            else find_project(data, project_id)
+        )
         if project is not None:
             return project
     if project_name:
-        return find_project_by_name(data, project_name)
+        return find_project_by_name(data, project_name, organization_id)
     return None
 
 def resolve_indicator_from_reference(
@@ -3545,6 +3599,7 @@ def resolve_indicator_from_reference(
     project: Optional[Project] = None,
     indicator_id: str = "",
     indicator_name: str = "",
+    organization_id: Optional[str] = None,
 ) -> Optional[Tuple[Optional[Project], Indicator]]:
     if project is not None:
         if indicator_id:
@@ -3558,7 +3613,7 @@ def resolve_indicator_from_reference(
                     return project, indicator
 
     if indicator_name:
-        global_match = find_indicator_global_by_name(data, indicator_name)
+        global_match = find_indicator_global_by_name(data, indicator_name, organization_id)
         if global_match is not None:
             return global_match
     return None
@@ -3720,6 +3775,7 @@ def build_reporting_record_from_payload(
     data: LogiTrackData,
     source_dataset_id: str = "",
     existing: Optional[ReportingPeriodRecord] = None,
+    organization_id: str = "",
 ) -> ReportingPeriodRecord:
     reporting_period = normalize_reporting_period_text(payload.get("reporting_period"))
     project_id = optional_text_field(payload, "project_id")
@@ -3727,14 +3783,29 @@ def build_reporting_record_from_payload(
     indicator_id = optional_text_field(payload, "indicator_id")
     indicator_name = optional_text_field(payload, "indicator_name")
 
-    project = resolve_project_from_reference(data, project_id, project_name)
+    project = resolve_project_from_reference(
+        data,
+        project_id,
+        project_name,
+        organization_id or None,
+    )
+    if organization_id and project_id and project is None:
+        raise ValueError(f"Project '{project_id}' not found.")
     if project is not None:
         project_id = project.id
         if not project_name:
             project_name = project.name
 
     indicator = None
-    indicator_match = resolve_indicator_from_reference(data, project, indicator_id, indicator_name)
+    indicator_match = resolve_indicator_from_reference(
+        data,
+        project,
+        indicator_id,
+        indicator_name,
+        organization_id or None,
+    )
+    if organization_id and indicator_id and indicator_match is None:
+        raise ValueError(f"Indicator '{indicator_id}' not found in the scoped project.")
     if indicator_match is not None:
         resolved_project, resolved_indicator = indicator_match
         indicator = resolved_indicator
@@ -3762,6 +3833,7 @@ def build_reporting_record_from_payload(
         reporting_period=reporting_period,
         project_id=project_id,
         project_name=project_name,
+        organization_id=organization_id,
         indicator_id=indicator_id,
         indicator_name=indicator_name,
         country=optional_text_field(payload, "country"),
@@ -3791,6 +3863,7 @@ def build_reporting_record_from_dataset_row(
     data: LogiTrackData,
     source_dataset_id: str,
     existing: Optional[ReportingPeriodRecord] = None,
+    organization_id: str = "",
 ) -> ReportingPeriodRecord:
     mappings = mapping_info["mappings"]
     payload = {
@@ -3817,21 +3890,45 @@ def build_reporting_record_from_dataset_row(
             get_mapped_row_value(row, mappings, "progress_value"),
             mappings["progress_value"],
         )
-    return build_reporting_record_from_payload(payload, data, source_dataset_id=source_dataset_id, existing=existing)
+    return build_reporting_record_from_payload(
+        payload,
+        data,
+        source_dataset_id=source_dataset_id,
+        existing=existing,
+        organization_id=organization_id,
+    )
 
-def find_reporting_record_by_key(data: LogiTrackData, key: str) -> Optional[ReportingPeriodRecord]:
+def find_reporting_record_by_key(
+    data: LogiTrackData,
+    key: str,
+    organization_id: Optional[str] = None,
+) -> Optional[ReportingPeriodRecord]:
     for record in data.reporting_records:
-        if reporting_record_natural_key(record) == key:
+        if reporting_record_natural_key(record) == key and (
+            organization_id is None
+            or reporting_record_organization_id(data, record) == organization_id
+        ):
             return record
     return None
 
 def upsert_reporting_records(data: LogiTrackData, records: List[ReportingPeriodRecord]) -> Dict[str, int]:
     created = 0
     updated = 0
-    existing_by_key = {reporting_record_natural_key(record): idx for idx, record in enumerate(data.reporting_records)}
+    existing_by_key = {}
+    for idx, existing in enumerate(data.reporting_records):
+        organization_id = reporting_record_organization_id(data, existing)
+        if organization_id:
+            existing_by_key[(organization_id, reporting_record_natural_key(existing))] = idx
 
+    resolved_records = []
     for record in records:
-        key = reporting_record_natural_key(record)
+        organization_id = reporting_record_organization_id(data, record)
+        if not organization_id:
+            raise ValueError('Reporting record ownership could not be resolved.')
+        resolved_records.append((organization_id, record))
+
+    for organization_id, record in resolved_records:
+        key = (organization_id, reporting_record_natural_key(record))
         if key in existing_by_key:
             idx = existing_by_key[key]
             record.id = data.reporting_records[idx].id
@@ -3849,8 +3946,9 @@ def materialize_reporting_records_from_tidy_dataset(
     data: LogiTrackData,
     dataset: TidyDataset,
 ) -> Dict[str, Any]:
+    organization_id = dataset_organization_id(data, dataset)
     mapping_info = infer_reporting_history_mapping(dataset.rows)
-    semantic_mapping = find_semantic_mapping(data, dataset.id)
+    semantic_mapping = find_semantic_mapping(data, dataset.id, organization_id)
     if semantic_mapping is not None and semantic_mapping.fields:
         merged = dict(mapping_info.get("mappings", {}))
         merged.update(semantic_mapping.fields)
@@ -3876,8 +3974,16 @@ def materialize_reporting_records_from_tidy_dataset(
                     normalize_column_name(str(get_mapped_row_value(row, mapping_info["mappings"], "district") or "")),
                     normalize_column_name(dataset.id),
                 ]),
+                organization_id=organization_id,
             )
-            record = build_reporting_record_from_dataset_row(row, mapping_info, data, dataset.id, existing=existing)
+            record = build_reporting_record_from_dataset_row(
+                row,
+                mapping_info,
+                data,
+                dataset.id,
+                existing=existing,
+                organization_id=organization_id,
+            )
             records.append(record)
         except Exception:
             skipped += 1
@@ -5264,7 +5370,7 @@ def build_project_team_assignments_from_payload(
         user_id = optional_text_field(item, "user_id")
         if not user_id:
             raise ValueError("Project team assignment requires 'user_id'.")
-        user = find_user_by_id(data, user_id)
+        user = find_scoped_user(data, organization_id, user_id)
         if user is None or user.status == "archived":
             raise ValueError(f"Selected project team user '{user_id}' does not exist.")
         if user.organization_id != organization_id:
@@ -5272,7 +5378,7 @@ def build_project_team_assignments_from_payload(
         role_id = normalize_project_assignment_role(optional_text_field(item, "role", user.role or "executive_viewer"))
         team_id = optional_text_field(item, "team_id", user.team_id)
         if team_id:
-            team = find_team_by_id(data, team_id)
+            team = find_scoped_team(data, organization_id, team_id)
             if team is None:
                 raise ValueError(f"Selected project team '{team_id}' does not exist.")
             if team.organization_id != organization_id:
@@ -5317,7 +5423,7 @@ def build_project_from_payload(
     if not project_code:
         project_code = generate_unique_project_code(data, organization_id, project_name)
     duplicate = find_project_by_code(data, organization_id, project_code)
-    if duplicate is not None and (existing is None or duplicate.id != existing.id):
+    if duplicate is not None and duplicate is not existing:
         raise ValueError(f"Project code '{project_code}' already exists in this organization.")
     description = optional_text_field(payload, "description", getattr(existing, "description", "") or getattr(existing, "objective", ""))
     country = optional_text_field(payload, "country", getattr(existing, "country", ""))
@@ -5926,23 +6032,21 @@ if FastAPI is not None:
         if not token:
             return None
         user = find_user_by_token(data, token)
-        if user is None or not user.is_active:
+        if user is None or not user.is_active or str(user.status or '').strip().lower() != 'active':
             raise HTTPException(status_code=401, detail="Invalid or inactive X-Auth-Token.")
+        if not str(user.organization_id or '').strip() or find_organization_by_id(data, user.organization_id) is None:
+            raise HTTPException(status_code=401, detail="Authenticated user has no valid organization context.")
         return user
 
     def _authorize_request(
         data: LogiTrackData,
         x_api_key: Optional[str],
         x_auth_token: Optional[str],
-        required_role: str = "analyst",
+        required_role: Optional[str] = "analyst",
         required_permission: Optional[str] = None,
         required_permissions: Optional[List[str]] = None,
         require_all_permissions: bool = False,
-    ) -> Optional[UserAccount]:
-        expected_key = (os.getenv("LOGITRACK_API_KEY", "") or "").strip()
-        if expected_key and (x_api_key or "").strip() == expected_key:
-            return None
-
+    ) -> AuthenticatedTenantContext:
         user = _resolve_authenticated_user(data, x_auth_token)
         if user is not None:
             requested_permissions = normalize_permission_ids(required_permissions or [])
@@ -5962,15 +6066,11 @@ if FastAPI is not None:
                         status_code=403,
                         detail=f"Missing required permission: {', '.join(requested_permissions)}.",
                     )
-            elif not role_allows(user.role, required_role):
+            elif required_role and not role_allows(user.role, required_role):
                 raise HTTPException(status_code=403, detail=f"Role '{user.role}' is not allowed to perform this action.")
-            return user
+            return AuthenticatedTenantContext.from_user(user, effective_permissions(user))
 
-        if expected_key:
-            raise HTTPException(status_code=401, detail="Provide a valid X-API-Key or X-Auth-Token.")
-        if data.users:
-            raise HTTPException(status_code=401, detail="Provide a valid X-Auth-Token.")
-        return None
+        raise HTTPException(status_code=401, detail="Provide a valid X-Auth-Token.")
 
     def _authorize_logical_framework_scope(
         *,
@@ -6087,6 +6187,15 @@ if FastAPI is not None:
     def _build_payload_for_api() -> Tuple[LogiTrackData, Dict[str, List[dict]]]:
         data = _load_for_api()
         return data, build_bi_payload(data)
+
+    def _build_tenant_payload_for_api(
+        x_api_key: Optional[str],
+        x_auth_token: Optional[str],
+    ) -> Tuple[LogiTrackData, Dict[str, List[dict]], AuthenticatedTenantContext]:
+        data = _load_for_api()
+        actor = _authorize_request(data, x_api_key, x_auth_token, required_role=None)
+        scoped = scope_snapshot_for_tenant(data, actor)
+        return scoped, build_bi_payload(scoped), actor
 
     def _build_dataset_payload(data: LogiTrackData, dataset: TidyDataset) -> Dict[str, Any]:
         recommendation = build_dashboard_recommendation_for_rows(dataset.rows, dataset.name)
@@ -6220,35 +6329,34 @@ if FastAPI is not None:
 
     @app.get("/health")
     def health():
-        storage = safe_get_storage_status()
-        runtime_status = _build_runtime_status()
-        data_error = None
-        loaded_data = None
-        if storage["exists"]:
-            try:
-                loaded_data = load_data_from_path(storage["target_path"])
-            except Exception as exc:
-                data_error = str(exc)
-        return build_health_payload(
-            storage=storage,
-            runtime_status=runtime_status,
-            cors_origins=cors_origins,
-            allow_credentials=allow_credentials,
-            loaded_data=loaded_data,
-            data_error=data_error,
-        )
+        return {"ok": True, "system": CONFIG["system_name"], "version": CONFIG["version"]}
 
     @app.get("/v1/system/runtime")
-    def v1_system_runtime():
-        return _build_runtime_status()
+    def v1_system_runtime(
+        x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
+        data = _load_for_api()
+        _authorize_request(data, x_api_key, x_auth_token, required_role=None)
+        raise HTTPException(status_code=403, detail="Global runtime diagnostics are not available through the tenant API.")
 
     @app.get("/v1/system/relational_store")
-    def v1_system_relational_store():
-        return safe_get_relational_store_status()
+    def v1_system_relational_store(
+        x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
+        data = _load_for_api()
+        _authorize_request(data, x_api_key, x_auth_token, required_role=None)
+        raise HTTPException(status_code=403, detail="Global relational-store diagnostics are not available through the tenant API.")
 
     @app.get("/v1/system/repositories")
-    def v1_system_repositories():
-        return safe_get_repository_domain_status()
+    def v1_system_repositories(
+        x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
+        data = _load_for_api()
+        _authorize_request(data, x_api_key, x_auth_token, required_role=None)
+        raise HTTPException(status_code=403, detail="Global repository diagnostics are not available through the tenant API.")
 
     @app.post("/v1/system/relational_sync")
     def v1_system_relational_sync(
@@ -6256,38 +6364,27 @@ if FastAPI is not None:
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
     ):
         data = _load_for_api()
-        actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="WORKSPACE_ADMIN")
-        result = update_relational_store_from_data(data, source_path=get_storage_target_path())
-        append_audit_event(
-            data,
-            action="system.relational_sync",
-            target_type="relational_store",
-            target_id=get_relational_store_path(get_storage_target_path()),
-            actor=actor,
-            endpoint="/v1/system/relational_sync",
-            details={"synced": bool(result), "path": get_relational_store_path(get_storage_target_path())},
-        )
-        _save_for_api(data)
-        return {
-            "ok": True,
-            "sync_result": result,
-            "status": safe_get_relational_store_status(),
-        }
+        _authorize_request(data, x_api_key, x_auth_token, required_role=None)
+        raise HTTPException(status_code=403, detail="Relational synchronization is not available through the tenant API.")
 
     @app.get("/v1/data/template")
     def v1_data_template():
         return build_api_template()
 
     @app.get("/v1/dashboard/summary")
-    def v1_dashboard_summary():
+    def v1_dashboard_summary(
+        x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
         data = _load_for_api()
-        return build_dashboard_summary(data)
+        actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_PORTFOLIO")
+        return build_dashboard_summary(scope_snapshot_for_tenant(data, actor))
 
     @app.post("/v1/auth/bootstrap")
     def v1_auth_bootstrap(payload: Dict[str, Any]):
         data = _load_for_api()
-        if data.users:
-            raise HTTPException(status_code=409, detail="Bootstrap is only allowed when no users exist.")
+        if not workspace_is_uninitialized(data):
+            raise HTTPException(status_code=409, detail="Bootstrap is only allowed for an uninitialized workspace.")
         organization_name = optional_text_field(payload, "organization_name", "Blue Delta Consortium") or "Blue Delta Consortium"
         if not data.organizations:
             data.organizations.append(OrganizationAccount(
@@ -6346,13 +6443,24 @@ if FastAPI is not None:
         user = find_user_by_email(data, login_email) if login_email else None
         if user is None and login_username:
             user = find_user_by_username(data, login_username)
-        if user is None or not user.is_active or not verify_password(password, user.password_salt, user.password_hash):
+        user_organization = (
+            find_organization_by_id(data, user.organization_id)
+            if user is not None and str(user.organization_id or '').strip()
+            else None
+        )
+        if (
+            user is None
+            or not user.is_active
+            or str(user.status or '').strip().lower() != 'active'
+            or user_organization is None
+            or not verify_password(password, user.password_salt, user.password_hash)
+        ):
             append_audit_event(
                 data,
                 action="auth.login",
                 target_type="user",
                 target_id=user.id if user else "",
-                actor=user if user and user.is_active else None,
+                actor=user if user and user.is_active and user_organization is not None else None,
                 endpoint="/v1/auth/login",
                 outcome="failure",
                 details={"email": login_email, "username": login_username},
@@ -6450,7 +6558,7 @@ if FastAPI is not None:
             ensure_organization_scope(actor, organization_id)
         team_id = optional_text_field(user_payload, "team_id", "")
         if team_id:
-            team = find_team_by_id(data, team_id)
+            team = find_scoped_team(data, actor.organization_id, team_id)
             if team is None:
                 raise HTTPException(status_code=400, detail="Selected team does not exist.")
             ensure_team_scope(actor, team)
@@ -6482,7 +6590,7 @@ if FastAPI is not None:
     def v1_admin_update_user(user_id: str, payload: Dict[str, Any], x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_USERS")
-        existing = find_user_by_id(data, user_id)
+        existing = find_scoped_user(data, actor.organization_id, user_id)
         if existing is None:
             raise HTTPException(status_code=404, detail="User not found.")
         ensure_user_scope(actor, existing)
@@ -6490,17 +6598,17 @@ if FastAPI is not None:
         user_payload["id"] = existing.id
         user_payload["organization_id"] = existing.organization_id
         if "team_id" in user_payload and user_payload.get("team_id"):
-            team = find_team_by_id(data, str(user_payload.get("team_id")))
+            team = find_scoped_team(data, actor.organization_id, str(user_payload.get("team_id")))
             if team is None:
                 raise HTTPException(status_code=400, detail="Selected team does not exist.")
             ensure_team_scope(actor, team)
         username_value = derive_username(user_payload, existing=existing)
         duplicate = find_user_by_username(data, username_value)
-        if duplicate is not None and duplicate.id != existing.id:
+        if duplicate is not None and duplicate is not existing:
             raise HTTPException(status_code=409, detail=f"Username '{username_value}' already exists.")
         email_value = optional_text_field(user_payload, "email", existing.email).lower()
         email_duplicate = find_user_by_email(data, email_value) if email_value else None
-        if email_duplicate is not None and email_duplicate.id != existing.id:
+        if email_duplicate is not None and email_duplicate is not existing:
             raise HTTPException(status_code=409, detail=f"Email '{email_value}' already exists.")
         try:
             user = build_user_account_from_payload(user_payload, existing=existing)
@@ -6523,7 +6631,7 @@ if FastAPI is not None:
     def v1_admin_suspend_user(user_id: str, x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_USERS")
-        user = find_user_by_id(data, user_id)
+        user = find_scoped_user(data, actor.organization_id, user_id)
         if user is None:
             raise HTTPException(status_code=404, detail="User not found.")
         ensure_user_scope(actor, user)
@@ -6538,7 +6646,7 @@ if FastAPI is not None:
     def v1_admin_reactivate_user(user_id: str, x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_USERS")
-        user = find_user_by_id(data, user_id)
+        user = find_scoped_user(data, actor.organization_id, user_id)
         if user is None:
             raise HTTPException(status_code=404, detail="User not found.")
         ensure_user_scope(actor, user)
@@ -6553,7 +6661,7 @@ if FastAPI is not None:
     def v1_admin_archive_user(user_id: str, x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_USERS")
-        user = find_user_by_id(data, user_id)
+        user = find_scoped_user(data, actor.organization_id, user_id)
         if user is None:
             raise HTTPException(status_code=404, detail="User not found.")
         ensure_user_scope(actor, user)
@@ -6583,7 +6691,7 @@ if FastAPI is not None:
             ensure_organization_scope(actor, organization_id)
         team_lead_user_id = optional_text_field(team_payload, "team_lead_user_id", "")
         if team_lead_user_id:
-            lead = find_user_by_id(data, team_lead_user_id)
+            lead = find_scoped_user(data, actor.organization_id, team_lead_user_id)
             if lead is None:
                 raise HTTPException(status_code=400, detail="Selected team lead does not exist.")
             ensure_user_scope(actor, lead)
@@ -6611,7 +6719,7 @@ if FastAPI is not None:
     def v1_admin_update_team(team_id: str, payload: Dict[str, Any], x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_ORGANIZATION")
-        existing = find_team_by_id(data, team_id)
+        existing = find_scoped_team(data, actor.organization_id, team_id)
         if existing is None:
             raise HTTPException(status_code=404, detail="Team not found.")
         ensure_team_scope(actor, existing)
@@ -6620,7 +6728,7 @@ if FastAPI is not None:
         team_payload["organization_id"] = existing.organization_id
         team_lead_user_id = optional_text_field(team_payload, "team_lead_user_id", existing.team_lead_user_id)
         if team_lead_user_id:
-            lead = find_user_by_id(data, team_lead_user_id)
+            lead = find_scoped_user(data, actor.organization_id, team_lead_user_id)
             if lead is None:
                 raise HTTPException(status_code=400, detail="Selected team lead does not exist.")
             ensure_user_scope(actor, lead)
@@ -6648,7 +6756,7 @@ if FastAPI is not None:
     def v1_admin_archive_team(team_id: str, x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_ORGANIZATION")
-        team = find_team_by_id(data, team_id)
+        team = find_scoped_team(data, actor.organization_id, team_id)
         if team is None:
             raise HTTPException(status_code=404, detail="Team not found.")
         ensure_team_scope(actor, team)
@@ -6719,7 +6827,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        existing = find_project(data, project_id)
+        existing = find_scoped_project(data, actor.organization_id, project_id)
         if existing is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, existing)
@@ -6751,7 +6859,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, project)
@@ -6781,7 +6889,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, project)
@@ -6811,7 +6919,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, project)
@@ -6839,7 +6947,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, project)
@@ -6867,7 +6975,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, project)
@@ -6897,7 +7005,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found.")
         ensure_project_scope(actor, project)
@@ -7050,8 +7158,7 @@ if FastAPI is not None:
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_AUDIT_LOG")
         events = list(reversed(data.audit_events))
-        if actor is not None and actor.organization_id:
-            events = [item for item in events if not item.organization_id or item.organization_id == actor.organization_id]
+        events = [item for item in events if audit_event_organization_id(data, item) == actor.organization_id]
         if action:
             events = [item for item in events if item.action == action]
         if actor_id:
@@ -7099,7 +7206,7 @@ if FastAPI is not None:
     def v1_save_user(payload: Dict[str, Any], x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_USERS")
-        existing = find_user_by_id(data, str(payload.get("id"))) if payload.get("id") else None
+        existing = find_scoped_user(data, actor.organization_id, str(payload.get("id"))) if payload.get("id") else None
         user_payload = dict(payload)
         if actor is not None:
             if existing is not None:
@@ -7112,15 +7219,15 @@ if FastAPI is not None:
             raise HTTPException(status_code=409, detail=f"Username '{username_value}' already exists.")
         if existing is not None:
             duplicate = find_user_by_username(data, username_value)
-            if duplicate is not None and duplicate.id != existing.id:
+            if duplicate is not None and duplicate is not existing:
                 raise HTTPException(status_code=409, detail=f"Username '{username_value}' already exists.")
         email_value = str(user_payload.get("email", existing.email if existing else "")).strip().lower()
         email_duplicate = find_user_by_email(data, email_value) if email_value else None
-        if email_duplicate is not None and (existing is None or email_duplicate.id != existing.id):
+        if email_duplicate is not None and email_duplicate is not existing:
             raise HTTPException(status_code=409, detail=f"Email '{email_value}' already exists.")
         team_id = optional_text_field(user_payload, "team_id", existing.team_id if existing else "")
         if team_id:
-            team = find_team_by_id(data, team_id)
+            team = find_scoped_team(data, actor.organization_id, team_id)
             if team is None:
                 raise HTTPException(status_code=400, detail="Selected team does not exist.")
             ensure_team_scope(actor, team)
@@ -7158,8 +7265,7 @@ if FastAPI is not None:
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_AUDIT_LOG")
         events = list(reversed(data.audit_events))
-        if actor is not None and actor.organization_id:
-            events = [item for item in events if not item.organization_id or item.organization_id == actor.organization_id]
+        events = [item for item in events if audit_event_organization_id(data, item) == actor.organization_id]
         if action:
             events = [item for item in events if item.action == action]
         if target_type:
@@ -7228,59 +7334,63 @@ if FastAPI is not None:
     )
 
     @app.get("/v1/projects")
-    def v1_projects():
-        _, payload = _build_payload_for_api()
+    def v1_projects(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["projects"]
 
     @app.get("/v1/indicators")
-    def v1_indicators():
-        _, payload = _build_payload_for_api()
+    def v1_indicators(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["indicators"]
 
     @app.get("/v1/indicator_locations")
-    def v1_indicator_locations():
-        _, payload = _build_payload_for_api()
+    def v1_indicator_locations(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["indicator_locations"]
 
     @app.get("/v1/activities")
-    def v1_activities():
-        _, payload = _build_payload_for_api()
+    def v1_activities(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["activities"]
 
     @app.get("/v1/tasks")
-    def v1_tasks():
-        _, payload = _build_payload_for_api()
+    def v1_tasks(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["tasks"]
 
     @app.get("/v1/activity_indicator_links")
-    def v1_links():
-        _, payload = _build_payload_for_api()
+    def v1_links(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["activity_indicator_links"]
 
     @app.get("/v1/kpi/project")
-    def v1_kpi_project():
-        _, payload = _build_payload_for_api()
+    def v1_kpi_project(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["kpi_project"]
 
     @app.get("/v1/kpi/indicator")
-    def v1_kpi_indicator():
-        _, payload = _build_payload_for_api()
+    def v1_kpi_indicator(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["kpi_indicator"]
 
     @app.get("/v1/kpi/district")
-    def v1_kpi_district():
-        _, payload = _build_payload_for_api()
+    def v1_kpi_district(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["kpi_district"]
 
     @app.get("/v1/kpi/workplan")
-    def v1_kpi_workplan():
-        _, payload = _build_payload_for_api()
+    def v1_kpi_workplan(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
         return payload["kpi_workplan"]
 
     @app.get("/v1/projects/{project_id}/dashboard")
-    def v1_project_dashboard(project_id: str):
-        data, payload = _build_payload_for_api()
-        project = find_project(data, project_id)
+    def v1_project_dashboard(
+        project_id: str,
+        x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
+        data, payload, actor = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 
@@ -7319,28 +7429,8 @@ if FastAPI is not None:
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
     ):
         current_data = _load_for_api()
-        actor = _authorize_request(current_data, x_api_key, x_auth_token, required_permission="WORKSPACE_ADMIN")
-        try:
-            data = from_serializable(payload)
-        except (KeyError, TypeError, ValueError) as exc:
-            raise HTTPException(status_code=400, detail=f"Invalid import payload: {exc}") from exc
-
-        append_audit_event(
-            data,
-            action="data.import",
-            target_type="workspace_data",
-            target_id="full_import",
-            actor=actor,
-            endpoint="/v1/data/import",
-            details={"projects": len(data.projects), "datasets": len(data.tidy_datasets), "users": len(data.users)},
-        )
-        saved_path = _save_for_api(data)
-        summary = build_dashboard_summary(data)
-        return {
-            "ok": True,
-            "saved_to": saved_path,
-            "counts": summary["counts"],
-        }
+        _authorize_request(current_data, x_api_key, x_auth_token, required_role=None)
+        raise HTTPException(status_code=403, detail="Global workspace import is not available to tenant actors.")
 
     @app.post("/v1/projects")
     def v1_create_project(
@@ -7437,7 +7527,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="EDIT_INDICATORS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 
@@ -7482,7 +7572,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="EDIT_INDICATORS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 
@@ -7524,7 +7614,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_WORKPLAN")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 
@@ -7566,7 +7656,7 @@ if FastAPI is not None:
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="ASSIGN_TASKS")
-        project = find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 

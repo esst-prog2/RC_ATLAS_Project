@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from .errors import ServiceError
+from .tenant_security import find_scoped_dataset, find_scoped_project, scope_snapshot_for_tenant
 
 
 UTC_DATETIME_MIN = datetime.min.replace(tzinfo=timezone.utc)
@@ -67,13 +68,22 @@ class ReportingService:
             raise ServiceError(404, f"Tidy dataset '{dataset_id}' not found.")
         return dataset
 
+    def _tenant_data(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> tuple[Any, Any]:
+        data = self.deps.load_data()
+        actor = self.deps.authorize_request(
+            data, x_api_key, x_auth_token, required_permission="VIEW_REPORTS"
+        )
+        return scope_snapshot_for_tenant(data, actor), actor
+
     def list_reporting_records(
         self,
         project_id: Optional[str] = None,
         indicator_id: Optional[str] = None,
         limit: int = 500,
+        x_api_key: Optional[str] = None,
+        x_auth_token: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        data = self.deps.load_data()
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         records = data.reporting_records
         if project_id:
             records = [record for record in records if record.project_id == project_id]
@@ -86,19 +96,19 @@ class ReportingService:
         )
         return [self.deps.reporting_record_to_dict(record, data) for record in records[:limit]]
 
-    def portfolio_trends(self) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def portfolio_trends(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         return {
             "generated_at": self.deps.now_iso_utc(),
             "series": self.deps.build_portfolio_trend_series(data),
         }
 
-    def portfolio_narrative(self) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def portfolio_narrative(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         return self.deps.build_portfolio_narrative_summary(data)
 
-    def project_trends(self, project_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def project_trends(self, project_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         project = self._require_project(data, project_id)
         return {
             "project_id": project.id,
@@ -106,15 +116,15 @@ class ReportingService:
             "series": self.deps.build_project_trend_series(data, project_id),
         }
 
-    def project_narrative(self, project_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def project_narrative(self, project_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         try:
             return self.deps.build_project_narrative_summary(data, project_id)
         except ValueError as exc:
             raise ServiceError(404, str(exc)) from exc
 
-    def indicator_trends(self, project_id: str, indicator_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def indicator_trends(self, project_id: str, indicator_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         project = self._require_project(data, project_id)
         indicator = self._require_indicator(project, project_id, indicator_id)
         return {
@@ -125,20 +135,20 @@ class ReportingService:
             "series": self.deps.build_indicator_trend_series(data, project_id, indicator_id),
         }
 
-    def list_tidy_datasets(self) -> List[Dict[str, Any]]:
-        data = self.deps.load_data()
+    def list_tidy_datasets(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> List[Dict[str, Any]]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         return [self.deps.build_dataset_payload(data, dataset) for dataset in data.tidy_datasets]
 
-    def get_tidy_dataset_detail(self, dataset_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def get_tidy_dataset_detail(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         payload = self.deps.build_dataset_payload(data, dataset)
         payload["preview_rows"] = dataset.rows[:20]
         payload["notifications"] = self.deps.build_tidy_dataset_notifications(dataset)
         return payload
 
-    def get_tidy_dataset_semantic_mapping(self, dataset_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def get_tidy_dataset_semantic_mapping(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         return asdict(self.deps.effective_semantic_mapping(data, dataset))
 
@@ -151,12 +161,14 @@ class ReportingService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="EDIT_INDICATORS")
-        self._require_dataset(data, dataset_id)
-        existing = self.deps.find_semantic_mapping(data, dataset_id)
+        if find_scoped_dataset(data, actor.organization_id, dataset_id) is None:
+            raise ServiceError(404, f"Tidy dataset '{dataset_id}' not found.")
+        existing = self.deps.find_semantic_mapping(data, dataset_id, actor.organization_id)
         try:
             mapping = self.deps.build_semantic_mapping_from_payload(payload, dataset_id, existing=existing)
         except ValueError as exc:
             raise ServiceError(400, str(exc)) from exc
+        mapping.organization_id = actor.organization_id
         action = self.deps.upsert_semantic_mapping(data, mapping)
         self.deps.append_audit_event(
             data,
@@ -175,13 +187,13 @@ class ReportingService:
             "mapping": asdict(mapping),
         }
 
-    def get_tidy_dataset_quality(self, dataset_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def get_tidy_dataset_quality(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         return self.deps.build_tidy_dataset_quality_report(data, dataset)
 
-    def get_tidy_dataset_narrative(self, dataset_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def get_tidy_dataset_narrative(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         return self.deps.build_dataset_narrative_summary(data, dataset)
 
@@ -189,18 +201,20 @@ class ReportingService:
         self,
         dataset_id: str,
         template_id: Optional[str] = None,
+        x_api_key: Optional[str] = None,
+        x_auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
-        data = self.deps.load_data()
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         return self.deps.build_dashboard_blueprint(data, dataset, template_id=template_id)
 
-    def get_tidy_dataset_history_mapping(self, dataset_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def get_tidy_dataset_history_mapping(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         return self.deps.infer_reporting_history_mapping(dataset.rows)
 
-    def get_tidy_dataset_dashboard_suggestions(self, dataset_id: str) -> Dict[str, Any]:
-        data = self.deps.load_data()
+    def get_tidy_dataset_dashboard_suggestions(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        data, _ = self._tenant_data(x_api_key, x_auth_token)
         dataset = self._require_dataset(data, dataset_id)
         return self.deps.build_dashboard_recommendation_for_rows(dataset.rows, dataset.name)
 
@@ -212,12 +226,16 @@ class ReportingService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="EDIT_INDICATORS")
-        existing = self.deps.find_tidy_dataset(data, str(payload.get("id"))) if payload.get("id") else None
+        requested_id = str(payload.get("id") or '').strip()
+        existing = find_scoped_dataset(data, actor.organization_id, requested_id) if requested_id else None
+        if requested_id and self.deps.find_tidy_dataset(data, requested_id) is not None and existing is None:
+            raise ServiceError(404, f"Tidy dataset '{requested_id}' not found.")
         try:
             dataset = self.deps.build_tidy_dataset_from_payload(payload, existing=existing)
         except ValueError as exc:
             raise ServiceError(400, str(exc)) from exc
 
+        dataset.organization_id = actor.organization_id
         action = self.deps.upsert_tidy_dataset(data, dataset)
         self.deps.append_audit_event(
             data,
@@ -248,7 +266,9 @@ class ReportingService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="EDIT_INDICATORS")
-        dataset = self._require_dataset(data, dataset_id)
+        dataset = find_scoped_dataset(data, actor.organization_id, dataset_id)
+        if dataset is None:
+            raise ServiceError(404, f"Tidy dataset '{dataset_id}' not found.")
         try:
             summary = self.deps.materialize_reporting_records_from_tidy_dataset(data, dataset)
         except ValueError as exc:
@@ -282,22 +302,37 @@ class ReportingService:
             raise ServiceError(400, "'records' must be a list of reporting record objects.")
 
         source_dataset_id = self.deps.optional_text_field(payload, "source_dataset_id")
+        if source_dataset_id and find_scoped_dataset(data, actor.organization_id, source_dataset_id) is None:
+            raise ServiceError(404, f"Tidy dataset '{source_dataset_id}' not found.")
         records: List[Any] = []
         try:
             for record_payload in records_payload:
                 if not isinstance(record_payload, dict):
                     raise ValueError("Each reporting record must be a JSON object.")
+                project_id = self.deps.optional_text_field(record_payload, "project_id")
+                if project_id and find_scoped_project(data, actor.organization_id, project_id) is None:
+                    raise ServiceError(404, f"Project '{project_id}' not found.")
+                record_dataset_id = source_dataset_id or self.deps.optional_text_field(
+                    record_payload,
+                    'source_dataset_id',
+                )
+                if record_dataset_id and find_scoped_dataset(data, actor.organization_id, record_dataset_id) is None:
+                    raise ServiceError(404, f'Tidy dataset {record_dataset_id!r} not found.')
                 records.append(
                     self.deps.build_reporting_record_from_payload(
                         record_payload,
                         data,
                         source_dataset_id=source_dataset_id,
+                        organization_id=actor.organization_id,
                     )
                 )
         except ValueError as exc:
             raise ServiceError(400, str(exc)) from exc
 
-        summary = self.deps.upsert_reporting_records(data, records)
+        try:
+            summary = self.deps.upsert_reporting_records(data, records)
+        except ValueError as exc:
+            raise ServiceError(400, str(exc)) from exc
         self.deps.append_audit_event(
             data,
             action="reporting_records.imported",

@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Callable, Dict, Optional
 
 from .errors import ServiceError
+from .tenant_security import find_scoped_dataset
 
 
 @dataclass(frozen=True)
@@ -22,13 +23,22 @@ class DashboardTemplateService:
     def __init__(self, deps: DashboardTemplateServiceDependencies):
         self.deps = deps
 
-    def list_templates(self, dataset_id: Optional[str] = None) -> Dict[str, Any]:
+    def list_templates(
+        self,
+        dataset_id: Optional[str] = None,
+        x_api_key: Optional[str] = None,
+        x_auth_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
         data = self.deps.load_data()
-        custom_templates = [asdict(item) for item in data.dashboard_templates]
+        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_REPORTS")
+        custom_templates = [
+            asdict(item) for item in data.dashboard_templates
+            if str(item.organization_id or '').strip() == actor.organization_id
+        ]
         if not dataset_id:
             return {"builtin": [], "custom": custom_templates}
 
-        dataset = self.deps.find_tidy_dataset(data, dataset_id)
+        dataset = find_scoped_dataset(data, actor.organization_id, dataset_id)
         if dataset is None:
             raise ServiceError(404, f"Tidy dataset '{dataset_id}' not found.")
         recommendation = self.deps.build_dashboard_recommendation_for_rows(dataset.rows, dataset.name)
@@ -43,12 +53,23 @@ class DashboardTemplateService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="WORKSPACE_ADMIN")
-        existing = self.deps.find_dashboard_template(data, str(payload.get("id"))) if payload.get("id") else None
+        requested_id = str(payload.get('id') or '').strip()
+        existing = next(
+            (
+                item for item in data.dashboard_templates
+                if item.id == requested_id and item.organization_id == actor.organization_id
+            ),
+            None,
+        ) if requested_id else None
+        if requested_id and self.deps.find_dashboard_template(data, requested_id) is not None and existing is None:
+            raise ServiceError(404, f"Dashboard template '{requested_id}' not found.")
         try:
             template = self.deps.build_dashboard_template_from_payload(payload, existing=existing)
         except ValueError as exc:
             raise ServiceError(400, str(exc)) from exc
 
+        template.organization_id = actor.organization_id
+        template.scope = 'custom'
         action = self.deps.upsert_dashboard_template(data, template)
         self.deps.append_audit_event(
             data,

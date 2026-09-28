@@ -104,6 +104,17 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn('id="datasetNarrativeInsights"', self.html)
         self.assertIn('class="technical-details"', self.html)
 
+    def test_dataset_intelligence_requests_use_existing_auth_headers(self):
+        expected_calls = (
+            'callApi(`/v1/tidy_datasets/${datasetId}/semantic_mapping`, { headers: headers(false) })',
+            'callApi(`/v1/tidy_datasets/${datasetId}/quality`, { headers: headers(false) })',
+            'callApi(`/v1/tidy_datasets/${datasetId}/narrative`, { headers: headers(false) })',
+            'callApi(`/v1/tidy_datasets/${datasetId}/dashboard_blueprint`, { headers: headers(false) })',
+            'callApi(`/v1/dashboard_templates?dataset_id=${encodeURIComponent(datasetId)}`, { headers: headers(false) })',
+        )
+        for call in expected_calls:
+            self.assertIn(call, self.html)
+
     def test_live_language_rerender_support_present(self):
         self.assertIn("function rerenderLocalizedViews", self.html)
         self.assertIn("renderSemanticMapping(state.datasetMapping)", self.html)
@@ -470,7 +481,7 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn("def effective_permissions(user: Optional[UserAccount]) -> List[str]:", self.python_source)
         self.assertIn("required_permission: Optional[str] = None,", self.python_source)
         self.assertIn("required_permissions: Optional[List[str]] = None,", self.python_source)
-        self.assertIn('required_permission="WORKSPACE_ADMIN"', self.python_source)
+        self.assertIn('Global workspace import is not available to tenant actors.', self.python_source)
         self.assertIn('required_permission="MANAGE_USERS"', self.python_source)
         self.assertIn('required_permission="VIEW_AUDIT_LOG"', self.python_source)
 

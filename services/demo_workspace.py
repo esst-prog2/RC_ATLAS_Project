@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from .demo_seed import DemoSeedBundle, build_demo_seed_bundle
 from .errors import ServiceError
+from .tenant_security import find_scoped_project, scope_snapshot_for_tenant, workspace_is_uninitialized
 
 
 UTC_DATETIME_MIN = datetime.min.replace(tzinfo=timezone.utc)
@@ -271,63 +271,7 @@ class DemoWorkspaceService:
         return str(getattr(first_org, "id", "") or "")
 
     def _scope_data_for_actor(self, data: Any, actor: Any) -> Any:
-        organization_id = self._organization_id_for_actor(data, actor)
-        if not organization_id:
-            return data
-        scoped = deepcopy(data)
-        scoped.organizations = [org for org in getattr(scoped, "organizations", []) if getattr(org, "id", "") == organization_id]
-        scoped.projects = [
-            project for project in getattr(scoped, "projects", [])
-            if (
-                (not getattr(project, "organization_id", "") or getattr(project, "organization_id", "") == organization_id)
-                and str(getattr(project, "status", "active") or "active").strip().lower() not in {"draft", "archived"}
-            )
-        ]
-        allowed_project_ids = {project.id for project in scoped.projects}
-        scoped.ops_by_project = {
-            project_id: ops
-            for project_id, ops in getattr(scoped, "ops_by_project", {}).items()
-            if project_id in allowed_project_ids
-        }
-        scoped.tidy_datasets = [
-            dataset for dataset in getattr(scoped, "tidy_datasets", [])
-            if not getattr(dataset, "organization_id", "") or getattr(dataset, "organization_id", "") == organization_id
-        ]
-        allowed_dataset_ids = {dataset.id for dataset in scoped.tidy_datasets}
-        scoped.reporting_records = [
-            record for record in getattr(scoped, "reporting_records", [])
-            if (
-                (not getattr(record, "organization_id", "") or getattr(record, "organization_id", "") == organization_id)
-                and (not getattr(record, "project_id", "") or getattr(record, "project_id", "") in allowed_project_ids)
-            )
-        ]
-        scoped.semantic_mappings = [
-            item for item in getattr(scoped, "semantic_mappings", [])
-            if (
-                (not getattr(item, "organization_id", "") or getattr(item, "organization_id", "") == organization_id)
-                and (not getattr(item, "dataset_id", "") or getattr(item, "dataset_id", "") in allowed_dataset_ids)
-            )
-        ]
-        scoped.dashboard_templates = [
-            item for item in getattr(scoped, "dashboard_templates", [])
-            if not getattr(item, "organization_id", "") or getattr(item, "organization_id", "") == organization_id
-        ]
-        scoped.notification_rules = [
-            item for item in getattr(scoped, "notification_rules", [])
-            if (
-                (not getattr(item, "organization_id", "") or getattr(item, "organization_id", "") == organization_id)
-                and (not getattr(item, "project_id", "") or getattr(item, "project_id", "") in allowed_project_ids)
-            )
-        ]
-        scoped.users = [
-            user for user in getattr(scoped, "users", [])
-            if not getattr(user, "organization_id", "") or getattr(user, "organization_id", "") == organization_id
-        ]
-        scoped.audit_events = [
-            item for item in getattr(scoped, "audit_events", [])
-            if not getattr(item, "organization_id", "") or getattr(item, "organization_id", "") == organization_id
-        ]
-        return scoped
+        return scope_snapshot_for_tenant(data, actor, operational_projects_only=True)
 
     def _canonical_status_from_score(self, score: Optional[float]) -> str:
         if score is None:
@@ -365,8 +309,10 @@ class DemoWorkspaceService:
     def _task_sort_key(self, value: Dict[str, Any], default: datetime = UTC_DATETIME_MAX) -> datetime:
         return self._task_due_datetime(value.get("due_date")) or default
 
-    def _find_task_context(self, data: Any, task_id: str) -> Dict[str, Any]:
+    def _find_task_context(self, data: Any, task_id: str, organization_id: str) -> Dict[str, Any]:
         for project in data.projects:
+            if str(getattr(project, 'organization_id', '') or '') != organization_id:
+                continue
             ops = data.ops_by_project.get(project.id)
             if not ops:
                 continue
@@ -750,7 +696,10 @@ class DemoWorkspaceService:
         x_auth_token: Optional[str],
     ) -> Dict[str, Any]:
         current_data = self.deps.load_data()
-        actor = self.deps.authorize_request(current_data, x_api_key, x_auth_token, required_permission="WORKSPACE_ADMIN")
+        actor = None
+        if not workspace_is_uninitialized(current_data):
+            self.deps.authorize_request(current_data, x_api_key, x_auth_token, required_role=None)
+            raise ServiceError(403, "Demo seeding is available only for an uninitialized workspace.")
         bundle = self._seed_bundle()
         data = self.deps.from_serializable(bundle.payload)
         default_user = self.deps.find_user_by_username(data, bundle.default_username)
@@ -936,7 +885,11 @@ class DemoWorkspaceService:
         raw_data = self.deps.load_data()
         actor = self.deps.authorize_request(raw_data, x_api_key, x_auth_token, required_permission="VIEW_EXECUTIVE_SNAPSHOT")
         data = self._scope_data_for_actor(raw_data, actor)
-        project = self.deps.find_project(data, project_id)
+        project = (
+            find_scoped_project(data, actor.organization_id, project_id)
+            if actor is not None
+            else self.deps.find_project(data, project_id)
+        )
         if project is None:
             raise ServiceError(404, f"Project '{project_id}' not found.")
         self._ensure_actor_project_scope(actor, project)
@@ -1091,7 +1044,11 @@ class DemoWorkspaceService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_WORKPLAN")
-        project = self.deps.find_project(data, project_id)
+        project = (
+            find_scoped_project(data, actor.organization_id, project_id)
+            if actor is not None
+            else self.deps.find_project(data, project_id)
+        )
         if project is None:
             raise ServiceError(404, f"Project '{project_id}' not found.")
         self._ensure_actor_project_scope(actor, project)
@@ -1192,8 +1149,9 @@ class DemoWorkspaceService:
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_NOTIFICATIONS")
         scenario = str(payload.get("scenario") or "overdue_alerts").strip().lower()
         project_id = str(payload.get("project_id") or "").strip()
+        scoped_data = scope_snapshot_for_tenant(data, actor)
         snapshot = self.project_executive_snapshot(
-            project_id or (data.projects[0].id if data.projects else ""),
+            project_id or (scoped_data.projects[0].id if scoped_data.projects else ""),
             x_api_key=x_api_key,
             x_auth_token=x_auth_token,
         )
@@ -1228,7 +1186,7 @@ class DemoWorkspaceService:
         project_id = str(payload.get("project_id") or "").strip()
         if not project_id:
             raise ServiceError(400, "Task creation requires 'project_id'.")
-        project = self.deps.find_project(data, project_id)
+        project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise ServiceError(404, f"Project '{project_id}' not found.")
         self._ensure_actor_project_scope(actor, project)
@@ -1337,7 +1295,7 @@ class DemoWorkspaceService:
             x_auth_token,
             required_permissions=["UPDATE_TASK_PROGRESS", "MANAGE_WORKPLAN", "ASSIGN_TASKS"],
         )
-        context = self._find_task_context(data, task_id)
+        context = self._find_task_context(data, task_id, actor.organization_id)
         task = context["task"]
         project = context["project"]
         activity = context["activity"]
@@ -1464,7 +1422,7 @@ class DemoWorkspaceService:
             x_auth_token,
             required_permission="APPROVE_TASKS" if decision in {"approve", "approved"} else "VALIDATE_EVIDENCE",
         )
-        context = self._find_task_context(data, task_id)
+        context = self._find_task_context(data, task_id, actor.organization_id)
         task = context["task"]
         project = context["project"]
         activity = context["activity"]

@@ -24490,11 +24490,11 @@
       }
       state.datasetId = datasetId;
       const [mapping, quality, narrative, blueprint, templates] = await Promise.all([
-        callApi(`/v1/tidy_datasets/${datasetId}/semantic_mapping`),
-        callApi(`/v1/tidy_datasets/${datasetId}/quality`),
-        callApi(`/v1/tidy_datasets/${datasetId}/narrative`),
-        callApi(`/v1/tidy_datasets/${datasetId}/dashboard_blueprint`),
-        callApi(`/v1/dashboard_templates?dataset_id=${encodeURIComponent(datasetId)}`),
+        callApi(`/v1/tidy_datasets/${datasetId}/semantic_mapping`, { headers: headers(false) }),
+        callApi(`/v1/tidy_datasets/${datasetId}/quality`, { headers: headers(false) }),
+        callApi(`/v1/tidy_datasets/${datasetId}/narrative`, { headers: headers(false) }),
+        callApi(`/v1/tidy_datasets/${datasetId}/dashboard_blueprint`, { headers: headers(false) }),
+        callApi(`/v1/dashboard_templates?dataset_id=${encodeURIComponent(datasetId)}`, { headers: headers(false) }),
       ]);
       state.datasetMapping = mapping;
       state.datasetQualityReport = quality;

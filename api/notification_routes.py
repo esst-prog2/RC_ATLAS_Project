@@ -11,16 +11,16 @@ def register_notification_routes(
     http_exception_cls: Optional[type[Exception]] = None,
 ) -> None:
     @app.get("/v1/notification_channels")
-    def v1_notification_channels():
+    def v1_notification_channels(x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"), x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token")):
         try:
-            return service.channel_status()
+            return service.channel_status(x_api_key, x_auth_token)
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 
     @app.get("/v1/notifications")
-    def v1_notifications(min_severity: str = "info", max_items: int = 50):
+    def v1_notifications(min_severity: str = "info", max_items: int = 50, x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"), x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token")):
         try:
-            return service.list_notifications(min_severity=min_severity, max_items=max_items)
+            return service.list_notifications(min_severity=min_severity, max_items=max_items, x_api_key=x_api_key, x_auth_token=x_auth_token)
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 

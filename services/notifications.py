@@ -5,6 +5,12 @@ from typing import Any, Callable, Dict, List, Optional
 from urllib import error as urlerror
 
 from .errors import ServiceError
+from .tenant_security import (
+    find_scoped_dataset,
+    find_scoped_project,
+    notification_rule_organization_id,
+    scope_snapshot_for_tenant,
+)
 
 
 @dataclass(frozen=True)
@@ -37,12 +43,28 @@ class NotificationService:
     def __init__(self, deps: NotificationServiceDependencies):
         self.deps = deps
 
-    def channel_status(self) -> Dict[str, Any]:
+    def _tenant_data(self, x_api_key: Optional[str], x_auth_token: Optional[str], permission: str) -> tuple[Any, Any]:
+        data = self.deps.load_data()
+        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission=permission)
+        return data, actor
+
+    def _find_scoped_rule(self, data: Any, organization_id: str, rule_id: str) -> Any:
+        return next(
+            (
+                rule for rule in data.notification_rules
+                if str(rule.id) == str(rule_id)
+                and notification_rule_organization_id(data, rule) == organization_id
+            ),
+            None,
+        )
+
+    def channel_status(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
+        self._tenant_data(x_api_key, x_auth_token, "VIEW_NOTIFICATIONS")
         return self.deps.notification_channels_status()
 
-    def list_notifications(self, min_severity: str = "info", max_items: int = 50) -> Dict[str, Any]:
-        data = self.deps.load_data()
-        notifications = self.deps.build_current_notifications(data)
+    def list_notifications(self, min_severity: str = "info", max_items: int = 50, x_api_key: Optional[str] = None, x_auth_token: Optional[str] = None) -> Dict[str, Any]:
+        data, actor = self._tenant_data(x_api_key, x_auth_token, "VIEW_NOTIFICATIONS")
+        notifications = self.deps.build_current_notifications(scope_snapshot_for_tenant(data, actor))
         return {
             "generated_at": self.deps.now_iso_utc(),
             "count": len(notifications),
@@ -51,8 +73,11 @@ class NotificationService:
 
     def list_rules(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> List[Dict[str, Any]]:
         data = self.deps.load_data()
-        self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_NOTIFICATIONS")
-        return [asdict(rule) for rule in data.notification_rules]
+        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_NOTIFICATIONS")
+        return [
+            asdict(rule) for rule in data.notification_rules
+            if notification_rule_organization_id(data, rule) == actor.organization_id
+        ]
 
     def save_rule(
         self,
@@ -62,12 +87,22 @@ class NotificationService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_NOTIFICATIONS")
-        existing = self.deps.find_notification_rule(data, str(payload.get("id"))) if payload.get("id") else None
+        requested_id = str(payload.get("id") or '').strip()
+        existing = self._find_scoped_rule(data, actor.organization_id, requested_id) if requested_id else None
+        if requested_id and self.deps.find_notification_rule(data, requested_id) is not None and existing is None:
+            raise ServiceError(404, f"Notification rule '{requested_id}' not found.")
+        project_id = str(payload.get('project_id') or (existing.project_id if existing else '')).strip()
+        dataset_id = str(payload.get('dataset_id') or (existing.dataset_id if existing else '')).strip()
+        if project_id and find_scoped_project(data, actor.organization_id, project_id) is None:
+            raise ServiceError(404, f"Project '{project_id}' not found.")
+        if dataset_id and find_scoped_dataset(data, actor.organization_id, dataset_id) is None:
+            raise ServiceError(404, f"Tidy dataset '{dataset_id}' not found.")
         try:
             rule = self.deps.build_notification_rule_from_payload(payload, existing=existing)
         except ValueError as exc:
             raise ServiceError(400, str(exc)) from exc
 
+        rule.organization_id = actor.organization_id
         action = self.deps.upsert_notification_rule(data, rule)
         self.deps.append_audit_event(
             data,
@@ -95,7 +130,7 @@ class NotificationService:
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_NOTIFICATIONS")
-        rule = self.deps.find_notification_rule(data, rule_id)
+        rule = self._find_scoped_rule(data, actor.organization_id, rule_id)
         if rule is None:
             raise ServiceError(404, f"Notification rule '{rule_id}' not found.")
         result = self.execute_rule(
@@ -105,6 +140,7 @@ class NotificationService:
             actor=actor,
             endpoint=f"/v1/notification_rules/{rule_id}/run",
             update_when_empty=False,
+            evaluation_data=scope_snapshot_for_tenant(data, actor),
         )
         self.deps.save_data(data)
         return result
@@ -122,6 +158,7 @@ class NotificationService:
             payload=payload,
             actor=actor,
             endpoint="/v1/notification_rules/run_due",
+            organization_id=actor.organization_id,
         )
         self.deps.append_audit_event(
             data,
@@ -157,7 +194,7 @@ class NotificationService:
             raise ServiceError(400, "'max_items' must be an integer.") from exc
 
         notifications = self.deps.filter_notifications(
-            self.deps.build_current_notifications(data),
+            self.deps.build_current_notifications(scope_snapshot_for_tenant(data, actor)),
             min_severity=min_severity,
             max_items=max_items,
         )
@@ -217,8 +254,9 @@ class NotificationService:
         actor: Optional[Any] = None,
         endpoint: str = "",
         update_when_empty: bool = False,
+        evaluation_data: Optional[Any] = None,
     ) -> Dict[str, Any]:
-        notifications = self.deps.evaluate_notification_rule(data, rule)
+        notifications = self.deps.evaluate_notification_rule(evaluation_data or data, rule)
         if not notifications:
             if update_when_empty:
                 rule.last_run_at = self.deps.now_iso_utc()
@@ -264,11 +302,17 @@ class NotificationService:
         payload: Optional[Dict[str, Any]] = None,
         actor: Optional[Any] = None,
         endpoint: str = "/v1/notification_rules/run_due",
+        organization_id: str = "",
     ) -> Dict[str, Any]:
         now_dt = self.deps.utc_now()
         ran = []
         due_rules = 0
+        checked_rules = 0
+        evaluation_data = scope_snapshot_for_tenant(data, actor) if actor is not None else data
         for rule in data.notification_rules:
+            if organization_id and notification_rule_organization_id(data, rule) != organization_id:
+                continue
+            checked_rules += 1
             if not self.deps.is_notification_rule_due(rule, now_dt=now_dt):
                 continue
             due_rules += 1
@@ -281,6 +325,7 @@ class NotificationService:
                         actor=actor,
                         endpoint=endpoint,
                         update_when_empty=True,
+                        evaluation_data=evaluation_data,
                     )
                 )
             except Exception as exc:
@@ -305,7 +350,7 @@ class NotificationService:
                     "reason": reason,
                 })
         return {
-            "checked_rules": len(data.notification_rules),
+            "checked_rules": checked_rules,
             "due_rules": due_rules,
             "ran_rules": len(ran),
             "results": ran,
