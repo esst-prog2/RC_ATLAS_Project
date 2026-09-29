@@ -1167,19 +1167,20 @@ def save_json(data: LogiTrackData, path: str) -> None:
     with DATA_STORE_LOCK:
         _atomic_write_text(path, serialized)
 
-def load_json(path: str) -> LogiTrackData:
+def _load_json_snapshot(path: str) -> Dict[str, Any]:
     with DATA_STORE_LOCK:
         try:
             with open(path, "r", encoding="utf-8") as f:
-                d = json.load(f)
-            return from_serializable(d)
+                return json.load(f)
         except json.JSONDecodeError:
             backup_path = _json_backup_path(path)
             if not os.path.exists(backup_path):
                 raise
             with open(backup_path, "r", encoding="utf-8") as f:
-                d = json.load(f)
-            return from_serializable(d)
+                return json.load(f)
+
+def load_json(path: str) -> LogiTrackData:
+    return from_serializable(_load_json_snapshot(path))
 
 def _sqlite_connect(path: str) -> sqlite3.Connection:
     target = Path(path).expanduser()
@@ -1259,9 +1260,9 @@ def save_sqlite(data: LogiTrackData, path: str) -> None:
         finally:
             conn.close()
 
-def load_sqlite(path: str) -> LogiTrackData:
+def _load_sqlite_snapshot(path: str) -> Dict[str, Any]:
     if not os.path.exists(path):
-        return LogiTrackData()
+        return {}
     with DATA_STORE_LOCK:
         conn = _sqlite_connect(path)
         try:
@@ -1270,34 +1271,43 @@ def load_sqlite(path: str) -> LogiTrackData:
                 "SELECT payload_json FROM app_state WHERE state_key = 'primary'"
             ).fetchone()
             if row is None or not row["payload_json"]:
-                return LogiTrackData()
-            return from_serializable(json.loads(str(row["payload_json"])))
+                return {}
+            return json.loads(str(row["payload_json"]))
         finally:
             conn.close()
+
+def load_sqlite(path: str) -> LogiTrackData:
+    return from_serializable(_load_sqlite_snapshot(path))
 
 def load_data_from_path(path: Optional[str] = None) -> LogiTrackData:
     backend = get_storage_backend()
     target = get_storage_target_path(path, backend=backend)
+    serialized_snapshot: Dict[str, Any]
     if backend == "sqlite":
         if not os.path.exists(target):
             legacy_json_path = get_json_data_path(None)
             if legacy_json_path != target and os.path.exists(legacy_json_path):
-                data = load_json(legacy_json_path)
+                serialized_snapshot = _load_json_snapshot(legacy_json_path)
+                data = from_serializable(serialized_snapshot)
                 save_sqlite(data, target)
                 loaded = data
             else:
-                loaded = load_sqlite(target)
+                serialized_snapshot = {}
+                loaded = LogiTrackData()
         else:
-            loaded = load_sqlite(target)
+            serialized_snapshot = _load_sqlite_snapshot(target)
+            loaded = from_serializable(serialized_snapshot)
     else:
         if not os.path.exists(target):
+            serialized_snapshot = {}
             loaded = LogiTrackData()
         else:
-            loaded = load_json(target)
+            serialized_snapshot = _load_json_snapshot(target)
+            loaded = from_serializable(serialized_snapshot)
     if repository_domains_enabled():
         try:
             hydrated_snapshot = hydrate_snapshot_with_repository_domains(
-                to_serializable(loaded),
+                serialized_snapshot,
                 db_path=get_relational_store_path(target),
             )
             loaded = from_serializable(hydrated_snapshot)
@@ -1374,38 +1384,53 @@ def update_relational_store_from_data(data: LogiTrackData, source_path: str = ""
         REPOSITORY_SYNC_STATE["last_result"] = {}
         REPOSITORY_SYNC_STATE["last_error"] = ""
         return None
+    snapshot = to_serializable(data)
+    resolved_source_path = source_path or get_storage_target_path()
+    relational_path = get_relational_store_path(resolved_source_path)
+    result: Optional[Dict[str, Any]] = None
+    relational_error: Optional[Exception] = None
+    repository_error: Optional[Exception] = None
     try:
         result = sync_snapshot_to_relational_store(
-            to_serializable(data),
-            db_path=get_relational_store_path(source_path or get_storage_target_path()),
+            snapshot,
+            db_path=relational_path,
             source_backend=get_storage_backend(),
-            source_path=source_path or get_storage_target_path(),
+            source_path=resolved_source_path,
         )
         RELATIONAL_SYNC_STATE["last_synced_at"] = str(result.get("synced_at", ""))
         RELATIONAL_SYNC_STATE["last_error"] = ""
         RELATIONAL_SYNC_STATE["last_result"] = result
         LOGGER.info("Relational mirror synchronized", extra={"relational_sync": result})
-        if REPOSITORY_SYNC_STATE["enabled"]:
-            repository_result = sync_repository_backed_domains_from_snapshot(
-                to_serializable(data),
-                db_path=get_relational_store_path(source_path or get_storage_target_path()),
-            )
-            REPOSITORY_SYNC_STATE["last_synced_at"] = str(result.get("synced_at", ""))
-            REPOSITORY_SYNC_STATE["last_error"] = ""
-            REPOSITORY_SYNC_STATE["last_result"] = repository_result
-        else:
-            REPOSITORY_SYNC_STATE["last_result"] = {}
-            REPOSITORY_SYNC_STATE["last_error"] = ""
-        return result
     except Exception as exc:
+        relational_error = exc
         RELATIONAL_SYNC_STATE["last_error"] = str(exc)
         RELATIONAL_SYNC_STATE["last_result"] = {}
-        REPOSITORY_SYNC_STATE["last_error"] = str(exc)
+        LOGGER.exception("Relational mirror synchronization failed after canonical persistence")
+
+    if REPOSITORY_SYNC_STATE["enabled"]:
+        try:
+            repository_result = sync_repository_backed_domains_from_snapshot(
+                snapshot,
+                db_path=relational_path,
+            )
+            REPOSITORY_SYNC_STATE["last_synced_at"] = now_iso_utc()
+            REPOSITORY_SYNC_STATE["last_error"] = ""
+            REPOSITORY_SYNC_STATE["last_result"] = repository_result
+        except Exception as exc:
+            repository_error = exc
+            REPOSITORY_SYNC_STATE["last_error"] = str(exc)
+            REPOSITORY_SYNC_STATE["last_result"] = {}
+            LOGGER.exception("Repository-domain synchronization failed after canonical persistence")
+    else:
         REPOSITORY_SYNC_STATE["last_result"] = {}
-        LOGGER.exception("Relational mirror synchronization failed")
-        if relational_sync_strict_setting():
-            raise
-        return None
+        REPOSITORY_SYNC_STATE["last_error"] = ""
+
+    if relational_sync_strict_setting():
+        if relational_error is not None:
+            raise relational_error
+        if repository_error is not None:
+            raise repository_error
+    return result
 
 def safe_get_relational_store_status(source_path: str = "") -> Dict[str, Any]:
     try:

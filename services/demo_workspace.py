@@ -345,6 +345,87 @@ class DemoWorkspaceService:
             return type(ops)
         raise ServiceError(500, "No workplan container class could be inferred from the workspace.")
 
+    def _activity_occurrences(self, data: Any, activity_id: str) -> List[Dict[str, Any]]:
+        return [
+            {"project_id": project_id, "ops": ops, "activity": activity}
+            for project_id, ops in data.ops_by_project.items()
+            for activity in (getattr(ops, "activities", []) or [])
+            if str(getattr(activity, "id", "") or "") == activity_id
+        ]
+
+    def _activity_is_structurally_compatible(self, activity: Any) -> bool:
+        return (
+            isinstance(getattr(activity, "tasks", None), list)
+            and isinstance(getattr(activity, "linked_indicator_ids", None), list)
+        )
+
+    def _resolve_task_activity(
+        self,
+        data: Any,
+        project: Any,
+        payload: Dict[str, Any],
+        actor: Any,
+    ) -> Dict[str, Any]:
+        project_id = str(getattr(project, "id", "") or "")
+        organization_id = str(getattr(project, "organization_id", "") or "")
+        explicit_activity_id = str(payload.get("activity_id") or "").strip()
+        activity_id = explicit_activity_id or f"act_{project_id}_coordination"
+        occurrences = self._activity_occurrences(data, activity_id)
+        if len(occurrences) > 1:
+            raise ServiceError(409, f"Activity '{activity_id}' is duplicated in the workspace.")
+
+        ops = data.ops_by_project.get(project_id)
+        ops_is_new = ops is None
+        if ops is None:
+            ops = self._opslite_class(data)(activities=[])
+
+        if occurrences:
+            occurrence = occurrences[0]
+            activity = occurrence["activity"]
+            local_scope = (
+                str(occurrence["project_id"] or "") == project_id
+                and str(getattr(activity, "organization_id", "") or "") == organization_id
+            )
+            if not local_scope:
+                status_code = 404 if explicit_activity_id else 409
+                raise ServiceError(status_code, f"Activity '{activity_id}' is unavailable for this project.")
+            if not self._activity_is_structurally_compatible(activity):
+                raise ServiceError(409, f"Activity '{activity_id}' is structurally incompatible.")
+            return {
+                "ops": ops,
+                "ops_is_new": ops_is_new,
+                "activity": activity,
+                "activity_is_new": False,
+            }
+
+        activity_cls = self._activity_class(data)
+        linked_indicator_id = str(payload.get("linked_indicator_id") or "").strip()
+        activity = activity_cls(
+            id=activity_id,
+            name=str(payload.get("activity_name") or "Operational Coordination Queue").strip(),
+            owner=str(payload.get("activity_owner") or getattr(actor, "full_name", "") or getattr(actor, "username", "")).strip(),
+            start_date=date.today(),
+            due_date=self._coerce_date(payload.get("due_date")),
+            status="ongoing",
+            organization_id=organization_id,
+            linked_indicator_ids=[linked_indicator_id] if linked_indicator_id else [],
+            tasks=[],
+        )
+        return {
+            "ops": ops,
+            "ops_is_new": ops_is_new,
+            "activity": activity,
+            "activity_is_new": True,
+        }
+
+    def _task_id_exists(self, data: Any, task_id: str) -> bool:
+        return any(
+            str(getattr(task, "id", "") or "") == task_id
+            for ops in data.ops_by_project.values()
+            for activity in (getattr(ops, "activities", []) or [])
+            for task in (getattr(activity, "tasks", []) or [])
+        )
+
     def _task_to_row(self, project_id: str, activity: Any, task: Any) -> Dict[str, Any]:
         status = _normalize_task_status(getattr(task, "status", "not_started"))
         due_date = task.due_date.isoformat() if getattr(task, "due_date", None) else None
@@ -1194,37 +1275,19 @@ class DemoWorkspaceService:
         if not task_name:
             raise ServiceError(400, "Task creation requires 'title' or 'name'.")
         assignee = self._resolve_task_assignee(data, project, payload.get("assignee_username"))
-
-        ops = data.ops_by_project.get(project_id)
-        if ops is None:
-            ops_cls = self._opslite_class(data)
-            ops = ops_cls(activities=[])
-            data.ops_by_project[project_id] = ops
-
-        activity_id = str(payload.get("activity_id") or "").strip()
-        activity = next((item for item in ops.activities if item.id == activity_id), None) if activity_id else None
-        if activity is None:
-            activity_cls = self._activity_class(data)
-            linked_indicator_id = str(payload.get("linked_indicator_id") or "").strip()
-            activity = activity_cls(
-                id=str(payload.get("activity_id") or f"act_{project_id}_coordination"),
-                name=str(payload.get("activity_name") or "Operational Coordination Queue").strip(),
-                owner=str(payload.get("activity_owner") or getattr(actor, "full_name", "") or getattr(actor, "username", "")).strip(),
-                start_date=date.today(),
-                due_date=self._coerce_date(payload.get("due_date")),
-                status="ongoing",
-                organization_id=str(getattr(project, "organization_id", "") or getattr(actor, "organization_id", "")),
-                linked_indicator_ids=[linked_indicator_id] if linked_indicator_id else [],
-                tasks=[],
-            )
-            ops.activities.append(activity)
+        task_id = str(payload.get("id") or f"task_{project_id}_{_safe_slug(payload.get('title') or payload.get('name') or self.deps.now_iso_utc())}")
+        if self._task_id_exists(data, task_id):
+            raise ServiceError(409, f"Task '{task_id}' already exists.")
+        activity_context = self._resolve_task_activity(data, project, payload, actor)
+        ops = activity_context["ops"]
+        activity = activity_context["activity"]
 
         task_cls = self._task_class(data)
         status = "not_started"
         assignee_name = str(getattr(assignee, "full_name", "") or getattr(assignee, "username", "") or "")
         assignee_username = str(getattr(assignee, "username", "") or "")
         task = task_cls(
-            id=str(payload.get("id") or f"task_{project_id}_{_safe_slug(payload.get('title') or payload.get('name') or self.deps.now_iso_utc())}"),
+            id=task_id,
             name=task_name,
             owner=assignee_name,
             due_date=self._coerce_date(payload.get("due_date")),
@@ -1252,7 +1315,6 @@ class DemoWorkspaceService:
             f"Task assigned to {task.assignee_name or task.owner or 'the team'} with {task.priority} priority.",
             {"project_id": project_id, "activity_id": activity.id, "task_id": task.id},
         )
-        activity.tasks.append(task)
 
         details = {
             "project_id": project_id,
@@ -1273,6 +1335,11 @@ class DemoWorkspaceService:
             endpoint="/v1/demo/tasks",
             details=details,
         )
+        if activity_context["activity_is_new"]:
+            ops.activities.append(activity)
+        if activity_context["ops_is_new"]:
+            data.ops_by_project[project_id] = ops
+        activity.tasks.append(task)
         self.deps.save_data(data)
         return {
             "ok": True,

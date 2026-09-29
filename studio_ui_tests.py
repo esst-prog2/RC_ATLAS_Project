@@ -714,6 +714,27 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn(".task-drawer-shell.pm-task-drawer.hidden", pm_css)
         self.assertIn(".app-shell.role-programme-manager .pm-task-drawer .task-drawer-backdrop", pm_css)
 
+    def test_field_drawer_hands_off_to_existing_workplan_controls(self):
+        state_block = self.html.split("const state = {", 1)[1].split("};", 1)[0]
+        open_helper = self.html.split("function openTaskWorkflowControls", 1)[1].split("function", 1)[0]
+        target_helper = self.html.split("function targetPendingTaskWorkflowControls", 1)[1].split("function", 1)[0]
+        workflow_renderer = self.html.split("function renderTaskWorkflowList", 1)[1].split("function renderOperationalActivityFeed", 1)[0]
+        drawer_listener = self.html.split('document.getElementById("taskDrawerContent").addEventListener', 1)[1].split("});", 1)[0]
+
+        self.assertIn("pendingWorkflowTaskId", state_block)
+        self.assertLess(open_helper.index("closeTaskDrawer();"), open_helper.index('setActiveView("workplan")'))
+        self.assertIn("state.pendingWorkflowTaskId = targetTaskId", open_helper)
+        self.assertIn('[data-task-open]', target_helper)
+        self.assertIn("item.dataset.taskOpen", target_helper)
+        self.assertIn('details.detail-toggle', target_helper)
+        self.assertIn('data-task-progress', target_helper)
+        self.assertIn('button[data-task-action]:not([disabled])', target_helper)
+        self.assertIn('state.pendingWorkflowTaskId = ' + chr(34) * 2, target_helper)
+        self.assertIn("targetPendingTaskWorkflowControls();", workflow_renderer)
+        self.assertIn("data-open-task-workflow", self.html)
+        self.assertIn("openTaskWorkflowControls", drawer_listener)
+        self.assertIn("taskWorkflowActionButtons(task)", self.html)
+
     def test_primary_shell_uses_document_scroll_model(self):
         app_shell_css = self.html.split('    .app-shell {', 1)[1].split('    }', 1)[0]
         workspace_css = self.html.split('    .workspace-shell {', 1)[1].split('    }', 1)[0]

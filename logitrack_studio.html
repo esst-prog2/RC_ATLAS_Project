@@ -9950,6 +9950,7 @@
       roleContext: null,
       permissionContext: null,
       taskDrawerTaskId: "",
+      pendingWorkflowTaskId: "",
       projectRegistrySearch: "",
       projectRegistryStatusFilter: "",
       projectRegistrySort: "updated_desc",
@@ -20080,6 +20081,33 @@
       renderTaskDrawer();
     }
 
+    function openTaskWorkflowControls(taskId) {
+      const targetTaskId = textSafe(taskId || "", "");
+      if (!targetTaskId) return;
+      state.pendingWorkflowTaskId = targetTaskId;
+      closeTaskDrawer();
+      setActiveView("workplan");
+    }
+
+    function targetPendingTaskWorkflowControls() {
+      const taskId = textSafe(state.pendingWorkflowTaskId || "", "");
+      if (!taskId) return false;
+      const box = document.getElementById("taskWorkflowList");
+      const card = Array.from(box?.querySelectorAll("[data-task-open]") || [])
+        .find(item => textSafe(item.dataset.taskOpen || "", "") === taskId);
+      state.pendingWorkflowTaskId = "";
+      if (!card) return false;
+      const details = card.querySelector("details.detail-toggle");
+      if (details) details.open = true;
+      card.scrollIntoView({ block: "center", behavior: "smooth" });
+      const focusTarget = card.querySelector("[data-task-progress]")
+        || card.querySelector('button[data-task-action]:not([disabled])');
+      if (focusTarget) {
+        window.requestAnimationFrame(() => focusTarget.focus({ preventScroll: true }));
+      }
+      return true;
+    }
+
     function programmeManagerTaskDrawerHtml(task, approval, escalation, timeline, progressValue, tone, actions) {
       const taskId = textSafe(task.task_id || task.id, "");
       const evidenceItems = toArray(task.evidence_placeholders);
@@ -20258,7 +20286,7 @@
             </div>
             <div class="distribution-track"><div class="distribution-segment" style="width:${progressValue}%; background:linear-gradient(135deg, ${toneColor(tone)}, ${toneSoftColor(tone)})"></div></div>
             <div class="inbox-item-actions">
-              <button class="small secondary" type="button" data-inbox-view="workplan">${localizedCopy({ EN: "Open workflow controls", PT: "Abrir controlos do workflow", FR: "Ouvrir les controles du workflow" })}</button>
+              <button class="small secondary" type="button" data-open-task-workflow="${textSafe(task.task_id)}">${localizedCopy({ EN: "Open workflow controls", PT: "Abrir controlos do workflow", FR: "Ouvrir les controles du workflow" })}</button>
               <button class="small ghost" type="button" data-inbox-view="notifications">${localizedCopy({ EN: "Open notifications", PT: "Abrir notificacoes", FR: "Ouvrir les notifications" })}</button>
             </div>
           </article>
@@ -20605,9 +20633,11 @@
           PT: "Ainda nao existem tarefas operacionais. Crie uma para iniciar o loop operacional ao vivo.",
           FR: "Aucune tache operationnelle n'est encore disponible. Creez-en une pour lancer la boucle operationnelle en direct.",
         }))}</div>`;
+        targetPendingTaskWorkflowControls();
         return;
       }
       box.innerHTML = clippedTasks.map(item => operationalTaskCardHtml(item)).join("");
+      targetPendingTaskWorkflowControls();
     }
 
     function renderOperationalActivityFeed(workplan) {
@@ -25345,6 +25375,12 @@
       if (taskAction) {
         event.preventDefault();
         handleTaskWorkflowAction(taskAction.dataset.taskAction, taskAction.dataset.taskId);
+        return;
+      }
+      const workflowTrigger = event.target.closest("button[data-open-task-workflow]");
+      if (workflowTrigger) {
+        event.preventDefault();
+        openTaskWorkflowControls(workflowTrigger.dataset.openTaskWorkflow);
         return;
       }
       const viewTrigger = event.target.closest("[data-inbox-view]");

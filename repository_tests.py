@@ -104,7 +104,7 @@ class RepositoryTests(unittest.TestCase):
             self.assertEqual(len(loaded), 1)
             self.assertEqual(loaded[0]["indicator_name"], "Coverage")
 
-    def test_sync_helpers_hydrate_snapshot(self):
+    def test_sync_helpers_preserve_present_canonical_domains(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             db_path = str(Path(tmp_dir) / "repo.sqlite3")
             snapshot = {
@@ -134,7 +134,43 @@ class RepositoryTests(unittest.TestCase):
             )
 
             self.assertEqual(len(list_users(db_path=db_path)), 1)
-            self.assertEqual(hydrated["users"][0]["username"], "admin")
+            self.assertEqual(hydrated["users"], [])
+            self.assertEqual(hydrated["notification_rules"], [])
+            self.assertEqual(hydrated["reporting_records"], [])
+
+    def test_sync_helpers_backfill_only_genuinely_absent_legacy_domains(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            db_path = str(Path(tmp_dir) / "repo.sqlite3")
+            snapshot = {
+                "users": [
+                    {
+                        "id": "user_1",
+                        "username": "admin",
+                        "full_name": "Admin",
+                        "email": "admin@example.org",
+                        "role": "admin",
+                        "password_salt": "salt",
+                        "password_hash": "hash",
+                        "api_token_hash": "projected-token",
+                        "is_active": True,
+                        "created_at": "2026-01-01T00:00:00Z",
+                        "updated_at": "2026-01-01T00:00:00Z",
+                        "last_login_at": "",
+                    }
+                ],
+                "notification_rules": [{"id": "rule_1", "organization_id": "org_demo"}],
+                "reporting_records": [{"id": "record_1", "organization_id": "org_demo"}],
+            }
+            sync_repository_backed_domains_from_snapshot(snapshot, db_path=db_path)
+
+            hydrated = hydrate_snapshot_with_repository_domains(
+                {"notification_rules": []},
+                db_path=db_path,
+            )
+
+            self.assertEqual(hydrated["users"][0]["api_token_hash"], "projected-token")
+            self.assertEqual(hydrated["notification_rules"], [])
+            self.assertEqual(hydrated["reporting_records"][0]["id"], "record_1")
 
 
 if __name__ == "__main__":

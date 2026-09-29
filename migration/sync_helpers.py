@@ -85,11 +85,11 @@ def hydrate_snapshot_with_repository_domains(
         return snapshot
 
     hydrated = copy.deepcopy(snapshot)
-    if "users" in active_domains:
+    if "users" in active_domains and "users" not in snapshot:
         hydrated["users"] = list_users(db_path=target_path)
-    if "notification_rules" in active_domains:
+    if "notification_rules" in active_domains and "notification_rules" not in snapshot:
         hydrated["notification_rules"] = list_notification_rules(db_path=target_path)
-    if "reporting_records" in active_domains:
+    if "reporting_records" in active_domains and "reporting_records" not in snapshot:
         hydrated["reporting_records"] = list_reporting_records(db_path=target_path)
     return hydrated
 
