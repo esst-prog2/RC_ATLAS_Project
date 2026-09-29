@@ -760,6 +760,27 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn('.view :where(.subtle, .panel-note, .list, .pill, .badge, code, pre, td, th)', self.html)
         self.assertNotIn('body { overflow-x: hidden;', self.html)
 
+    def test_project_configuration_obeys_primary_view_visibility_lifecycle(self):
+        inactive_view_css = self.html.split('    .view {', 1)[1].split('    }', 1)[0]
+        active_view_css = self.html.split('    .view.active {', 1)[1].split('    }', 1)[0]
+        project_view_css = self.html.split('    .view[data-view="project-config"] {', 1)[1].split('    }', 1)[0]
+        project_workspace_css = self.html.split('    .project-config-workspace {', 1)[1].split('    }', 1)[0]
+        active_view_helper = self.html.split('    function setActiveView', 1)[1].split('    function renderLoadingCards', 1)[0]
+        project_workspace_renderer = self.html.split('    function renderProjectConfigWorkspaceNavigation', 1)[1].split('    async function setProjectConfigWorkspace', 1)[0]
+
+        self.assertIn('display: none;', inactive_view_css)
+        self.assertIn('display: grid;', active_view_css)
+        self.assertNotIn('display:', project_view_css)
+        self.assertIn('display: grid;', project_workspace_css)
+        for view_id in ('overview', 'workplan', 'reports', 'project-config'):
+            self.assertIn(f'data-view="{view_id}"', self.html)
+        self.assertIn('state.currentView = targetView;', active_view_helper)
+        self.assertIn('section.classList.toggle("active", section.dataset.view === targetView);', active_view_helper)
+        self.assertEqual(self.html.count('document.querySelectorAll(".view").forEach'), 1)
+        self.assertNotIn('document.querySelectorAll(".view")', project_workspace_renderer)
+        self.assertIn('document.getElementById("projectRegistryWorkspace")?.classList.toggle("hidden"', project_workspace_renderer)
+        self.assertIn('document.getElementById("logicalFrameworkWorkspace")?.classList.toggle("hidden"', project_workspace_renderer)
+
     def test_collapsed_shell_resets_sidebar_scroll_constraints(self):
         tablet_css = self.html.split('@media (max-width: 1024px)', 1)[1].split('@media (max-width: 920px)', 1)[0]
 
