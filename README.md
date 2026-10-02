@@ -4,6 +4,10 @@ RC Atlas is an operational workspace for managing project implementation.
 
 For this course, the project focuses on a small but complete operational workflow in which work is assigned, executed, submitted for validation, reviewed, and reflected in the current project status.
 
+## Homework 4 persistence spike
+
+This revision measures how many predefined workflow mutations the demo survives in the default configuration before saving fails. With the default relational mirror configuration, the locked sequence completed 10/10 counted operations and its logout/login checkpoint without an observed save failure. This is a bounded spike result, not a claim of unlimited reliability. Reproduction materials are in `spike/`.
+
 ## 1. The demo
 
 I start RC Atlas locally and open it in the browser. I log in as Teresa Mbanze, the Programme Manager for the Coastal Resilience and Livelihoods Programme, and create a task called **“Finalize Buzi monitoring report”**, assign it to Aline Duarte, and set its deadline. I log in as Aline, the Field Coordinator; the task appears in her work queue, where I update its progress and submit it for validation. I then log in as Raimundo Cumba, the MEAL Officer, open the submitted task, review it, and validate it. When I return as Teresa, the task is shown as validated and the project view reflects the updated operational status.
