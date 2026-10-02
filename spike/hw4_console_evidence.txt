@@ -1,0 +1,89 @@
+HW4 SPIKE CONSOLE EVIDENCE
+Date: 2026-10-02
+Question: In the default configuration, how many operations does the demo survive before the workspace stops saving?
+
+Source and isolation
+- Source revision: 8ae7cb2bf1ef2c4fde18af81f01fa8c25f7c3817 (hw4-spike)
+- Fresh-state method: local Git clone into a temporary directory. The clone did not include the developer checkout's untracked runtime files.
+- Environment check: no environment variable whose name matched LOGITRACK or RC_ATLAS was present.
+- LOGITRACK_ENABLE_RELATIONAL_MIRROR was not set. Its application default is True.
+- Demo seed was a non-counted preparation request against the isolated, uninitialized workspace.
+
+Commands used (paths redacted to <TEMP>)
+1. git branch --show-current
+2. git rev-parse HEAD
+3. git clone --no-local --branch hw4-spike --single-branch . <TEMP>
+4. py -m uvicorn logitrack_rc_v4_4_api:app --host 127.0.0.1 --port 8000
+5. GET http://127.0.0.1:8000/health
+6. POST http://127.0.0.1:8000/v1/demo/seed
+7. py measure.py
+8. Stop only the isolated Uvicorn process and launcher.
+
+Server startup (stderr)
+INFO:     Started server process [25364]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+Locked counted-operation results
+1. Teresa creates Task 1 for Aline: HTTP 200; persisted verified.
+2. Aline updates Task 1: HTTP 200; persisted verified.
+3. Aline submits Task 1: HTTP 200; persisted verified.
+4. Raimundo validates Task 1: HTTP 200; persisted verified.
+5. Teresa approves Task 1: HTTP 200; persisted verified.
+6. Teresa creates Task 2 for Aline: HTTP 200; persisted verified.
+7. Aline updates Task 2: HTTP 200; persisted verified.
+8. Aline submits Task 2: HTTP 200; persisted verified.
+Non-counted logout/login checkpoint: client token discarded; Raimundo login HTTP 200; subsequent GET /v1/auth/me HTTP 200.
+9. Raimundo validates Task 2: HTTP 200; persisted verified.
+10. Teresa approves Task 2: HTTP 200; persisted verified.
+
+Relevant request-console output (stdout)
+INFO:     127.0.0.1 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/seed HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_1/update HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_1/update HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_1/validate HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_1/validate HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_2/update HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_2/update HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "GET /v1/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_2/validate HTTP/1.1" 200 OK
+INFO:     127.0.0.1 - "POST /v1/demo/tasks/task_hw4_spike_2/validate HTTP/1.1" 200 OK
+
+Result
+- Successful counted operations: 10/10.
+- First failing operation: none in the locked sequence.
+- First relevant server-console error line: none observed.
+- Workspace stopped saving: no, not within the locked ten-operation sequence.
+- Historical failure reproduction: no; this isolated default-config measurement did not reproduce a save failure.
+
+Measurement hygiene note
+- An initial isolated clone was discarded before measurement completion because its verification driver looked for `id` instead of the actual workplan field `task_id`; its operation 1 mutation returned HTTP 200, but the verifier falsely reported the task absent.
+- No production or developer workspace data was used. The final result above is from a new, freshly cloned and newly seeded isolated workspace using the corrected verifier.
+
+REPRODUCTION COMMANDS
+Run these from a fresh clone on the hw4-spike revision. Do not set LOGITRACK_ENABLE_RELATIONAL_MIRROR or any RC Atlas runtime override.
+
+1. If the normal project dependencies are not already available:
+   py -m pip install -r requirements.txt
+
+2. Confirm no relevant override is present. This should produce no output:
+   Get-ChildItem Env: | Where-Object { $_.Name -match 'LOGITRACK|RC_ATLAS' }
+
+3. In terminal 1, start the default application configuration:
+   py -m uvicorn logitrack_rc_v4_4_api:app --host 127.0.0.1 --port 8000
+
+4. In terminal 2, confirm liveness and seed the fresh, uninitialized demo workspace:
+   Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/health
+   Invoke-WebRequest -UseBasicParsing -Method Post http://127.0.0.1:8000/v1/demo/seed
+
+5. Run the locked driver:
+   py spike/measure.py
+
+6. Stop only the Uvicorn server started in step 3 with Ctrl+C.
+
+The driver uses the application's existing fictional demo identities through the committed demo-seed bundle; it emits no credentials or tokens. Its final two lines report the actual derived count and first failing operation. The expected bounded result for this revision is 10/10 and none.
