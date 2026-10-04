@@ -2,7 +2,7 @@
 
 - [x] 1.1 Run `py -m unittest discover -v -p "*tests.py"` before source edits and verify the 201-test main baseline passes with zero failures, errors, or skips.
 - [ ] 1.2 Add focused service/API characterization tests for current Field submission, PM self-assigned rejection, MEAL-assigned execution, broad non-assignee mutation, validation, approval, return, and escalation; verify the tests capture current behavior before implementation.
-- [ ] 1.3 Add task snapshot characterization fixtures covering legacy username-only assignment, missing policy fields, existing submission/validation/approval timestamps, history, and status vocabulary; verify byte-for-byte reads do not mutate fixtures.
+- [x] 1.3 Add task snapshot characterization fixtures covering legacy username-only assignment, missing policy fields, existing submission/validation/approval timestamps, history, and status vocabulary; verify byte-for-byte reads do not mutate fixtures.
 - [ ] 1.4 Add Studio characterization assertions for task creation fields, `taskWorkflowActionButtons()`, task drawer handoff, role-derived action assumptions, and pending-review labels; verify the current PM/MEAL execution gaps are represented.
 - [ ] 1.5 Record focused Golden Journey, tenant-security, canonical-projection, and Logical Framework regression commands and verify their pre-change baselines pass.
 
@@ -47,11 +47,11 @@
 
 ## 6. Legacy Backfill Safety
 
-- [ ] 6.1 Add a focused dry-run-first legacy routing backfill utility that reports uniquely resolved and unresolved tasks without running at startup; verify dry-run is byte-for-byte non-mutating.
-- [ ] 6.2 Require explicit apply mode, a verified canonical backup, and unchanged-input/precondition checks before backfill; verify any failed precondition aborts before mutation.
-- [ ] 6.3 Backfill only uniquely resolved stable identities, default review policy, evidence flag, and derived stage while preserving task IDs, status, timestamps, evidence, notes, and activity history; verify fixture comparisons field-for-field.
-- [ ] 6.4 Save a validated backfill atomically and rebuild derived projection from canonical state; verify projection failure never replaces or rolls back the canonical snapshot.
-- [ ] 6.5 Leave ambiguous tasks unchanged and report the exact unresolved identity/routing reason; verify no caller-derived or first-match assignment occurs.
+- [x] 6.1 Add a focused dry-run-first legacy routing backfill utility that reports uniquely resolved and unresolved tasks without running at startup; verify dry-run is byte-for-byte non-mutating.
+- [x] 6.2 Require explicit apply mode, a verified canonical backup, and unchanged-input/precondition checks before backfill; verify any failed precondition aborts before mutation.
+- [x] 6.3 Backfill only uniquely resolved stable identities, default review policy, evidence flag, and derived stage while preserving task IDs, status, timestamps, evidence, notes, and activity history; verify fixture comparisons field-for-field.
+- [x] 6.4 Save a validated backfill atomically and rebuild derived projection from canonical state; verify projection failure never replaces or rolls back the canonical snapshot.
+- [x] 6.5 Leave ambiguous tasks unchanged and report the exact unresolved identity/routing reason; verify no caller-derived or first-match assignment occurs.
 
 ## 7. Studio Compatibility and Workflow UX
 
@@ -68,7 +68,7 @@
 - [x] 8.3 Add evidence-required and evidence-optional tests across direct and reviewed modes; verify evidence attachment requires `SUBMIT_EVIDENCE`, evidence-optional completion does not, and missing required evidence returns 409.
 - [x] 8.4 Add transition-order tests proving validators cannot act before submission, approvers cannot act before their stage, and same-tenant malformed input retains 400 while lifecycle conflicts retain 409.
 - [x] 8.5 Add escalation and pre-execution-routing tests proving ownership is stable, valid untouched-task correction succeeds, and post-start changes fail closed.
-- [ ] 8.6 Add legacy compatibility tests for unique resolution, ambiguous assignee, ambiguous reviewers, read non-mutation, guarded backfill, and no schema migration.
+- [x] 8.6 Add legacy compatibility tests for unique resolution, ambiguous assignee, ambiguous reviewers, read non-mutation, guarded backfill, and no schema migration.
 - [ ] 8.7 Add Studio source/behavior tests proving controls match backend identity/capability/policy decisions and all four modes render the correct actions and labels.
 - [x] 8.8 Run protected tenant-security, canonical-projection-reliability, Course MVP, and Logical Framework suites and verify no existing expectation is weakened or deleted for convenience.
 
