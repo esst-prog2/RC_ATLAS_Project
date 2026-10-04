@@ -32,15 +32,25 @@ TASK_STATUS_LABELS = {
 
 PRIORITY_ORDER = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
-FIELD_TASK_UPDATE_FIELDS = frozenset({
+TASK_EXECUTION_FIELDS = frozenset({
     "comment",
+    "complete_execution",
     "evidence_note",
+    "escalate",
     "progress_pct",
     "status",
     "submit_for_validation",
 })
-FIELD_MUTABLE_TASK_STATUSES = frozenset({"not_started", "in_progress", "overdue", "escalated"})
-FIELD_SUBMITTABLE_TASK_STATUSES = frozenset({"in_progress", "overdue", "escalated"})
+TASK_MUTABLE_STATUSES = frozenset({"not_started", "in_progress", "overdue", "escalated"})
+TASK_SUBMITTABLE_STATUSES = frozenset({"in_progress", "overdue", "escalated"})
+REVIEW_MODES = frozenset({
+    "direct_completion",
+    "validation",
+    "approval",
+    "validation_and_approval",
+})
+REVIEW_STAGES = frozenset({"execution", "validation", "approval", "complete"})
+DEFAULT_REVIEW_MODE = "validation_and_approval"
 
 ROLE_EXPERIENCE = {
     "organization_admin": {
@@ -164,19 +174,17 @@ class DemoWorkspaceService:
             return {"id": "programme_manager", **ROLE_EXPERIENCE["programme_manager"]}
         return {"id": "executive_viewer", **ROLE_EXPERIENCE["executive_viewer"]}
 
-    def _enforce_task_update_scope(self, actor: Any, task: Any) -> None:
-        if actor is None:
-            return
-        role = str(getattr(actor, "role", "") or "").strip().lower()
-        if role != "field_coordinator":
-            return
-        actor_username = str(getattr(actor, "username", "") or "").strip().lower()
-        assignee_username = str(getattr(task, "assignee_username", "") or "").strip().lower()
-        if not actor_username or actor_username != assignee_username:
-            raise ServiceError(403, "Field coordinators may update only tasks assigned to their authenticated account.")
-
     def _actor_role(self, actor: Any) -> str:
         return str(getattr(actor, "role", "") or "").strip().lower()
+
+    def _user_permissions(self, user: Any) -> set[str]:
+        if user is None:
+            return set()
+        contextual = getattr(user, "effective_permissions", None)
+        values = contextual if contextual is not None else self.deps.sanitize_user(user).get("permissions", [])
+        return {str(item).strip() for item in values if str(item).strip()}
+    def _user_has_permission(self, user: Any, permission: str) -> bool:
+        return permission in self._user_permissions(user)
 
     def _ensure_actor_project_scope(self, actor: Any, project: Any) -> None:
         if actor is None:
@@ -186,31 +194,30 @@ class DemoWorkspaceService:
         if actor_organization_id and project_organization_id and actor_organization_id != project_organization_id:
             raise ServiceError(403, "Access denied for this project's organization.")
 
-    def _eligible_project_assignees(self, data: Any, project: Any) -> List[Dict[str, Any]]:
+    def _project_member_users(self, data: Any, project: Any) -> List[Any]:
         project_id = str(getattr(project, "id", "") or "").strip()
         organization_id = str(getattr(project, "organization_id", "") or "").strip()
-        assignments_by_user_id: Dict[str, Any] = {}
-        for assignment in getattr(project, "team_assignments", []) or []:
-            if str(getattr(assignment, "project_id", "") or "").strip() != project_id:
-                continue
-            if str(getattr(assignment, "organization_id", "") or "").strip() != organization_id:
-                continue
-            if str(getattr(assignment, "status", "active") or "active").strip().lower() != "active":
-                continue
-            user_id = str(getattr(assignment, "user_id", "") or "").strip()
-            if user_id and user_id not in assignments_by_user_id:
-                assignments_by_user_id[user_id] = assignment
+        active_ids = {
+            str(getattr(assignment, "user_id", "") or "").strip()
+            for assignment in (getattr(project, "team_assignments", []) or [])
+            if str(getattr(assignment, "project_id", "") or "").strip() == project_id
+            and str(getattr(assignment, "organization_id", "") or "").strip() == organization_id
+            and str(getattr(assignment, "status", "active") or "active").strip().lower() == "active"
+            and str(getattr(assignment, "user_id", "") or "").strip()
+        }
+        return [
+            user
+            for user in (getattr(data, "users", []) or [])
+            if str(getattr(user, "id", "") or "").strip() in active_ids
+            and str(getattr(user, "organization_id", "") or "").strip() == organization_id
+            and bool(getattr(user, "is_active", False))
+            and str(getattr(user, "status", "active") or "active").strip().lower() == "active"
+        ]
 
+    def _eligible_project_assignees(self, data: Any, project: Any) -> List[Dict[str, Any]]:
         eligible: List[Dict[str, Any]] = []
-        for user in getattr(data, "users", []) or []:
-            assignment = assignments_by_user_id.get(str(getattr(user, "id", "") or "").strip())
-            if assignment is None:
-                continue
-            if str(getattr(user, "organization_id", "") or "").strip() != organization_id:
-                continue
-            if not bool(getattr(user, "is_active", False)):
-                continue
-            if str(getattr(user, "status", "active") or "active").strip().lower() != "active":
+        for user in self._project_member_users(data, project):
+            if not self._user_has_permission(user, "UPDATE_TASK_PROGRESS"):
                 continue
             sanitized = self.deps.sanitize_user(user)
             eligible.append({
@@ -219,51 +226,239 @@ class DemoWorkspaceService:
                 "full_name": str(getattr(user, "full_name", "") or getattr(user, "username", "") or ""),
                 "role": str(getattr(user, "role", "") or ""),
                 "role_label": str(sanitized.get("role_label") or getattr(user, "role", "") or ""),
-                "project_role": str(getattr(assignment, "role", "") or ""),
-                "team_id": str(getattr(assignment, "team_id", "") or getattr(user, "team_id", "") or ""),
+                "permissions": list(sanitized.get("permissions", []) or []),
             })
         return sorted(eligible, key=lambda item: (item["full_name"].lower(), item["username"].lower()))
 
-    def _resolve_task_assignee(self, data: Any, project: Any, username: Any) -> Any:
-        canonical_username = str(username or "").strip()
-        if not canonical_username:
-            raise ServiceError(400, "Task creation requires an eligible project assignee.")
-        user = self.deps.find_user_by_username(data, canonical_username)
-        if user is None:
-            raise ServiceError(400, "The selected task assignee is not eligible for this project.")
-        eligible_user_ids = {item["user_id"] for item in self._eligible_project_assignees(data, project)}
-        if str(getattr(user, "id", "") or "") not in eligible_user_ids:
-            raise ServiceError(400, "The selected task assignee is not eligible for this project.")
-        return user
+    def _resolve_project_member_by_id(self, data: Any, project: Any, user_id: Any) -> Any:
+        target = str(user_id or "").strip()
+        matches = [
+            user
+            for user in self._project_member_users(data, project)
+            if str(getattr(user, "id", "") or "").strip() == target
+        ]
+        return matches[0] if len(matches) == 1 else None
 
-    def _validate_task_update_request(self, actor: Any, task: Any, payload: Dict[str, Any]) -> None:
-        role = self._actor_role(actor)
+    def _resolve_task_assignee(self, data: Any, project: Any, username: Any, user_id: Any = "") -> Any:
+        canonical_user_id = str(user_id or "").strip()
+        canonical_username = str(username or "").strip().lower()
+        members = self._project_member_users(data, project)
+        if canonical_user_id:
+            matches = [
+                user for user in members
+                if str(getattr(user, "id", "") or "").strip() == canonical_user_id
+            ]
+            if canonical_username:
+                matches = [
+                    user for user in matches
+                    if str(getattr(user, "username", "") or "").strip().lower() == canonical_username
+                ]
+        elif canonical_username:
+            matches = [
+                user for user in members
+                if str(getattr(user, "username", "") or "").strip().lower() == canonical_username
+            ]
+        else:
+            matches = []
+        if len(matches) != 1 or not self._user_has_permission(matches[0], "UPDATE_TASK_PROGRESS"):
+            raise ServiceError(400, "The selected task assignee is not eligible for this project.")
+        return matches[0]
+
+    def _coerce_optional_bool(self, value: Any, field_name: str, default: bool = False) -> bool:
+        if value is None or value == "":
+            return default
+        if isinstance(value, bool):
+            return value
+        raise ServiceError(400, f"'{field_name}' must be a boolean.")
+
+    def _normalize_review_mode(self, value: Any, default: str = DEFAULT_REVIEW_MODE) -> str:
+        raw = str(value or "").strip().lower()
+        normalized = raw or default
+        if normalized not in REVIEW_MODES:
+            raise ServiceError(400, "Unsupported task review mode.")
+        return normalized
+
+    def _routing_requirements(self, review_mode: str) -> tuple[bool, bool]:
+        return (
+            review_mode in {"validation", "validation_and_approval"},
+            review_mode in {"approval", "validation_and_approval"},
+        )
+
+    def _validate_routing_configuration(
+        self,
+        data: Any,
+        project: Any,
+        assignee: Any,
+        review_mode: str,
+        validator_user_id: Any,
+        approver_user_id: Any,
+        evidence_required: bool,
+        require_explicit_reviewers: bool,
+    ) -> Dict[str, Any]:
+        assignee_id = str(getattr(assignee, "id", "") or "").strip()
+        if evidence_required and not self._user_has_permission(assignee, "SUBMIT_EVIDENCE"):
+            raise ServiceError(400, "The selected assignee cannot supply required evidence.")
+
+        needs_validator, needs_approver = self._routing_requirements(review_mode)
+        validator_id = str(validator_user_id or "").strip()
+        approver_id = str(approver_user_id or "").strip()
+        if not needs_validator and validator_id:
+            raise ServiceError(400, "Validator is not applicable to this review mode.")
+        if not needs_approver and approver_id:
+            raise ServiceError(400, "Approver is not applicable to this review mode.")
+        if require_explicit_reviewers and needs_validator and not validator_id:
+            raise ServiceError(400, "This review mode requires a designated validator.")
+        if require_explicit_reviewers and needs_approver and not approver_id:
+            raise ServiceError(400, "This review mode requires a designated approver.")
+
+        validator = self._resolve_project_member_by_id(data, project, validator_id) if validator_id else None
+        approver = self._resolve_project_member_by_id(data, project, approver_id) if approver_id else None
+        if validator_id and (validator is None or not self._user_has_permission(validator, "VALIDATE_EVIDENCE")):
+            raise ServiceError(400, "The designated validator is not eligible for this project.")
+        if approver_id and (approver is None or not self._user_has_permission(approver, "APPROVE_TASKS")):
+            raise ServiceError(400, "The designated approver is not eligible for this project.")
+        if validator_id and validator_id == assignee_id:
+            raise ServiceError(400, "The task assignee cannot validate their own reviewed task.")
+        if approver_id and approver_id == assignee_id:
+            raise ServiceError(400, "The task assignee cannot approve their own reviewed task.")
+        if review_mode == "validation_and_approval" and validator_id == approver_id:
+            raise ServiceError(400, "Validator and approver must be different people.")
+        return {
+            "assignee": assignee,
+            "validator": validator,
+            "approver": approver,
+            "review_mode": review_mode,
+            "evidence_required": evidence_required,
+        }
+
+    def _effective_task_assignee(self, data: Any, project: Any, task: Any) -> Any:
+        members = self._project_member_users(data, project)
+        assignee_id = str(getattr(task, "assignee_user_id", "") or "").strip()
+        if assignee_id:
+            matches = [
+                user for user in members
+                if str(getattr(user, "id", "") or "").strip() == assignee_id
+            ]
+        else:
+            username = str(getattr(task, "assignee_username", "") or "").strip().lower()
+            matches = [
+                user for user in members
+                if username and str(getattr(user, "username", "") or "").strip().lower() == username
+            ]
+        return matches[0] if len(matches) == 1 else None
+    def _effective_task_routing(self, data: Any, project: Any, task: Any) -> Dict[str, Any]:
+        try:
+            review_mode = self._normalize_review_mode(getattr(task, "review_mode", ""))
+        except ServiceError as exc:
+            return {"resolved": False, "reason": exc.detail}
+
+        members = self._project_member_users(data, project)
+        assignee = self._effective_task_assignee(data, project, task)
+        if assignee is None:
+            return {"resolved": False, "reason": "Task assignee identity is unresolved."}
+        if not self._user_has_permission(assignee, "UPDATE_TASK_PROGRESS"):
+            return {"resolved": False, "reason": "Task assignee lacks execution capability."}
+
+        needs_validator, needs_approver = self._routing_requirements(review_mode)
+        validator_id = str(getattr(task, "validator_user_id", "") or "").strip()
+        approver_id = str(getattr(task, "approver_user_id", "") or "").strip()
+
+        if needs_validator and not validator_id:
+            candidates = [
+                user for user in members
+                if self._user_has_permission(user, "VALIDATE_EVIDENCE")
+                and str(getattr(user, "id", "") or "").strip() != str(getattr(assignee, "id", "") or "").strip()
+            ]
+            if len(candidates) != 1:
+                return {"resolved": False, "reason": "Task validator identity is unresolved."}
+            validator_id = str(getattr(candidates[0], "id", "") or "").strip()
+        if needs_approver and not approver_id:
+            candidates = [
+                user for user in members
+                if self._user_has_permission(user, "APPROVE_TASKS")
+                and str(getattr(user, "id", "") or "").strip() != str(getattr(assignee, "id", "") or "").strip()
+                and str(getattr(user, "id", "") or "").strip() != validator_id
+            ]
+            if len(candidates) != 1:
+                return {"resolved": False, "reason": "Task approver identity is unresolved."}
+            approver_id = str(getattr(candidates[0], "id", "") or "").strip()
+
+        try:
+            routing = self._validate_routing_configuration(
+                data,
+                project,
+                assignee,
+                review_mode,
+                validator_id,
+                approver_id,
+                bool(getattr(task, "evidence_required", False)),
+                require_explicit_reviewers=True,
+            )
+        except ServiceError as exc:
+            return {"resolved": False, "reason": exc.detail}
+
+        status = _normalize_task_status(getattr(task, "status", "not_started"))
+        raw_stage = str(getattr(task, "review_stage", "") or "").strip().lower()
+        if raw_stage:
+            if raw_stage not in REVIEW_STAGES:
+                return {"resolved": False, "reason": "Task review stage is invalid."}
+            review_stage = raw_stage
+        elif status == "completed":
+            review_stage = "complete"
+        elif status == "pending_validation":
+            review_stage = "approval" if str(getattr(task, "validated_at", "") or "").strip() else "validation"
+        else:
+            review_stage = "execution"
+
+        return {
+            **routing,
+            "resolved": True,
+            "reason": "",
+            "assignee_user_id": str(getattr(assignee, "id", "") or "").strip(),
+            "validator_user_id": validator_id if needs_validator else "",
+            "approver_user_id": approver_id if needs_approver else "",
+            "review_stage": review_stage,
+        }
+
+    def _require_effective_task_routing(self, data: Any, project: Any, task: Any) -> Dict[str, Any]:
+        routing = self._effective_task_routing(data, project, task)
+        if not routing.get("resolved"):
+            raise ServiceError(409, str(routing.get("reason") or "Task routing is unresolved."))
+        return routing
+
+    def _validate_task_update_request(
+        self,
+        actor: Any,
+        task: Any,
+        payload: Dict[str, Any],
+        routing: Dict[str, Any],
+    ) -> None:
+        actor_id = str(getattr(actor, "id", "") or "").strip()
+        if actor_id != routing["assignee_user_id"]:
+            raise ServiceError(403, "Only the assigned task executor may update this task.")
+        unsupported_fields = sorted(set(payload) - TASK_EXECUTION_FIELDS)
+        if unsupported_fields:
+            raise ServiceError(403, "Execution updates cannot change task assignment or routing.")
         current_status = _normalize_task_status(getattr(task, "status", "not_started"))
-        submit_for_validation = bool(payload.get("submit_for_validation"))
+        if current_status not in TASK_MUTABLE_STATUSES:
+            raise ServiceError(409, "This task is not currently open for execution updates.")
 
-        if role == "field_coordinator":
-            self._enforce_task_update_scope(actor, task)
-            unsupported_fields = sorted(set(payload) - FIELD_TASK_UPDATE_FIELDS)
-            if unsupported_fields:
-                raise ServiceError(403, "Field coordinators may update only progress, evidence, comments, and submission state.")
-            if current_status not in FIELD_MUTABLE_TASK_STATUSES:
-                raise ServiceError(409, "This task is not currently open for Field execution updates.")
-            if "status" in payload:
-                requested_status = _normalize_task_status(payload.get("status"))
-                if requested_status != "in_progress":
-                    raise ServiceError(403, "Field coordinators cannot set arbitrary task status values.")
-                if current_status != "not_started" or submit_for_validation:
-                    raise ServiceError(409, "Only a Not Started task can be started through this action.")
-            if submit_for_validation and current_status not in FIELD_SUBMITTABLE_TASK_STATUSES:
-                raise ServiceError(409, "Only active Field work can be submitted for MEAL validation.")
-        elif submit_for_validation:
-            raise ServiceError(403, "Only the assigned Field Coordinator may submit this task for validation.")
-
+        completion_requested = bool(payload.get("complete_execution") or payload.get("submit_for_validation"))
         if "status" in payload:
             requested_status = _normalize_task_status(payload.get("status"))
-            if requested_status in {"pending_validation", "completed"}:
-                raise ServiceError(409, "Use the supported submission and approval actions for this workflow transition.")
-
+            if requested_status != "in_progress":
+                raise ServiceError(409, "Use the supported completion action for this workflow transition.")
+            if current_status != "not_started" or completion_requested:
+                raise ServiceError(409, "Only a Not Started task can be started through this action.")
+        if completion_requested and current_status not in TASK_SUBMITTABLE_STATUSES:
+            raise ServiceError(409, "Only active work can complete execution.")
+        if payload.get("submit_for_validation") and routing["review_mode"] not in {
+            "validation",
+            "validation_and_approval",
+        }:
+            raise ServiceError(409, "This task review policy does not use validation submission.")
+        if str(payload.get("evidence_note") or "").strip() and not self._user_has_permission(actor, "SUBMIT_EVIDENCE"):
+            raise ServiceError(403, "Submitting task evidence requires SUBMIT_EVIDENCE.")
     def _organization_id_for_actor(self, data: Any, actor: Any) -> str:
         if actor is not None and getattr(actor, "organization_id", ""):
             return str(getattr(actor, "organization_id", "") or "")
@@ -426,18 +621,48 @@ class DemoWorkspaceService:
             for task in (getattr(activity, "tasks", []) or [])
         )
 
-    def _task_to_row(self, project_id: str, activity: Any, task: Any) -> Dict[str, Any]:
+    def _task_to_row(self, data: Any, project: Any, activity: Any, task: Any) -> Dict[str, Any]:
         status = _normalize_task_status(getattr(task, "status", "not_started"))
         due_date = task.due_date.isoformat() if getattr(task, "due_date", None) else None
+        routing = self._effective_task_routing(data, project, task)
+        review_mode = (
+            routing.get("review_mode")
+            or str(getattr(task, "review_mode", "") or "").strip().lower()
+            or DEFAULT_REVIEW_MODE
+        )
+        review_stage = (
+            routing.get("review_stage")
+            or str(getattr(task, "review_stage", "") or "").strip().lower()
+            or ("complete" if status == "completed" else "execution")
+        )
+        canonical_assignee = routing.get("assignee") if routing.get("resolved") else None
+        canonical_assignee_username = str(
+            getattr(canonical_assignee, "username", "") or getattr(task, "assignee_username", "") or ""
+        )
+        canonical_assignee_name = str(
+            getattr(canonical_assignee, "full_name", "")
+            or canonical_assignee_username
+            or getattr(task, "assignee_name", "")
+            or getattr(task, "owner", "")
+            or ""
+        )
         return {
             "task_id": task.id,
-            "project_id": project_id,
+            "project_id": str(getattr(project, "id", "") or ""),
             "activity_id": activity.id,
             "activity_name": getattr(activity, "name", ""),
             "task_name": task.name,
-            "owner": task.owner,
-            "assignee_username": getattr(task, "assignee_username", ""),
-            "assignee_name": getattr(task, "assignee_name", "") or task.owner,
+            "owner": canonical_assignee_name,
+            "assignee_user_id": routing.get("assignee_user_id") or str(getattr(task, "assignee_user_id", "") or ""),
+            "assignee_username": canonical_assignee_username,
+            "assignee_name": canonical_assignee_name,
+            "review_mode": review_mode,
+            "validator_user_id": routing.get("validator_user_id") or str(getattr(task, "validator_user_id", "") or ""),
+            "approver_user_id": routing.get("approver_user_id") or str(getattr(task, "approver_user_id", "") or ""),
+            "evidence_required": bool(getattr(task, "evidence_required", False)),
+            "review_stage": review_stage,
+            "routing_resolved": bool(routing.get("resolved")),
+            "routing_resolution_error": str(routing.get("reason") or ""),
             "due_date": due_date,
             "status": status,
             "status_label": _task_status_label(status),
@@ -456,7 +681,6 @@ class DemoWorkspaceService:
             "evidence_placeholders": list(getattr(task, "evidence_placeholders", []) or []),
             "activity_log": list(getattr(task, "activity_log", []) or []),
         }
-
     def _append_task_log_entry(
         self,
         task: Any,
@@ -483,9 +707,12 @@ class DemoWorkspaceService:
         if not ops:
             return []
         rows: List[Dict[str, Any]] = []
+        project = self.deps.find_project(data, project_id)
+        if project is None:
+            return []
         for activity in ops.activities:
             for task in activity.tasks:
-                rows.append(self._task_to_row(project_id, activity, task))
+                rows.append(self._task_to_row(data, project, activity, task))
         return rows
 
     def _workflow_rollup(self, task_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -1256,31 +1483,60 @@ class DemoWorkspaceService:
             "items": generated,
         }
 
-    def create_task(
+    def prepare_task_creation(
         self,
+        data: Any,
+        project: Any,
+        actor: Any,
         payload: Dict[str, Any],
-        x_api_key: Optional[str],
-        x_auth_token: Optional[str],
+        activity_id: str,
+        reserved_task_ids: Optional[set[str]] = None,
     ) -> Dict[str, Any]:
-        data = self.deps.load_data()
-        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="ASSIGN_TASKS")
-        project_id = str(payload.get("project_id") or "").strip()
-        if not project_id:
-            raise ServiceError(400, "Task creation requires 'project_id'.")
-        project = find_scoped_project(data, actor.organization_id, project_id)
-        if project is None:
-            raise ServiceError(404, f"Project '{project_id}' not found.")
-        self._ensure_actor_project_scope(actor, project)
+        project_id = str(getattr(project, "id", "") or "")
         task_name = str(payload.get("title") or payload.get("name") or "").strip()
         if not task_name:
             raise ServiceError(400, "Task creation requires 'title' or 'name'.")
-        assignee = self._resolve_task_assignee(data, project, payload.get("assignee_username"))
-        task_id = str(payload.get("id") or f"task_{project_id}_{_safe_slug(payload.get('title') or payload.get('name') or self.deps.now_iso_utc())}")
-        if self._task_id_exists(data, task_id):
+
+        evidence_required = self._coerce_optional_bool(
+            payload.get("evidence_required"),
+            "evidence_required",
+            default=False,
+        )
+        assignee = self._resolve_task_assignee(
+            data,
+            project,
+            payload.get("assignee_username"),
+            payload.get("assignee_user_id"),
+        )
+        review_mode = self._normalize_review_mode(payload.get("review_mode"))
+        initial_evidence = [
+            str(item).strip()
+            for item in payload.get("evidence_placeholders", [])
+            if str(item).strip()
+        ]
+        if initial_evidence and (
+            str(getattr(actor, "id", "") or "") != str(getattr(assignee, "id", "") or "")
+            or not self._user_has_permission(actor, "SUBMIT_EVIDENCE")
+        ):
+            raise ServiceError(403, "Submitting task evidence requires the assigned executor and SUBMIT_EVIDENCE.")
+        routing = self._validate_routing_configuration(
+            data,
+            project,
+            assignee,
+            review_mode,
+            payload.get("validator_user_id"),
+            payload.get("approver_user_id"),
+            evidence_required,
+            require_explicit_reviewers=True,
+        )
+
+        task_id = str(
+            payload.get("id")
+            or f"task_{project_id}_{_safe_slug(payload.get('title') or payload.get('name') or self.deps.now_iso_utc())}"
+        )
+        reserved_ids = reserved_task_ids or set()
+        if task_id in reserved_ids or self._task_id_exists(data, task_id):
             raise ServiceError(409, f"Task '{task_id}' already exists.")
-        activity_context = self._resolve_task_activity(data, project, payload, actor)
-        ops = activity_context["ops"]
-        activity = activity_context["activity"]
 
         task_cls = self._task_class(data)
         status = "not_started"
@@ -1296,11 +1552,17 @@ class DemoWorkspaceService:
             notes=str(payload.get("description") or payload.get("notes") or "").strip(),
             assignee_username=assignee_username,
             assignee_name=assignee_name,
+            assignee_user_id=str(getattr(assignee, "id", "") or ""),
+            review_mode=review_mode,
+            validator_user_id=str(getattr(routing.get("validator"), "id", "") or ""),
+            approver_user_id=str(getattr(routing.get("approver"), "id", "") or ""),
+            evidence_required=evidence_required,
+            review_stage="execution",
             priority=_normalize_priority(payload.get("priority")),
             progress_pct=_task_progress_default(status),
             category=str(payload.get("category") or "implementation").strip().lower() or "implementation",
             linked_indicator_id=str(payload.get("linked_indicator_id") or "").strip(),
-            evidence_placeholders=[str(item).strip() for item in payload.get("evidence_placeholders", []) if str(item).strip()],
+            evidence_placeholders=initial_evidence,
             activity_log=[],
             created_at=self.deps.now_iso_utc(),
             updated_at=self.deps.now_iso_utc(),
@@ -1313,19 +1575,52 @@ class DemoWorkspaceService:
             actor,
             "task_assigned",
             f"Task assigned to {task.assignee_name or task.owner or 'the team'} with {task.priority} priority.",
-            {"project_id": project_id, "activity_id": activity.id, "task_id": task.id},
+            {
+                "project_id": project_id,
+                "activity_id": activity_id,
+                "task_id": task.id,
+                "assignee_user_id": task.assignee_user_id,
+                "review_mode": review_mode,
+            },
         )
-
         details = {
             "project_id": project_id,
-            "activity_id": activity.id,
+            "activity_id": activity_id,
             "task_id": task.id,
             "task_name": task.name,
+            "assignee_user_id": task.assignee_user_id,
             "assignee_username": task.assignee_username,
             "assignee_name": task.assignee_name or task.owner,
+            "review_mode": review_mode,
+            "validator_user_id": task.validator_user_id,
+            "approver_user_id": task.approver_user_id,
+            "evidence_required": task.evidence_required,
             "priority": task.priority,
             "message": f"{task.name} was assigned to {task.assignee_name or task.owner or 'the team'}.",
         }
+        return {"task": task, "audit_details": details}
+
+    def create_task(
+        self,
+        payload: Dict[str, Any],
+        x_api_key: Optional[str],
+        x_auth_token: Optional[str],
+    ) -> Dict[str, Any]:
+        data = self.deps.load_data()
+        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="ASSIGN_TASKS")
+        project_id = str(payload.get("project_id") or "").strip()
+        if not project_id:
+            raise ServiceError(400, "Task creation requires 'project_id'.")
+        project = find_scoped_project(data, actor.organization_id, project_id)
+        if project is None:
+            raise ServiceError(404, f"Project '{project_id}' not found.")
+        self._ensure_actor_project_scope(actor, project)
+
+        activity_context = self._resolve_task_activity(data, project, payload, actor)
+        ops = activity_context["ops"]
+        activity = activity_context["activity"]
+        prepared = self.prepare_task_creation(data, project, actor, payload, activity.id)
+        task = prepared["task"]
         self.deps.append_audit_event(
             data,
             action="demo.task.created",
@@ -1333,17 +1628,18 @@ class DemoWorkspaceService:
             target_id=task.id,
             actor=actor,
             endpoint="/v1/demo/tasks",
-            details=details,
+            details=prepared["audit_details"],
         )
         if activity_context["activity_is_new"]:
             ops.activities.append(activity)
         if activity_context["ops_is_new"]:
             data.ops_by_project[project_id] = ops
         activity.tasks.append(task)
-        self.deps.save_data(data)
+        saved_path = self.deps.save_data(data)
         return {
             "ok": True,
-            "task": self._task_to_row(project_id, activity, task),
+            "saved_to": saved_path,
+            "task": self._task_to_row(data, project, activity, task),
             "project_id": project_id,
             "workflow": self.project_workplan_snapshot(project_id, x_api_key=x_api_key, x_auth_token=x_auth_token),
         }
@@ -1360,94 +1656,119 @@ class DemoWorkspaceService:
             data,
             x_api_key,
             x_auth_token,
-            required_permissions=["UPDATE_TASK_PROGRESS", "MANAGE_WORKPLAN", "ASSIGN_TASKS"],
+            required_permission="UPDATE_TASK_PROGRESS",
         )
         context = self._find_task_context(data, task_id, actor.organization_id)
         task = context["task"]
         project = context["project"]
         activity = context["activity"]
         self._ensure_actor_project_scope(actor, project)
-        self._validate_task_update_request(actor, task, payload)
-
-        if "status" in payload:
-            task.status = _normalize_task_status(payload.get("status"))
-        if "progress_pct" in payload and payload.get("progress_pct") not in (None, ""):
-            task.progress_pct = _clamp_number(float(payload.get("progress_pct") or 0.0))
-        else:
-            task.progress_pct = float(getattr(task, "progress_pct", _task_progress_default(task.status)) or 0.0)
-        if "due_date" in payload:
-            task.due_date = self._coerce_date(payload.get("due_date"))
-        if "priority" in payload:
-            task.priority = _normalize_priority(payload.get("priority"))
-        if "category" in payload:
-            task.category = str(payload.get("category") or "implementation").strip().lower() or "implementation"
-        if "assignee_name" in payload:
-            task.assignee_name = str(payload.get("assignee_name") or "").strip()
-        if "assignee_username" in payload:
-            task.assignee_username = str(payload.get("assignee_username") or "").strip()
-        if "owner" in payload:
-            task.owner = str(payload.get("owner") or "").strip()
-        if "linked_indicator_id" in payload:
-            task.linked_indicator_id = str(payload.get("linked_indicator_id") or "").strip()
+        effective_assignee = self._effective_task_assignee(data, project, task)
+        if effective_assignee is not None and str(getattr(actor, "id", "") or "") != str(getattr(effective_assignee, "id", "") or ""):
+            raise ServiceError(403, "Only the assigned task executor may update this task.")
+        routing = self._require_effective_task_routing(data, project, task)
+        self._validate_task_update_request(actor, task, payload, routing)
 
         comment = str(payload.get("comment") or "").strip()
         evidence_note = str(payload.get("evidence_note") or "").strip()
         submit_for_validation = bool(payload.get("submit_for_validation"))
+        complete_execution = bool(payload.get("complete_execution"))
+        completion_requested = submit_for_validation or complete_execution
         escalate = bool(payload.get("escalate"))
+        if completion_requested and escalate:
+            raise ServiceError(400, "Completion and escalation cannot be requested together.")
+        evidence_items = [
+            str(item).strip()
+            for item in [*(getattr(task, "evidence_placeholders", []) or []), evidence_note]
+            if str(item).strip()
+        ]
+        if completion_requested and routing["evidence_required"] and not evidence_items:
+            raise ServiceError(409, "Required task evidence must exist before execution can complete.")
+
+        if "status" in payload:
+            task.status = "in_progress"
+        if "progress_pct" in payload and payload.get("progress_pct") not in (None, ""):
+            task.progress_pct = _clamp_number(float(payload.get("progress_pct") or 0.0))
+        else:
+            task.progress_pct = float(getattr(task, "progress_pct", _task_progress_default(task.status)) or 0.0)
 
         if comment:
-            if task.notes:
-                task.notes = f"{task.notes}\n\n{comment}"
-            else:
-                task.notes = comment
+            task.notes = f"{task.notes}{chr(10)}{chr(10)}{comment}" if task.notes else comment
         if evidence_note:
             task.evidence_placeholders.append(evidence_note)
-        if submit_for_validation:
-            task.status = "pending_validation"
-            task.submitted_at = self.deps.now_iso_utc()
+
+        if completion_requested:
             task.validated_at = ""
             task.approved_at = ""
-            task.progress_pct = max(float(getattr(task, "progress_pct", 0.0) or 0.0), 90.0)
-        if escalate:
+            if routing["review_mode"] == "direct_completion":
+                task.submitted_at = ""
+                task.status = "completed"
+                task.review_stage = "complete"
+                task.progress_pct = 100.0
+            else:
+                task.submitted_at = self.deps.now_iso_utc()
+                task.status = "pending_validation"
+                task.review_stage = (
+                    "approval"
+                    if routing["review_mode"] == "approval"
+                    else "validation"
+                )
+                task.progress_pct = max(float(getattr(task, "progress_pct", 0.0) or 0.0), 90.0)
+        elif escalate:
             task.status = "escalated"
-        if _task_is_complete(task.status):
-            task.progress_pct = 100.0
-        elif self._coerce_datetime(task.due_date) and self._coerce_datetime(task.due_date) < (self.deps.parse_date_like_value(self.deps.now_iso_utc()) or UTC_DATETIME_MIN) and task.status not in {"pending_validation", "escalated"}:
+
+        if (
+            not completion_requested
+            and not escalate
+            and self._coerce_datetime(task.due_date)
+            and self._coerce_datetime(task.due_date) < (self.deps.parse_date_like_value(self.deps.now_iso_utc()) or UTC_DATETIME_MIN)
+            and task.status != "escalated"
+        ):
             task.status = "overdue"
 
         message_bits = []
         if comment:
             message_bits.append("comment added")
         if evidence_note:
-            message_bits.append("evidence placeholder attached")
-        if submit_for_validation:
-            message_bits.append("submitted for validation")
+            message_bits.append("evidence attached")
+        if completion_requested:
+            message_bits.append(
+                "execution completed"
+                if routing["review_mode"] == "direct_completion"
+                else f"submitted for {task.review_stage}"
+            )
         if escalate:
             message_bits.append("escalated")
         if "progress_pct" in payload:
             message_bits.append(f"progress updated to {round(float(task.progress_pct), 1)}%")
-        if "status" in payload and not submit_for_validation and not escalate:
-            message_bits.append(f"status changed to {_task_status_label(task.status)}")
+        if "status" in payload and not completion_requested and not escalate:
+            message_bits.append("task started")
         update_message = ", ".join(message_bits) or "task details updated"
 
-        normalized_status = _normalize_task_status(getattr(task, "status", "not_started"))
         log_event_type = (
-            "submitted_for_validation" if submit_for_validation
-            else "task_started" if "status" in payload and normalized_status in {"in_progress", "overdue"}
+            "execution_completed" if completion_requested and routing["review_mode"] == "direct_completion"
+            else "submitted_for_validation" if completion_requested
+            else "task_started" if "status" in payload
             else "task_updated"
         )
         audit_action = (
-            "demo.task.submitted" if submit_for_validation
+            "demo.task.completed" if log_event_type == "execution_completed"
+            else "demo.task.submitted" if completion_requested
             else "demo.task.started" if log_event_type == "task_started"
             else "demo.task.updated"
         )
-
         self._append_task_log_entry(
             task,
             actor,
             log_event_type,
             update_message,
-            {"project_id": project.id, "activity_id": activity.id, "task_id": task.id},
+            {
+                "project_id": project.id,
+                "activity_id": activity.id,
+                "task_id": task.id,
+                "assignee_user_id": routing["assignee_user_id"],
+                "review_mode": routing["review_mode"],
+            },
         )
         self.deps.append_audit_event(
             data,
@@ -1461,7 +1782,10 @@ class DemoWorkspaceService:
                 "activity_id": activity.id,
                 "task_id": task.id,
                 "task_name": task.name,
+                "assignee_user_id": routing["assignee_user_id"],
+                "review_mode": routing["review_mode"],
                 "status": task.status,
+                "review_stage": getattr(task, "review_stage", ""),
                 "progress_pct": round(float(task.progress_pct), 2),
                 "message": f"{task.name}: {update_message}.",
             },
@@ -1469,9 +1793,113 @@ class DemoWorkspaceService:
         self.deps.save_data(data)
         return {
             "ok": True,
-            "task": self._task_to_row(project.id, activity, task),
+            "task": self._task_to_row(data, project, activity, task),
             "project_id": project.id,
             "workflow": self.project_workplan_snapshot(project.id, x_api_key=x_api_key, x_auth_token=x_auth_token),
+        }
+
+    def update_task_routing(
+        self,
+        task_id: str,
+        payload: Dict[str, Any],
+        x_api_key: Optional[str],
+        x_auth_token: Optional[str],
+    ) -> Dict[str, Any]:
+        data = self.deps.load_data()
+        actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="ASSIGN_TASKS")
+        context = self._find_task_context(data, task_id, actor.organization_id)
+        task = context["task"]
+        project = context["project"]
+        activity = context["activity"]
+        self._ensure_actor_project_scope(actor, project)
+
+        allowed_fields = {
+            "assignee_user_id",
+            "assignee_username",
+            "review_mode",
+            "validator_user_id",
+            "approver_user_id",
+            "evidence_required",
+        }
+        if set(payload) - allowed_fields:
+            raise ServiceError(400, "Routing updates contain unsupported fields.")
+        status = _normalize_task_status(getattr(task, "status", "not_started"))
+        execution_events = [
+            item for item in (getattr(task, "activity_log", []) or [])
+            if str(item.get("event_type") or "") != "task_assigned"
+        ]
+        if (
+            status != "not_started"
+            or float(getattr(task, "progress_pct", 0.0) or 0.0) != 0.0
+            or bool(getattr(task, "evidence_placeholders", []) or [])
+            or bool(str(getattr(task, "submitted_at", "") or "").strip())
+            or bool(str(getattr(task, "validated_at", "") or "").strip())
+            or bool(str(getattr(task, "approved_at", "") or "").strip())
+            or execution_events
+        ):
+            raise ServiceError(409, "Task routing can change only before execution begins.")
+
+        assignee = self._resolve_task_assignee(
+            data,
+            project,
+            payload.get("assignee_username"),
+            payload.get("assignee_user_id"),
+        )
+        review_mode = self._normalize_review_mode(payload.get("review_mode"))
+        evidence_required = self._coerce_optional_bool(
+            payload.get("evidence_required"),
+            "evidence_required",
+            default=False,
+        )
+        routing = self._validate_routing_configuration(
+            data,
+            project,
+            assignee,
+            review_mode,
+            payload.get("validator_user_id"),
+            payload.get("approver_user_id"),
+            evidence_required,
+            require_explicit_reviewers=True,
+        )
+
+        task.assignee_user_id = str(getattr(assignee, "id", "") or "")
+        task.assignee_username = str(getattr(assignee, "username", "") or "")
+        task.assignee_name = str(getattr(assignee, "full_name", "") or task.assignee_username)
+        task.owner = task.assignee_name
+        task.review_mode = review_mode
+        task.validator_user_id = str(getattr(routing.get("validator"), "id", "") or "")
+        task.approver_user_id = str(getattr(routing.get("approver"), "id", "") or "")
+        task.evidence_required = evidence_required
+        task.review_stage = "execution"
+        self._append_task_log_entry(
+            task,
+            actor,
+            "task_routing_updated",
+            "Task assignment and review routing updated before execution.",
+            {"project_id": project.id, "activity_id": activity.id, "task_id": task.id},
+        )
+        self.deps.append_audit_event(
+            data,
+            action="demo.task.routing_updated",
+            target_type="task",
+            target_id=task.id,
+            actor=actor,
+            endpoint=f"/v1/demo/tasks/{task.id}/routing",
+            details={
+                "project_id": project.id,
+                "activity_id": activity.id,
+                "assignee_user_id": task.assignee_user_id,
+                "review_mode": task.review_mode,
+                "validator_user_id": task.validator_user_id,
+                "approver_user_id": task.approver_user_id,
+                "evidence_required": task.evidence_required,
+            },
+        )
+        self.deps.save_data(data)
+        return {
+            "ok": True,
+            "task": self._task_to_row(data, project, activity, task),
+            "project_id": project.id,
         }
 
     def validate_task(
@@ -1487,59 +1915,84 @@ class DemoWorkspaceService:
             data,
             x_api_key,
             x_auth_token,
-            required_permission="APPROVE_TASKS" if decision in {"approve", "approved"} else "VALIDATE_EVIDENCE",
+            required_permissions=["VALIDATE_EVIDENCE", "APPROVE_TASKS"],
         )
         context = self._find_task_context(data, task_id, actor.organization_id)
         task = context["task"]
         project = context["project"]
         activity = context["activity"]
         self._ensure_actor_project_scope(actor, project)
+        routing = self._require_effective_task_routing(data, project, task)
 
         status = _normalize_task_status(getattr(task, "status", "not_started"))
-        submitted_at = str(getattr(task, "submitted_at", "") or "").strip()
-        validated_at = str(getattr(task, "validated_at", "") or "").strip()
-        approved_at = str(getattr(task, "approved_at", "") or "").strip()
+        stage = routing["review_stage"]
+        actor_id = str(getattr(actor, "id", "") or "").strip()
+        if status != "pending_validation" or stage not in {"validation", "approval"}:
+            raise ServiceError(409, "This task is not waiting at a review stage.")
 
         if decision in {"validate", "validated"}:
-            if status != "pending_validation" or not submitted_at or validated_at:
-                raise ServiceError(409, "Only an unvalidated submitted task can complete MEAL validation.")
+            if stage != "validation":
+                raise ServiceError(409, "Validation is not the active review stage.")
+            if actor_id != routing["validator_user_id"] or not self._user_has_permission(actor, "VALIDATE_EVIDENCE"):
+                raise ServiceError(403, "Only the designated validator may validate this task.")
             task.validated_at = self.deps.now_iso_utc()
+            if routing["review_mode"] == "validation":
+                task.status = "completed"
+                task.review_stage = "complete"
+                task.progress_pct = 100.0
+                message = "Validation completed and task closed."
+            else:
+                task.review_stage = "approval"
+                message = "Validation completed; task is pending approval."
             event_type = "demo.task.validated"
             task_event_type = "validated"
-            message = "Validation checkpoint completed."
         elif decision in {"approve", "approved"}:
-            if status != "pending_validation" or not validated_at or approved_at:
-                raise ServiceError(409, "Final approval requires a pending task already validated by MEAL.")
+            if stage != "approval":
+                raise ServiceError(409, "Approval is not the active review stage.")
+            if actor_id != routing["approver_user_id"] or not self._user_has_permission(actor, "APPROVE_TASKS"):
+                raise ServiceError(403, "Only the designated approver may approve this task.")
             task.approved_at = self.deps.now_iso_utc()
             task.status = "completed"
+            task.review_stage = "complete"
             task.progress_pct = 100.0
             event_type = "demo.task.approved"
             task_event_type = "approved"
-            message = "Manager approval completed and task closed."
+            message = "Approval completed and task closed."
         elif decision in {"reject", "rejected", "changes_required"}:
-            if status != "pending_validation" or not submitted_at or validated_at:
-                raise ServiceError(409, "Only an unvalidated submitted task can be returned for rework.")
+            reviewer_id = (
+                routing["validator_user_id"] if stage == "validation"
+                else routing["approver_user_id"]
+            )
+            permission = "VALIDATE_EVIDENCE" if stage == "validation" else "APPROVE_TASKS"
+            if actor_id != reviewer_id or not self._user_has_permission(actor, permission):
+                raise ServiceError(403, "Only the designated active reviewer may return this task.")
             task.status = "in_progress"
+            task.review_stage = "execution"
+            task.submitted_at = ""
             task.validated_at = ""
             task.approved_at = ""
             event_type = "demo.task.returned"
             task_event_type = "returned_for_rework"
-            message = "Validation requested further work before closure."
+            message = "Review requested further work before closure."
         else:
-            raise ServiceError(400, "Unsupported validation decision. Use validated, approved, or rejected.")
+            raise ServiceError(400, "Unsupported review decision. Use validated, approved, or rejected.")
 
         comment = str(payload.get("comment") or "").strip()
         if comment:
-            if task.notes:
-                task.notes = f"{task.notes}\n\n{comment}"
-            else:
-                task.notes = comment
+            task.notes = f"{task.notes}{chr(10)}{chr(10)}{comment}" if task.notes else comment
         self._append_task_log_entry(
             task,
             actor,
             task_event_type,
             message,
-            {"project_id": project.id, "activity_id": activity.id, "task_id": task.id},
+            {
+                "project_id": project.id,
+                "activity_id": activity.id,
+                "task_id": task.id,
+                "assignee_user_id": routing["assignee_user_id"],
+                "review_mode": routing["review_mode"],
+                "reviewer_user_id": actor_id,
+            },
         )
         self.deps.append_audit_event(
             data,
@@ -1553,7 +2006,11 @@ class DemoWorkspaceService:
                 "activity_id": activity.id,
                 "task_id": task.id,
                 "task_name": task.name,
+                "assignee_user_id": routing["assignee_user_id"],
+                "review_mode": routing["review_mode"],
+                "reviewer_user_id": actor_id,
                 "status": task.status,
+                "review_stage": getattr(task, "review_stage", ""),
                 "submitted_at": getattr(task, "submitted_at", ""),
                 "validated_at": getattr(task, "validated_at", ""),
                 "approved_at": getattr(task, "approved_at", ""),
@@ -1563,11 +2020,10 @@ class DemoWorkspaceService:
         self.deps.save_data(data)
         return {
             "ok": True,
-            "task": self._task_to_row(project.id, activity, task),
+            "task": self._task_to_row(data, project, activity, task),
             "project_id": project.id,
             "workflow": self.project_workplan_snapshot(project.id, x_api_key=x_api_key, x_auth_token=x_auth_token),
         }
-
     def report_preview(
         self,
         audience: str = "donor",

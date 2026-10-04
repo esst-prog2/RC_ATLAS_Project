@@ -71,6 +71,7 @@ from services import (
     LogicalFrameworkValidationError,
     ReportingService,
     ReportingServiceDependencies,
+    ServiceError,
     AuthenticatedTenantContext,
     audit_event_organization_id,
     dataset_organization_id,
@@ -670,6 +671,12 @@ class Task:
     notes: str = ""
     assignee_username: str = ""
     assignee_name: str = ""
+    assignee_user_id: str = ""
+    review_mode: str = ""
+    validator_user_id: str = ""
+    approver_user_id: str = ""
+    evidence_required: bool = False
+    review_stage: str = ""
     priority: str = "medium"
     progress_pct: float = 0.0
     category: str = "implementation"
@@ -913,6 +920,12 @@ def from_serializable(d: dict) -> LogiTrackData:
                     notes=t.get("notes", ""),
                     assignee_username=t.get("assignee_username", ""),
                     assignee_name=t.get("assignee_name", ""),
+                    assignee_user_id=str(t.get("assignee_user_id", "") or ""),
+                    review_mode=str(t.get("review_mode", "") or ""),
+                    validator_user_id=str(t.get("validator_user_id", "") or ""),
+                    approver_user_id=str(t.get("approver_user_id", "") or ""),
+                    evidence_required=bool(t.get("evidence_required", False)),
+                    review_stage=str(t.get("review_stage", "") or ""),
                     priority=str(t.get("priority", "medium") or "medium"),
                     progress_pct=float(num(t.get("progress_pct")) or task_progress_default(task_status)),
                     category=str(t.get("category", "implementation") or "implementation"),
@@ -1797,6 +1810,7 @@ ROLE_PERMISSION_TEMPLATES = {
         "MANAGE_WORKPLAN",
         "MANAGE_PROJECTS",
         "ASSIGN_TASKS",
+        "UPDATE_TASK_PROGRESS",
         "APPROVE_TASKS",
         "VIEW_NOTIFICATIONS",
         "VIEW_RISKS",
@@ -7643,15 +7657,44 @@ if FastAPI is not None:
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
 
+        tasks_payload = payload.get("tasks") or []
+        if not isinstance(tasks_payload, list):
+            raise HTTPException(status_code=400, detail="'tasks' must be a list.")
+        if tasks_payload:
+            actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="ASSIGN_TASKS")
+
         try:
-            activity = build_activity_from_payload(payload, project)
+            activity_payload = dict(payload)
+            activity_payload["tasks"] = []
+            activity = build_activity_from_payload(activity_payload, project)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-        ops = ensure_ops(data, project_id)
-        if find_activity(ops, activity.id) is not None:
+        ops = data.ops_by_project.get(project_id)
+        if ops is not None and find_activity(ops, activity.id) is not None:
             raise HTTPException(status_code=409, detail=f"Activity id '{activity.id}' already exists in project '{project_id}'.")
 
+        prepared_tasks = []
+        reserved_task_ids = set()
+        for task_payload in tasks_payload:
+            if not isinstance(task_payload, dict):
+                raise HTTPException(status_code=400, detail="Each task must be a JSON object.")
+            try:
+                prepared = demo_workspace_service.prepare_task_creation(
+                    data,
+                    project,
+                    actor,
+                    task_payload,
+                    activity.id,
+                    reserved_task_ids,
+                )
+            except ServiceError as exc:
+                raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+            prepared_tasks.append(prepared)
+            reserved_task_ids.add(prepared["task"].id)
+
+        ops = ensure_ops(data, project_id)
+        activity.tasks = [prepared["task"] for prepared in prepared_tasks]
         ops.activities.append(activity)
         append_audit_event(
             data,
@@ -7662,6 +7705,17 @@ if FastAPI is not None:
             endpoint=f"/v1/projects/{project_id}/activities",
             details={"project_id": project_id, "name": activity.name, "tasks_total": len(activity.tasks)},
         )
+        for prepared in prepared_tasks:
+            task = prepared["task"]
+            append_audit_event(
+                data,
+                action="demo.task.created",
+                target_type="task",
+                target_id=task.id,
+                actor=actor,
+                endpoint=f"/v1/projects/{project_id}/activities",
+                details=prepared["audit_details"],
+            )
         saved_path = _save_for_api(data)
         return {
             "ok": True,
@@ -7670,7 +7724,6 @@ if FastAPI is not None:
             "activity_id": activity.id,
             "tasks_total": len(activity.tasks),
         }
-
     @app.post("/v1/projects/{project_id}/activities/{activity_id}/tasks")
     def v1_add_task(
         project_id: str,
@@ -7679,44 +7732,21 @@ if FastAPI is not None:
         x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
     ):
-        data = _load_for_api()
-        actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="ASSIGN_TASKS")
-        project = find_scoped_project(data, actor.organization_id, project_id)
-        if project is None:
-            raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")
-
-        ops = ensure_ops(data, project_id)
-        activity = find_activity(ops, activity_id)
-        if activity is None:
-            raise HTTPException(status_code=404, detail=f"Activity '{activity_id}' not found in project '{project_id}'.")
-
+        delegated_payload = dict(payload)
+        delegated_payload["project_id"] = project_id
+        delegated_payload["activity_id"] = activity_id
         try:
-            task = build_task_from_payload(payload)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-        if any(existing.id == task.id for existing in activity.tasks):
-            raise HTTPException(status_code=409, detail=f"Task id '{task.id}' already exists in activity '{activity_id}'.")
-
-        activity.tasks.append(task)
-        append_audit_event(
-            data,
-            action="task.created",
-            target_type="task",
-            target_id=task.id,
-            actor=actor,
-            endpoint=f"/v1/projects/{project_id}/activities/{activity_id}/tasks",
-            details={"project_id": project_id, "activity_id": activity_id, "name": task.name, "status": task.status},
-        )
-        saved_path = _save_for_api(data)
+            result = demo_workspace_service.create_task(delegated_payload, x_api_key, x_auth_token)
+        except ServiceError as exc:
+            raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+        task = result["task"]
         return {
             "ok": True,
-            "saved_to": saved_path,
+            "saved_to": result.get("saved_to", ""),
             "project_id": project_id,
             "activity_id": activity_id,
-            "task_id": task.id,
+            "task_id": task["task_id"],
         }
-
 # ----------------------------
 # LOCAL CLI MAIN APP (NO FEATURES REMOVED)
 # ----------------------------

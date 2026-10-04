@@ -66,6 +66,8 @@ class CourseMvpWorkflowTests(unittest.TestCase):
             "priority": "high",
             "category": "reporting",
             "status": "completed",
+            "validator_user_id": "user_demo_3",
+            "approver_user_id": "user_demo_2",
         }
         payload.update(overrides)
         return self.client.post(
@@ -124,7 +126,7 @@ class CourseMvpWorkflowTests(unittest.TestCase):
         usernames = {item["username"] for item in payload["eligible_assignees"]}
         self.assertEqual(
             usernames,
-            {"teresa.mbanze", "raimundo.cumba", "aline.duarte", "executive.director"},
+            {"teresa.mbanze", "raimundo.cumba", "aline.duarte"},
         )
         self.assertNotIn("org.admin", usernames)
         self.assertIn("tasks", payload)
@@ -184,13 +186,18 @@ class CourseMvpWorkflowTests(unittest.TestCase):
         self.assertEqual(created.status_code, 200, created.text)
         task_id = created.json()["task"]["task_id"]
 
+        before_manager_data, before_manager_task = self.persisted_task(task_id)
+        before_manager_payload = MODULE.to_serializable(before_manager_task)
+        before_manager_audits = len(before_manager_data.audit_events)
         manager_update = self.client.post(
             f"/v1/demo/tasks/{task_id}/update",
             headers=self.headers("teresa.mbanze"),
-            json={"priority": "critical", "due_date": (date.today() + timedelta(days=30)).isoformat()},
+            json={"progress_pct": 40},
         )
-        self.assertEqual(manager_update.status_code, 200, manager_update.text)
-        self.assertEqual(manager_update.json()["task"]["priority"], "critical")
+        self.assertEqual(manager_update.status_code, 403, manager_update.text)
+        after_manager_data, after_manager_task = self.persisted_task(task_id)
+        self.assertEqual(MODULE.to_serializable(after_manager_task), before_manager_payload)
+        self.assertEqual(len(after_manager_data.audit_events), before_manager_audits)
 
         before_data, before_task = self.persisted_task(task_id)
         before_task_payload = MODULE.to_serializable(before_task)
@@ -340,7 +347,7 @@ class CourseMvpWorkflowTests(unittest.TestCase):
             headers=self.headers("raimundo.cumba"),
             json={"decision": "rejected"},
         )
-        self.assertEqual(late_return.status_code, 409, late_return.text)
+        self.assertEqual(late_return.status_code, 403, late_return.text)
         final_data, final_record = self.persisted_task(task_id)
         self.assertEqual(MODULE.to_serializable(final_record), validated_payload)
         self.assertEqual(len(final_data.audit_events), validated_audits)

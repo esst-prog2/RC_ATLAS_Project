@@ -119,6 +119,18 @@ def register_demo_routes(
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 
+    @app.patch("/v1/demo/tasks/{task_id}/routing")
+    def v1_demo_tasks_routing(
+        task_id: str,
+        payload: Dict[str, Any],
+        x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"),
+        x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token"),
+    ):
+        try:
+            return service.update_task_routing(task_id, payload, x_api_key, x_auth_token)
+        except ServiceError as exc:
+            raise_http_error(exc, http_exception_cls)
+
     @app.post("/v1/demo/tasks/{task_id}/validate")
     def v1_demo_tasks_validate(
         task_id: str,

@@ -18,6 +18,9 @@ class FakeApp:
     def post(self, path, **kwargs):
         return self._register("POST", path)
 
+    def patch(self, path, **kwargs):
+        return self._register("PATCH", path)
+
     def _register(self, method, path):
         def decorator(func):
             self.routes.append((method, path, func.__name__))
@@ -100,6 +103,7 @@ class RouteCompatibilityTests(unittest.TestCase):
             ("GET", "/v1/demo/report_preview"),
             ("POST", "/v1/demo/tasks"),
             ("POST", "/v1/demo/tasks/{task_id}/update"),
+            ("PATCH", "/v1/demo/tasks/{task_id}/routing"),
             ("POST", "/v1/demo/tasks/{task_id}/validate"),
         }
         actual = {(method, path) for method, path, _ in app.routes}

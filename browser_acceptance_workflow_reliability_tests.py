@@ -60,7 +60,10 @@ class CoordinationActivityReliabilityTests(unittest.TestCase):
         payload = {
             "project_id": project_id or self.project_id,
             "title": title,
+            "assignee_user_id": "user_demo_4",
             "assignee_username": "aline.duarte",
+            "validator_user_id": "user_demo_3",
+            "approver_user_id": "user_demo_2",
             "priority": "medium",
         }
         payload.update(overrides)
