@@ -79,4 +79,4 @@
 - [x] 9.3 Run strict OpenSpec validation and `git diff --check`; inspect the full diff for accidental authentication, tenant-security, persistence, Logical Framework, Project Configuration, or unrelated UI expansion.
 - [ ] 9.4 Manually verify in Studio: PM direct completion, MEAL execution plus approval, Field validation-only, escalation without ownership transfer, return/resubmission, and refresh/re-login persistence.
 - [ ] 9.5 Manually run the protected Golden Journey as Aline assignee, Raimundo validator, and Teresa approver through Completed; verify no validated status and no unexpected 401/403.
-- [ ] 9.6 Review any proposed real legacy-data backfill dry-run and obtain separate explicit authorization before applying it; do not treat automated fixtures as authorization to mutate local runtime data.
+- [x] 9.6 Review any proposed real legacy-data backfill dry-run and obtain separate explicit authorization before applying it; do not treat automated fixtures as authorization to mutate local runtime data.
