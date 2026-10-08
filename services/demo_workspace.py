@@ -230,6 +230,20 @@ class DemoWorkspaceService:
             })
         return sorted(eligible, key=lambda item: (item["full_name"].lower(), item["username"].lower()))
 
+    def _project_members_for_routing(self, data: Any, project: Any) -> List[Dict[str, Any]]:
+        """Return the scoped, non-sensitive member facts Studio needs for routing selectors."""
+        members: List[Dict[str, Any]] = []
+        for user in self._project_member_users(data, project):
+            display_name = str(
+                getattr(user, "full_name", "") or getattr(user, "username", "") or ""
+            ).strip()
+            members.append({
+                "user_id": str(getattr(user, "id", "") or ""),
+                "display_name": display_name,
+                "permissions": sorted(self._user_permissions(user)),
+            })
+        return sorted(members, key=lambda item: (item["display_name"].lower(), item["user_id"]))
+
     def _resolve_project_member_by_id(self, data: Any, project: Any, user_id: Any) -> Any:
         target = str(user_id or "").strip()
         matches = [
@@ -1367,6 +1381,7 @@ class DemoWorkspaceService:
         return {
             "project_id": project_id,
             "eligible_assignees": self._eligible_project_assignees(data, project),
+            "project_members": self._project_members_for_routing(data, project),
             "summary": snapshot["executive"],
             "activities": snapshot["activities"],
             "tasks": tasks,

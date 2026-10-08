@@ -55,11 +55,11 @@
 
 ## 7. Studio Compatibility and Workflow UX
 
-- [ ] 7.1 Extend task creation with an assignee selector filtered by the effective evidence policy, a four-mode Review selector preselected to validation-and-approval, conditional capability-filtered reviewer selectors, and an evidence-required toggle defaulted off; verify payloads match backend defaults.
-- [ ] 7.2 Update Workplan action generation to use stable actor/assignee/reviewer IDs, permissions, effective policy, review stage, and state rather than profile role labels; verify crafted requests remain backend-enforced.
-- [ ] 7.3 Present approval-only and post-validation approval posture as Pending Approval while preserving stored `pending_validation`; verify no visual or persistence contract introduces a validated status.
-- [ ] 7.4 Preserve the existing task-drawer handoff and focus behavior for PM, MEAL, and Field assignees; verify the drawer does not duplicate workflow authorization.
-- [ ] 7.5 Label return behavior and routing configuration clearly without redesigning Workplan, Portfolio, Project Configuration, or Studio navigation; verify existing visual regression assertions remain green.
+- [x] 7.1 Extend task creation with an assignee selector filtered by the effective evidence policy, a four-mode Review selector preselected to validation-and-approval, conditional capability-filtered reviewer selectors, and an evidence-required toggle defaulted off; verify payloads match backend defaults.
+- [x] 7.2 Update Workplan action generation to use stable actor/assignee/reviewer IDs, permissions, effective policy, review stage, and state rather than profile role labels; verify crafted requests remain backend-enforced.
+- [x] 7.3 Present approval-only and post-validation approval posture as Pending Approval while preserving stored `pending_validation`; verify no visual or persistence contract introduces a validated status.
+- [x] 7.4 Preserve the existing task-drawer handoff and focus behavior for PM, MEAL, and Field assignees; verify the drawer does not duplicate workflow authorization.
+- [x] 7.5 Label return behavior and routing configuration clearly without redesigning Workplan, Portfolio, Project Configuration, or Studio navigation; verify existing visual regression assertions remain green.
 
 ## 8. Contract and Regression Tests
 
@@ -69,7 +69,7 @@
 - [x] 8.4 Add transition-order tests proving validators cannot act before submission, approvers cannot act before their stage, and same-tenant malformed input retains 400 while lifecycle conflicts retain 409.
 - [x] 8.5 Add escalation and pre-execution-routing tests proving ownership is stable, valid untouched-task correction succeeds, and post-start changes fail closed.
 - [x] 8.6 Add legacy compatibility tests for unique resolution, ambiguous assignee, ambiguous reviewers, read non-mutation, guarded backfill, and no schema migration.
-- [ ] 8.7 Add Studio source/behavior tests proving controls match backend identity/capability/policy decisions and all four modes render the correct actions and labels.
+- [x] 8.7 Add Studio source/behavior tests proving controls match backend identity/capability/policy decisions and all four modes render the correct actions and labels.
 - [x] 8.8 Run protected tenant-security, canonical-projection-reliability, Course MVP, and Logical Framework suites and verify no existing expectation is weakened or deleted for convenience.
 
 ## 9. Final Verification and Acceptance
@@ -77,6 +77,6 @@
 - [x] 9.1 Run all focused assignment-aware workflow tests and verify every policy, denial, compatibility, audit, and side-effect contract passes.
 - [x] 9.2 Run `py -m unittest discover -v -p "*tests.py"` and verify all original 201 tests plus new tests pass with zero failures, errors, or skips.
 - [x] 9.3 Run strict OpenSpec validation and `git diff --check`; inspect the full diff for accidental authentication, tenant-security, persistence, Logical Framework, Project Configuration, or unrelated UI expansion.
-- [ ] 9.4 Manually verify in Studio: PM direct completion, MEAL execution plus approval, Field validation-only, escalation without ownership transfer, return/resubmission, and refresh/re-login persistence.
-- [ ] 9.5 Manually run the protected Golden Journey as Aline assignee, Raimundo validator, and Teresa approver through Completed; verify no validated status and no unexpected 401/403.
+- [x] 9.4 Manually verify in Studio: PM direct completion, MEAL execution plus approval, Field validation-only, escalation without ownership transfer, return/resubmission, and refresh/re-login persistence.
+- [x] 9.5 Manually run the protected Golden Journey as Aline assignee, Raimundo validator, and Teresa approver through Completed; verify no validated status and no unexpected 401/403.
 - [x] 9.6 Review any proposed real legacy-data backfill dry-run and obtain separate explicit authorization before applying it; do not treat automated fixtures as authorization to mutate local runtime data.

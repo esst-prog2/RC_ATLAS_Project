@@ -470,8 +470,10 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn("function preferredAccessibleView", self.html)
         self.assertIn("function renderAdaptiveNavigation", self.html)
         self.assertIn('if (!hasPermission("ASSIGN_TASKS")) {', self.html)
-        self.assertIn('const canValidate = hasPermission("VALIDATE_EVIDENCE");', self.html)
-        self.assertIn('const canApprove = hasPermission("APPROVE_TASKS");', self.html)
+        self.assertIn('&& hasPermission("VALIDATE_EVIDENCE");', self.html)
+        self.assertIn('&& hasPermission("APPROVE_TASKS");', self.html)
+        self.assertIn('actorId === textSafe(task.validator_user_id || "", "")', self.html)
+        self.assertIn('actorId === textSafe(task.approver_user_id || "", "")', self.html)
         self.assertIn('if (!hasPermission("VIEW_DATA_QUALITY")) {', self.html)
         self.assertIn('if (!hasAnyRequestPermission(["MANAGE_NOTIFICATIONS", "WORKSPACE_ADMIN"])) {', self.html)
         self.assertIn("permissions: Object.keys(PERMISSION_CATALOG),", self.html)
@@ -514,31 +516,34 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn('module: "project_registry_counts"', self.html)
         self.assertIn("state.dataQuality?.issue_count ?? workspace?.data_quality?.issue_count", self.html)
         self.assertIn("value: formatValue(model.qualityIssueCount)", self.html)
-        self.assertIn("function taskRequiresMealReview", self.html)
-        self.assertIn("tasks.filter(taskRequiresMealReview)", inbox_builder)
+        self.assertNotIn("function taskRequiresMealReview", self.html)
+        self.assertIn("const actionableTasks = tasks;", inbox_builder)
         self.assertIn("No tasks are currently awaiting validation or evidence review.", self.html)
-        self.assertIn("fieldUpdateScopeAllows", task_actions)
-        self.assertIn('assigneeUsername === currentUsername', task_actions)
+        self.assertIn("currentActorUserId()", task_actions)
+        self.assertIn("task.validator_user_id", task_actions)
+        self.assertIn("task.approver_user_id", task_actions)
+        self.assertNotIn("fieldUpdateScopeAllows", task_actions)
 
     def test_course_mvp_task_handoff_uses_canonical_identity_and_two_checkpoints(self):
         composer = self.html.split("async function createOperationalTaskFromForm", 1)[1].split("function clearProtectedPanels", 1)[0]
-        meal_predicate = self.html.split("function taskRequiresMealReview", 1)[1].split("function buildOperationalInboxItems", 1)[0]
         task_actions = self.html.split("function taskWorkflowActionButtons", 1)[1].split("function operationalTaskCardHtml", 1)[0]
         approval_posture = self.html.split("function taskApprovalState", 1)[1].split("function taskEvidenceState", 1)[0]
 
         self.assertIn('<select id="taskAssigneeInput">', self.html)
         self.assertIn("function populateTaskAssigneePicker", self.html)
-        self.assertIn("workplan?.eligible_assignees", self.html)
-        self.assertIn("assignee_username: assigneeUsername", composer)
+        self.assertIn("workplan?.project_members", self.html)
+        self.assertIn("assignee_user_id: assigneeUserId", composer)
+        self.assertIn("review_mode: reviewMode", composer)
+        self.assertIn("complete_execution: true", self.html)
         self.assertNotIn("assignee_name:", composer)
+        self.assertNotIn("assignee_username:", composer)
         self.assertNotIn('status: "not_started"', composer)
-        self.assertIn('status === "pending_validation"', meal_predicate)
-        self.assertIn("task?.submitted_at", meal_predicate)
-        self.assertIn("task?.validated_at", meal_predicate)
-        self.assertIn("needsMealReview && canValidate", task_actions)
-        self.assertIn("awaitsManagerApproval && canApprove", task_actions)
-        self.assertIn("Validated by MEAL - awaiting final approval", approval_posture)
-        self.assertNotIn('status === "pending_validation" && canApprove', task_actions)
+        self.assertIn('stage === "validation"', task_actions)
+        self.assertIn('stage === "approval"', task_actions)
+        self.assertIn("actorId === textSafe(task.validator_user_id", task_actions)
+        self.assertIn("actorId === textSafe(task.approver_user_id", task_actions)
+        self.assertIn("Pending Approval", approval_posture)
+        self.assertNotIn("Validated by MEAL", approval_posture)
 
     def test_programme_manager_command_center_uses_real_portfolio_sources(self):
         self.assertIn('id="programmeManagerWorkspace"', self.html)
@@ -689,6 +694,7 @@ class StudioUiTests(unittest.TestCase):
     def test_programme_manager_drawer_uses_compact_inspector_and_canonical_permissions(self):
         drawer_helper = self.html.split("function programmeManagerTaskDrawerHtml", 1)[1].split("function renderTaskDrawer", 1)[0]
         drawer_renderer = self.html.split("function renderTaskDrawer", 1)[1].split("function currentOperationalProfile", 1)[0]
+        execution_helper = self.html.split("function taskExecutionActionAllowed", 1)[1].split("function taskWorkflowActionButtons", 1)[0]
         action_helper = self.html.split("function taskWorkflowActionButtons", 1)[1].split("function operationalTaskCardHtml", 1)[0]
         pm_css = self.html.split("/* Programme Manager analytical workspace */", 1)[1].split("@media (max-width: 1560px)", 1)[0]
 
@@ -708,7 +714,11 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn('data-task-comment="${escapeProgrammeHtml(taskId)}"', drawer_helper)
         self.assertIn('hasPermission("APPROVE_TASKS")', action_helper)
         self.assertIn('hasPermission("VALIDATE_EVIDENCE")', action_helper)
-        self.assertIn('profile.id !== "field_coordinator"', action_helper)
+        self.assertIn("currentActorUserId()", action_helper)
+        self.assertIn("taskExecutionActionAllowed(task)", action_helper)
+        self.assertIn("task.assignee_user_id", execution_helper)
+        self.assertIn('hasPermission("UPDATE_TASK_PROGRESS")', execution_helper)
+        self.assertNotIn('profile.id !== "field_coordinator"', action_helper)
         self.assertIn("width: min(640px, 100%);", pm_css)
         self.assertIn("height: 100dvh;", pm_css)
         self.assertIn(".task-drawer-shell.pm-task-drawer.hidden", pm_css)
