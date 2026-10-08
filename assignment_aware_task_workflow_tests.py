@@ -118,6 +118,28 @@ class AssignmentAwareTaskWorkflowTests(unittest.TestCase):
         approved = self.review(task_id, "teresa.mbanze", "approved")
         self.assertEqual(approved.json()["task"]["status"], "completed")
 
+    def test_hw5_two_stage_workflow_requires_approval_before_completion(self):
+        task_id = self.start("HW5 approval gate")
+
+        submitted = self.update(task_id, "aline.duarte", submit_for_validation=True)
+        self.assertEqual(
+            (submitted.status_code, submitted.json()["task"]["status"], submitted.json()["task"]["review_stage"]),
+            (200, "pending_validation", "validation"),
+        )
+
+        validated = self.review(task_id, "raimundo.cumba", "validated")
+        self.assertEqual(
+            (validated.status_code, validated.json()["task"]["status"], validated.json()["task"]["review_stage"]),
+            (200, "pending_validation", "approval"),
+        )
+        self.assertNotEqual(validated.json()["task"]["status"], "completed")
+
+        approved = self.review(task_id, "teresa.mbanze", "approved")
+        self.assertEqual(
+            (approved.status_code, approved.json()["task"]["status"], approved.json()["task"]["review_stage"]),
+            (200, "completed", "complete"),
+        )
+
     def test_non_assignee_is_rejected_without_mutation(self):
         created = self.create_task("Ownership")
         task_id = created.json()["task"]["task_id"]
