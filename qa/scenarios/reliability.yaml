@@ -1,0 +1,101 @@
+schema_version: 1
+catalog: reliability
+primary_owner: reliability
+rules:
+  - Record before and after hashes for persistence scenarios.
+  - Never induce failure against canonical runtime data.
+scenarios:
+  - id: REL-BOOT-001
+    title: Pristine bootstrap and known audit-event interference
+    product_areas: [bootstrap, audit]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: known issue KNOWN-BOOTSTRAP-001 and pristine bootstrap contract
+      expected: A pristine workspace can initialize once; reproducing login-audit interference confirms the registered issue unless novel scope is proven.
+    known_issue_refs: [KNOWN-BOOTSTRAP-001]
+    status: NOT_TESTED
+  - id: REL-PERSIST-001
+    title: Canonical snapshot atomic save and restart durability
+    product_areas: [canonical_persistence]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: canonical-projection-reliability specification
+      expected: Successful mutations survive restart, failed saves do not replace the last valid snapshot, and temporary files do not become authoritative.
+    status: NOT_TESTED
+  - id: REL-PROJ-001
+    title: Derived projection rebuild and canonical precedence
+    product_areas: [relational_projection]
+    modes: [automated_test]
+    oracle:
+      source: canonical-projection-reliability specification
+      expected: Projection rebuild is deterministic and cannot overwrite or contradict canonical entity state.
+    status: NOT_TESTED
+  - id: REL-LF-001
+    title: Logical Framework repository reload and unit-of-work atomicity
+    product_areas: [logical_framework, persistence]
+    modes: [automated_test]
+    oracle:
+      source: logical-framework-persistence-boundary specification
+      expected: Committed scoped changes reload exactly once, while failed operations leave canonical and repository views unchanged.
+    status: NOT_TESTED
+  - id: REL-TASK-001
+    title: Workflow mutation atomicity and refresh durability
+    product_areas: [tasks, audit, notifications]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: operational-task-workflow specification
+      expected: Authorization and transition validation precede mutation; successful stage, history, audit, notification, save, and projection effects survive refresh.
+    status: NOT_TESTED
+  - id: REL-MIG-001
+    title: Backfill backup hash apply and idempotence
+    product_areas: [migration, backup, projection]
+    modes: [automated_test]
+    oracle:
+      source: assignment-routing migration safety contract
+      expected: Verified backup precedes isolated apply, only safe records change, projection follows canonical save, and rerun proposes no repeated mutation.
+    status: NOT_TESTED
+  - id: REL-ATOMIC-001
+    title: Nested activity and multi-effect mutation rollback
+    product_areas: [activities, tasks, audit]
+    modes: [automated_test]
+    oracle:
+      source: assignment-aware nested creation contract
+      expected: Any invalid nested task prevents activity, earlier tasks, audit, notification, canonical, and projection partial effects.
+    status: NOT_TESTED
+  - id: REL-OPS-001
+    title: Application restart session and state behavior
+    product_areas: [operations, session, persistence]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: oracle definition required for session lifetime and restart policy
+      expected: null
+    oracle_definition_required: Define expected session validity, in-flight action behavior, startup recovery, and user-visible feedback across restart.
+    status: NOT_TESTED
+  - id: REL-OPS-002
+    title: Concurrent mutation conflict behavior
+    product_areas: [tasks, projects, persistence]
+    modes: [automated_test]
+    oracle:
+      source: concurrency oracle required before execution
+      expected: null
+    oracle_definition_required: Define accepted serialization or conflict behavior for two actors updating the same isolated entity.
+    status: NOT_TESTED
+  - id: REL-PROVIDER-001
+    title: Provider timeout retry and duplicate suppression
+    product_areas: [external_integrations, notifications]
+    modes: [automated_test, external_provider]
+    oracle:
+      source: retry and idempotency policy required
+      expected: null
+    oracle_definition_required: Define timeout, retry count, idempotency, duplicate, and business-transaction behavior before execution.
+    status: BLOCKED
+  - id: REL-CALC-001
+    title: Analytical calculation determinism
+    product_areas: [kpis, dashboards, reports]
+    modes: [automated_test]
+    oracle_class: APPROVED_OWNER
+    decision_ref: QA-003
+    oracle:
+      source: Project-owner decision QA-003 approved on 2026-10-09
+      expected: Identical canonical inputs, filters, parameters, and calculation rules produce reproducible analytical results, including values, ordering, rounding, and exports.
+    status: NOT_TESTED

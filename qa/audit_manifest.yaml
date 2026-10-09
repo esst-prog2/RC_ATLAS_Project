@@ -1,0 +1,148 @@
+schema_version: 1
+framework:
+  name: rc-atlas-system-wide-qa
+  phase_1_base_commit: 821d4381e85d09e4528f53112816dea32d98a321
+audit:
+  audit_id: null
+  state: PLANNING
+  scope: all_implemented_rc_atlas_modules
+  baseline_commit_sha: null
+  baseline_is_immutable: true
+  created_at_utc: null
+  lead_owner: qa_lead
+  execution_mode: null
+  allowed_execution_modes:
+    - codex_subagents
+    - sequential_roles
+  execution_metadata_authority: qa_lead
+  oracle_readiness_register: qa/oracle_readiness.yaml
+oracle_classes:
+  - APPROVED_EXISTING
+  - APPROVED_OWNER
+  - UNDEFINED
+oracle_readiness:
+  scenario_total: 68
+  APPROVED_EXISTING: 38
+  APPROVED_OWNER: 6
+  UNDEFINED: 24
+  executable_with_resolved_oracle: 44
+statuses:
+  - PASS
+  - FAIL
+  - BLOCKED
+  - NOT_TESTED
+  - INCONCLUSIVE
+severities:
+  - P0
+  - P1
+  - P2
+  - P3
+verification_modes:
+  - source_inspection
+  - automated_test
+  - real_browser
+  - external_provider
+roles:
+  qa_lead:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+  functional:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+    scenario_catalog: qa/scenarios/functional.yaml
+  integration:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+    scenario_catalog: qa/scenarios/integration.yaml
+  data_analytics:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+    scenario_catalog: qa/scenarios/data_analytics.yaml
+  ui_ux:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+    scenario_catalog: qa/scenarios/ui_ux.yaml
+  security_access:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+    scenario_catalog: qa/scenarios/security.yaml
+  reliability:
+    status: NOT_TESTED
+    specialist_owner: null
+    runtime_id: null
+    scenario_catalog: qa/scenarios/reliability.yaml
+safety:
+  canonical_runtime_access: prohibited
+  protected_files:
+    - Site.txt
+    - logitrack_data.json
+    - "*.sqlite"
+    - "*.db"
+    - "*.bak"
+  live_provider_calls: prohibited_without_separate_authorization
+  credentials_in_evidence: prohibited
+  required_runtime_isolation: per_stateful_agent
+  source_only_boundary: verified_git_archive_snapshot
+  original_checkout_path_in_agent_handoff: prohibited
+  canonical_hash_before: null
+  canonical_hash_after: null
+  stop_conditions:
+    - isolation_path_is_ambiguous
+    - protected_resource_is_read_or_written_unexpectedly
+    - canonical_runtime_hash_changes
+    - unexpected_live_provider_side_effect
+    - data_integrity_or_tenant_boundary_failure_risks_further_damage
+browser:
+  shared_access: serialized
+  lease_owner: null
+  runtime_id: null
+  actor_at_handoff: null
+  local_storage_reset_verified: false
+source_snapshot:
+  required_for_source_agents: true
+  source_kind: git_archive
+  snapshot_root: null
+  metadata_file: null
+  verified_baseline_commit_sha: null
+  verified: false
+  includes_untracked_files: false
+  original_checkout_reference_prohibited: true
+execution_guards:
+  plan_schema: qa/schemas/audit-execution-plan.schema.json
+  source_snapshot_protocol: qa/protocols/source_snapshot.md
+  source_only_process_policy: no_processes
+  source_only_ports: []
+  stateful_runtime_id: null
+  stateful_process_owner: null
+  stateful_process_id: null
+  stateful_ports: []
+  stateful_execution_authorized: false
+known_issues:
+  - issue_id: KNOWN-BOOTSTRAP-001
+    title: Failed login audit events can block demo seed in an uninitialized workspace
+    classification: pre_existing
+    provenance: HW5 isolated real-use setup on 2026-10-08
+    rule: Do not report as newly discovered unless new scope or impact is proven.
+artifacts:
+  coverage_matrix: qa/matrices/full_system_coverage.md
+  isolation_protocol: qa/protocols/isolation.md
+  evidence_protocol: qa/protocols/evidence.md
+  findings_register: null
+  reconciliation_log: null
+  final_report: null
+  scenario_result_schema: qa/schemas/scenario-result.schema.json
+  finding_schema: qa/schemas/finding.schema.json
+  hypothesis_schema: qa/schemas/hypothesis.schema.json
+  reconciliation_schema: qa/schemas/reconciliation.schema.json
+coverage_summary:
+  PASS: 0
+  FAIL: 0
+  BLOCKED: 0
+  NOT_TESTED: 0
+  INCONCLUSIVE: 0

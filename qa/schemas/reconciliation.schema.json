@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rc-atlas.local/qa/reconciliation.schema.json",
+  "title": "RC Atlas QA Lead reconciliation record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "reconciliation_id", "audit_id", "baseline_commit_sha", "lead_owner", "source_ids", "relationship", "decision", "rationale", "canonical_finding_id"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "reconciliation_id": {"type": "string", "pattern": "^REC-[A-Z0-9._-]+$"},
+    "audit_id": {"type": "string"},
+    "baseline_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "lead_owner": {"const": "qa_lead"},
+    "source_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string"}},
+    "relationship": {"enum": ["DUPLICATE", "RELATED", "CONFLICTING", "INDEPENDENT"]},
+    "decision": {"type": "string", "minLength": 1},
+    "rationale": {"type": "string", "minLength": 1},
+    "canonical_finding_id": {"type": ["string", "null"]}
+  }
+}

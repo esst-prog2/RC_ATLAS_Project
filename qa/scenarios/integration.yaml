@@ -1,0 +1,94 @@
+schema_version: 1
+catalog: integration
+primary_owner: integration
+rules:
+  - Live providers remain disabled unless separately authorized with sandbox endpoints.
+  - Capture request and response contracts without secrets.
+scenarios:
+  - id: INT-API-001
+    title: Public route inventory and compatibility contract
+    product_areas: [api, compatibility]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: registered route table and existing compatibility tests
+      expected: Documented current routes retain methods, scoped semantics, response shape, and 4xx distinctions without duplicate conflicting registrations.
+    status: NOT_TESTED
+  - id: INT-API-002
+    title: Task creation execution and review API chain
+    product_areas: [api, workplan, tasks]
+    modes: [automated_test]
+    oracle:
+      source: operational-task-workflow canonical specification
+      expected: API transitions and effective routing fields match the configured review mode and remain atomic on rejection.
+    status: NOT_TESTED
+  - id: INT-API-003
+    title: Project member capability response contract
+    product_areas: [api, project_members]
+    modes: [automated_test]
+    oracle:
+      source: assignment-aware Workplan contract
+      expected: Only active same-organization project members appear with canonical ID, display name, and effective routing permissions; no sensitive account fields appear.
+    status: NOT_TESTED
+  - id: INT-DATA-001
+    title: Dataset import and semantic mapping boundary
+    product_areas: [datasets, import, semantic_mapping]
+    modes: [source_inspection, automated_test, real_browser]
+    oracle:
+      source: oracle definition required from accepted import formats and mapping rules
+      expected: null
+    oracle_definition_required: Freeze valid and invalid fixture files, mapping expectations, row counts, and atomic rejection behavior.
+    status: NOT_TESTED
+  - id: INT-EXPORT-001
+    title: Report and BI export contract
+    product_areas: [reports, exports]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: oracle definition required from report templates and export schema
+      expected: null
+    oracle_definition_required: Define exact columns, ordering, filters, formats, encoding, and empty-state behavior.
+    status: NOT_TESTED
+  - id: INT-NOTIFY-001
+    title: Notification event rule dispatch integration
+    product_areas: [notifications, audit, task_events]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: configured notification rules and recipient scope
+      expected: One qualifying event dispatches only configured channels and recipients after successful business persistence; denied mutations dispatch nothing.
+    status: NOT_TESTED
+  - id: INT-NARR-001
+    title: Narrative generation input and output contract
+    product_areas: [narratives, analytics]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: oracle definition required for deterministic narrative inputs
+      expected: null
+    oracle_definition_required: Define approved fixture metrics, required provenance, language, and fallback output before execution.
+    status: NOT_TESTED
+  - id: INT-FAIL-001
+    title: Downstream provider failure containment
+    product_areas: [notifications, external_integrations]
+    modes: [automated_test]
+    oracle_class: APPROVED_OWNER
+    decision_ref: QA-002
+    oracle:
+      source: Project-owner decision QA-002 approved on 2026-10-09
+      expected: A provider failure preserves committed business operations and is reported without credential leakage or cross-tenant effects; retry and duplicate prevention are supported where technically possible, without claiming exactly-once delivery absent provider guarantees.
+    status: NOT_TESTED
+  - id: INT-PROVIDER-001
+    title: Authorized sandbox email and webhook delivery
+    product_areas: [smtp, sendgrid, webhook]
+    modes: [external_provider]
+    oracle:
+      source: oracle definition and sandbox authorization required
+      expected: null
+    oracle_definition_required: Approve sandbox endpoints, recipients, payload redaction, credentials handling, and delivery acceptance criteria.
+    status: BLOCKED
+  - id: INT-PROVIDER-002
+    title: Authorized sandbox WhatsApp delivery
+    product_areas: [twilio, meta_cloud, whatsapp]
+    modes: [external_provider]
+    oracle:
+      source: oracle definition and sandbox authorization required
+      expected: null
+    oracle_definition_required: Approve a non-production provider, recipient, template, payload, cost limit, and delivery acceptance criteria.
+    status: BLOCKED

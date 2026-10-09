@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "audit_id": "AUDIT-YYYYMMDD-NNN",
+  "baseline_commit_sha": "0000000000000000000000000000000000000000",
+  "lead_owner": "qa_lead",
+  "authorization": {
+    "phase": "source-inspection",
+    "source_only": true,
+    "authorized_by": "project_owner"
+  },
+  "source_snapshot": {
+    "root": "C:\\qa-audits\\AUDIT-YYYYMMDD-NNN\\source",
+    "metadata_file": "C:\\qa-audits\\AUDIT-YYYYMMDD-NNN\\source\\.qa-source-snapshot.json",
+    "baseline_commit_sha": "0000000000000000000000000000000000000000",
+    "verified": true
+  },
+  "execution": {
+    "mode": "codex_subagents",
+    "runtime_id": null,
+    "process_policy": "no_processes",
+    "ports": [],
+    "specialist_assignments": [
+      {
+        "specialist_role": "functional",
+        "agent_id": null,
+        "scenario_ids": ["FUN-TASK-001"],
+        "verification_mode": "source_inspection"
+      }
+    ]
+  },
+  "safety": {
+    "original_checkout_reference_prohibited": true,
+    "runtime_access": "prohibited",
+    "network_access": "prohibited",
+    "protected_resource_access": "prohibited"
+  }
+}

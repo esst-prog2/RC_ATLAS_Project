@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rc-atlas.local/qa/scenario-result.schema.json",
+  "title": "RC Atlas QA scenario result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "audit_id", "baseline_commit_sha", "scenario_id", "specialist_role", "verification_mode", "status", "oracle_class", "oracle_source", "expected", "actual", "evidence_refs", "confidence", "protected_resource_check"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "audit_id": {"type": "string"},
+    "baseline_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "scenario_id": {"type": "string"},
+    "specialist_role": {"type": "string"},
+    "verification_mode": {"enum": ["source_inspection", "automated_test", "real_browser", "external_provider"]},
+    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_TESTED", "INCONCLUSIVE"]},
+    "oracle_class": {"enum": ["APPROVED_EXISTING", "APPROVED_OWNER", "UNDEFINED"]},
+    "oracle_source": {"type": "string"},
+    "expected": {"type": ["string", "null"]},
+    "actual": {"type": ["string", "null"]},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"enum": ["HIGH", "MEDIUM", "LOW", "NONE"]},
+    "protected_resource_check": {"enum": ["UNCHANGED", "NOT_APPLICABLE", "VIOLATION"]},
+    "notes": {"type": ["string", "null"]}
+  }
+}

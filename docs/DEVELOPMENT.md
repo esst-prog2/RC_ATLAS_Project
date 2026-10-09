@@ -78,3 +78,28 @@ real organizations, or external accounts.
 - Legacy and compatibility source files are preserved for this checkpoint.
 - Runtime data is not included. A fresh installation starts with an empty local
   datastore unless it is initialized or seeded through the application.
+
+## System-Wide QA Framework
+
+The governance-only system-wide audit framework lives under `qa/`. Start with
+`qa/README.md`, instantiate `qa/audit_manifest.yaml` for one immutable commit,
+and use the scenario catalogs and full-system coverage matrix to retain both
+tested and untested product surfaces.
+
+Stateful audit execution requires one verified disposable runtime per agent,
+dedicated persistence paths and ports, disabled live providers, and source
+runtime hashes before and after execution. Real-browser verification is
+serialized through the QA Lead. External-provider verification requires a
+separately authorized sandbox and is blocked by default.
+
+The Codex coordination instructions are in
+`.agents/skills/rc-atlas-qa-audit/SKILL.md`. They use actual subagent lifecycle
+tools when those tools are available and authorized; otherwise the same role
+briefs run sequentially. Written role files are governance, not proof that
+autonomous agents executed.
+
+Source-only specialists use `qa/tools/New-SourceAuditSnapshot.ps1` to plan or
+create a committed-tree archive outside the checkout, then validate a Lead-owned
+plan with `qa/tools/Test-AuditExecutionPlan.ps1`. Agents receive only the verified
+snapshot path. See `qa/protocols/source_snapshot.md` and `qa/schemas/` for the
+residual host risks and machine-readable contracts.

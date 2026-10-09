@@ -1,0 +1,95 @@
+schema_version: 1
+catalog: data_analytics
+primary_owner: data_analytics
+rules:
+  - Freeze fixture values and formulas before observing RC Atlas output.
+  - Record filters, rounding, null handling, and aggregation grain.
+scenarios:
+  - id: DAT-QUAL-001
+    title: Data quality dimensions and issue counts
+    product_areas: [datasets, data_quality]
+    modes: [source_inspection, automated_test, real_browser]
+    oracle:
+      source: oracle definition required from accepted quality rules
+      expected: null
+    oracle_definition_required: Provide a fixture with independently calculated completeness, validity, duplicate, and mapping issue counts.
+    status: NOT_TESTED
+  - id: DAT-KPI-001
+    title: KPI calculation against hand-computed fixture
+    product_areas: [kpis, indicators]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: independent hand calculation required before execution
+      expected: null
+    oracle_definition_required: Record formula, source rows, filters, denominator policy, rounding, and exact expected result.
+    status: NOT_TESTED
+  - id: DAT-KPI-002
+    title: KPI missing zero and invalid data handling
+    product_areas: [kpis, data_quality]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: oracle definition required from product data policy
+      expected: null
+    oracle_definition_required: Distinguish missing, zero, invalid, and not-applicable values plus display and aggregate rules.
+    status: NOT_TESTED
+  - id: DAT-PORT-001
+    title: Portfolio and executive totals
+    product_areas: [portfolio, executive]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: independent fixture aggregation required before execution
+      expected: null
+    oracle_definition_required: Freeze project fixtures and expected organization/project totals, filters, and drill-down membership.
+    status: NOT_TESTED
+  - id: DAT-DASH-001
+    title: Dashboard filter and saved-template consistency
+    product_areas: [dashboards, templates]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: approved dashboard fixture and filter definition required
+      expected: null
+    oracle_definition_required: Define expected tiles, totals, ordering, filter intersections, and saved-template restoration.
+    status: NOT_TESTED
+  - id: DAT-REPORT-001
+    title: Report preview and export analytical equivalence
+    product_areas: [reports, exports]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: approved report fixture required
+      expected: null
+    oracle_definition_required: Define expected sections, metrics, filters, locale, and export equivalence before execution.
+    status: NOT_TESTED
+  - id: DAT-LF-001
+    title: Logical Framework indicator attribution
+    product_areas: [logical_framework, indicators]
+    modes: [automated_test]
+    oracle:
+      source: logical-framework hierarchy fixture and canonical specification
+      expected: Each indicator contributes only to its scoped linked result and survives repository reload without duplication.
+    status: NOT_TESTED
+  - id: DAT-INTEL-001
+    title: Indicator intelligence and trend interpretation
+    product_areas: [indicator_intelligence, trends]
+    modes: [source_inspection, automated_test, real_browser]
+    oracle:
+      source: independent time-series fixture and interpretation rubric required
+      expected: null
+    oracle_definition_required: Freeze chronological points, expected trend, threshold interpretation, and text provenance.
+    status: NOT_TESTED
+  - id: DAT-CONSIST-001
+    title: Canonical snapshot and projection analytical consistency
+    product_areas: [persistence, projection, analytics]
+    modes: [automated_test]
+    oracle:
+      source: canonical-projection-reliability specification
+      expected: Rebuilt derived records match canonical entity existence, scope, status, and counts without overriding canonical values.
+    status: NOT_TESTED
+  - id: DAT-RISK-001
+    title: Risk analytics and project filtering
+    product_areas: [risks, analytics]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: oracle definition required from risk scoring policy
+      expected: null
+    oracle_definition_required: Define scoring, severity bands, filter behavior, aggregation, and ordering before execution.
+    status: NOT_TESTED
