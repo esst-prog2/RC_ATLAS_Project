@@ -18,6 +18,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$helperPath = Join-Path $PSScriptRoot 'SourceAuditPathHelpers.ps1'
+if (-not (Test-Path -LiteralPath $helperPath -PathType Leaf)) {
+    throw "Required path helper is missing."
+}
+. $helperPath
+
 function Invoke-RepositoryGit {
     param([Parameter(Mandatory = $true)][string[]] $Arguments)
 
@@ -26,35 +32,6 @@ function Invoke-RepositoryGit {
         throw "git $($Arguments -join ' ') failed: $($output -join [Environment]::NewLine)"
     }
     return @($output)
-}
-
-function Test-IsPathWithin {
-    param(
-        [Parameter(Mandatory = $true)][string] $Candidate,
-        [Parameter(Mandatory = $true)][string] $Container
-    )
-
-    $candidatePath = [IO.Path]::GetFullPath($Candidate).TrimEnd('\', '/')
-    $containerPath = [IO.Path]::GetFullPath($Container).TrimEnd('\', '/')
-    return $candidatePath.Equals($containerPath, [StringComparison]::OrdinalIgnoreCase) -or
-        $candidatePath.StartsWith($containerPath + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
-}
-
-function Get-ProhibitedPaths {
-    param([Parameter(Mandatory = $true)][string[]] $Paths)
-
-    $patterns = @(
-        '(^|/)Site\.txt$',
-        '(^|/)logitrack_data\.json$',
-        '\.bak$',
-        '\.(sqlite|sqlite3|db)(-(wal|shm|journal))?$',
-        '(^|/)\.env($|\.)',
-        '(^|/)(credentials|secrets?)(/|$)'
-    )
-    return @($Paths | Where-Object {
-        $normalized = $_ -replace '\\', '/'
-        @($patterns | Where-Object { $normalized -match $_ }).Count -gt 0
-    })
 }
 
 if ($AuditId -notmatch '^[A-Z0-9][A-Z0-9._-]{7,127}$') {
@@ -110,6 +87,7 @@ $requiredFrameworkPaths = @(
     'qa/oracle_readiness.yaml',
     'qa/protocols/source_snapshot.md',
     'qa/schemas/audit-execution-plan.schema.json',
+    'qa/tools/SourceAuditPathHelpers.ps1',
     '.agents/skills/rc-atlas-qa-audit/SKILL.md'
 )
 $missingFrameworkPaths = @($requiredFrameworkPaths | Where-Object { $_ -notin $trackedPaths })
@@ -159,7 +137,7 @@ if ($LASTEXITCODE -ne 0) {
 Remove-Item -LiteralPath $archivePath
 
 $snapshotPaths = @(Get-ChildItem -LiteralPath $resolvedDestination -File -Recurse | ForEach-Object {
-    [IO.Path]::GetRelativePath($resolvedDestination, $_.FullName) -replace '\\', '/'
+    (Get-SafeRelativePath -BasePath $resolvedDestination -TargetPath $_.FullName) -replace '\\', '/'
 })
 $prohibitedSnapshotPaths = @(Get-ProhibitedPaths -Paths $snapshotPaths)
 if ($prohibitedSnapshotPaths.Count -gt 0) {
