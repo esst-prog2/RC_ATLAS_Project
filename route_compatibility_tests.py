@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from collections import Counter
 from pathlib import Path
 
 from api.dashboard_template_routes import register_dashboard_template_routes
@@ -33,6 +34,19 @@ class StubService:
 
 
 class RouteCompatibilityTests(unittest.TestCase):
+    def test_active_application_has_unique_method_path_pairs(self):
+        from logitrack_rc_v4_4_api import app
+
+        route_pairs = [
+            (method, route.path)
+            for route in app.routes
+            for method in getattr(route, "methods", set())
+            if method not in {"HEAD", "OPTIONS"}
+        ]
+        duplicates = [pair for pair, count in Counter(route_pairs).items() if count > 1]
+
+        self.assertEqual(duplicates, [])
+
     def test_reporting_routes_register_expected_paths(self):
         app = FakeApp()
         register_reporting_routes(app, StubService(), header_factory=lambda **kwargs: None)
