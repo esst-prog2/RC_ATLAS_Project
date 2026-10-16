@@ -10,7 +10,7 @@ This revision measures how many predefined workflow mutations the demo survives 
 
 ## 1. The demo
 
-I start RC Atlas locally and open it in the browser. I log in as Teresa Mbanze, the Programme Manager for the Coastal Resilience and Livelihoods Programme, and create a task called **“Finalize Buzi monitoring report”**, assign it to Aline Duarte, and set its deadline. I log in as Aline, the Field Coordinator; the task appears in her work queue, where I update its progress and submit it for validation. I then log in as Raimundo Cumba, the MEAL Officer, open the submitted task, review it, and validate it. When I return as Teresa, the task is shown as validated and the project view reflects the updated operational status.
+I start RC Atlas locally and open it in the browser. I log in as Teresa Mbanze, the Programme Manager for the Coastal Resilience and Livelihoods Programme, and create a task called **“Finalize Buzi monitoring report”**, assign it to Aline Duarte, and set its deadline. I log in as Aline, the Field Coordinator; the task appears in her work queue, where I update its progress and submit it for validation. I then log in as Raimundo Cumba, the MEAL Officer, open the submitted task, review it, and validate it. The task remains pending final approval. When I return as Teresa, I approve the validated work and the task becomes Completed.
 
 ## 2. The shape
 
@@ -33,12 +33,13 @@ I start RC Atlas locally and open it in the browser. I log in as Teresa Mbanze, 
 - Programme Manager can create a task, assign it to a project user, and set a deadline
 - Field Coordinator can see assigned tasks, update progress, and submit a task for validation
 - MEAL Officer can see submitted tasks and validate or return them
+- Programme Manager can approve validated work as the final checkpoint
 - task state persists between logins
 - each role sees only the actions available to that role
 - the project workplan reflects the current state of its tasks
 - a basic activity history records the main task transitions
 
-**Not this term**
+**Not part of the assessed course workflow**
 
 - multi-organization onboarding and subscription management
 - organization administration UI
@@ -54,13 +55,14 @@ I start RC Atlas locally and open it in the browser. I log in as Teresa Mbanze, 
 - predictive analytics or machine learning
 - cloud production deployment
 
-These features belong to the wider RC Atlas idea, but the course project is deliberately limited to the operational task-to-validation workflow described above.
+Some of these broader product surfaces are present in the repository as experimental, supporting, or separately specified functionality. Their presence does not expand the assessed course workflow or make them acceptance criteria for this homework. The course demonstration remains limited to the assignment-to-approval workflow described above.
 
 ## 4. How we would know it works
 
 - Given a Programme Manager who assigns **“Finalize Buzi monitoring report”** to Aline, the task appears after Aline logs in with the correct owner, deadline, and status; it does not appear as her assigned task before it is assigned to her.
 - Given Aline submits the task for validation, she can no longer validate or complete the task herself, and the task appears in the MEAL Officer's validation queue.
-- Given the MEAL Officer validates the task, its state changes to validated and remains so after logout and login; a user without validation responsibility cannot perform the same transition.
+- Given the MEAL Officer validates the task, it remains pending with the approval checkpoint active; it does not become Completed before the Programme Manager approves it.
+- Given the Programme Manager approves the validated task, it becomes Completed and remains so after logout and login; a user without approval responsibility cannot perform the same transition.
 
 ## 5. What could stop this
 
