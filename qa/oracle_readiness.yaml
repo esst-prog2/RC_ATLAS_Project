@@ -1,0 +1,113 @@
+schema_version: 1
+review_date: 2026-10-09
+scenario_total: 68
+summary:
+  APPROVED_EXISTING: 38
+  APPROVED_OWNER: 6
+  PROPOSED_REVIEW: 0
+  UNDEFINED: 24
+  ready: 44
+  not_ready: 24
+rules:
+  - APPROVED_EXISTING requires a cited repository specification, test, documented business rule, or independent reference.
+  - APPROVED_OWNER requires a stable decision ID and the project owner's explicit approval.
+  - UNDEFINED scenarios remain non-executable until their oracle-definition requirement is resolved.
+  - Observed implementation output never establishes an oracle.
+decisions:
+  QA-001:
+    scenario_ids: [FUN-NOTIFY-001]
+    approved_on: 2026-10-09
+    statement: Acknowledging a notification must not mutate underlying business state.
+  QA-002:
+    scenario_ids: [INT-FAIL-001]
+    approved_on: 2026-10-09
+    statement: External provider failures must preserve committed business operations. Retry and duplicate prevention must be supported where technically possible; exactly-once delivery is not claimed without provider guarantees.
+  QA-003:
+    scenario_ids: [REL-CALC-001]
+    approved_on: 2026-10-09
+    statement: Identical canonical inputs, filters, parameters, and calculation rules must produce reproducible analytics.
+  QA-004:
+    scenario_ids: [UI-A11Y-001]
+    approved_on: 2026-10-09
+    statement: WCAG 2.2 AA is the accessibility evaluation target, not a claim of compliance.
+  QA-005:
+    scenario_ids: [UI-RESP-001]
+    approved_on: 2026-10-09
+    statement: Evaluate responsive layouts at 360x800, 768x1024, 1366x768, and 1920x1080.
+  QA-006:
+    scenario_ids: [UI-PROJ-001]
+    approved_on: 2026-10-09
+    statement: Project forms must provide actionable validation, prevent accidental duplicate submissions, confirm saves, and preserve values after reload.
+classifications:
+  APPROVED_EXISTING:
+    - DAT-LF-001
+    - DAT-CONSIST-001
+    - FUN-AUTH-001
+    - FUN-ADMIN-001
+    - FUN-PROJ-001
+    - FUN-WORK-001
+    - FUN-TASK-001
+    - FUN-TASK-002
+    - FUN-LF-001
+    - FUN-I18N-001
+    - INT-API-001
+    - INT-API-002
+    - INT-API-003
+    - INT-NOTIFY-001
+    - REL-BOOT-001
+    - REL-PERSIST-001
+    - REL-PROJ-001
+    - REL-LF-001
+    - REL-TASK-001
+    - REL-MIG-001
+    - REL-ATOMIC-001
+    - SEC-AUTH-001
+    - SEC-ADMIN-001
+    - SEC-SCOPE-001
+    - SEC-TASK-001
+    - SEC-EXPORT-001
+    - SEC-NOTIFY-001
+    - SEC-AUDIT-001
+    - SEC-DATA-001
+    - SEC-ERROR-001
+    - SEC-MIG-001
+    - SEC-PROVIDER-001
+    - UI-NAV-001
+    - UI-WORK-001
+    - UI-TASK-001
+    - UI-I18N-001
+    - UI-ERROR-001
+    - UI-STALE-001
+  APPROVED_OWNER:
+    - FUN-NOTIFY-001
+    - INT-FAIL-001
+    - REL-CALC-001
+    - UI-A11Y-001
+    - UI-RESP-001
+    - UI-PROJ-001
+  PROPOSED_REVIEW: []
+  UNDEFINED:
+    - DAT-QUAL-001
+    - DAT-KPI-001
+    - DAT-KPI-002
+    - DAT-PORT-001
+    - DAT-DASH-001
+    - DAT-REPORT-001
+    - DAT-INTEL-001
+    - DAT-RISK-001
+    - FUN-RISK-001
+    - INT-DATA-001
+    - INT-EXPORT-001
+    - INT-NARR-001
+    - INT-PROVIDER-001
+    - INT-PROVIDER-002
+    - REL-OPS-001
+    - REL-OPS-002
+    - REL-PROVIDER-001
+    - SEC-UPLOAD-001
+    - UI-DATA-001
+    - UI-ANL-001
+    - UI-DASH-001
+    - UI-REPORT-001
+    - UI-RISK-001
+    - UI-LAB-001

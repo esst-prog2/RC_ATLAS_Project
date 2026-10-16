@@ -1,0 +1,105 @@
+schema_version: 1
+catalog: security_access
+primary_owner: security_access
+rules:
+  - Use fictional tenants and least-privilege actors in isolated runtimes.
+  - Conceal secrets and foreign-resource details in all evidence.
+scenarios:
+  - id: SEC-AUTH-001
+    title: Authentication session and logout enforcement
+    product_areas: [authentication, session]
+    modes: [source_inspection, automated_test, real_browser]
+    oracle:
+      source: security-tenant-stabilization canonical specification
+      expected: Protected routes require a valid actor, logout invalidates the session, and authentication failures disclose no secret or foreign resource detail.
+    status: NOT_TESTED
+  - id: SEC-ADMIN-001
+    title: Administration capability boundaries
+    product_areas: [administration, users, teams, roles]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: effective permission contract
+      expected: Only actors with the required capability in the correct organization can perform each administration action.
+    status: NOT_TESTED
+  - id: SEC-SCOPE-001
+    title: Cross-organization and cross-project isolation
+    product_areas: [all_tenant_owned_routes]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: security-tenant-stabilization canonical specification
+      expected: Foreign organization and project resources cannot be read, inferred, modified, reviewed, exported, or notified through identifiers or filters.
+    status: NOT_TESTED
+  - id: SEC-TASK-001
+    title: Canonical assignee and designated reviewer authorization
+    product_areas: [tasks, workflow]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: operational-task-workflow canonical specification
+      expected: Execution requires canonical assignment and capability; review requires designated identity, capability, policy, and active stage; denial has zero success side effects.
+    status: NOT_TESTED
+  - id: SEC-UPLOAD-001
+    title: Dataset upload validation and isolation
+    product_areas: [datasets, uploads]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: secure upload policy must be approved before adversarial execution
+      expected: null
+    oracle_definition_required: Define allowed formats, size limits, parsing containment, filename handling, and rejected-content behavior.
+    status: NOT_TESTED
+  - id: SEC-EXPORT-001
+    title: Report and export tenant containment
+    product_areas: [reports, exports]
+    modes: [automated_test]
+    oracle:
+      source: tenant scope and export contract
+      expected: Generated previews and files contain only authorized organization/project data and reveal no filesystem or credential detail.
+    status: NOT_TESTED
+  - id: SEC-NOTIFY-001
+    title: Notification recipient and payload isolation
+    product_areas: [notifications]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: tenant scope and notification rule contract
+      expected: Notification rules resolve only authorized recipients, redact sensitive fields, and emit nothing for denied mutations.
+    status: NOT_TESTED
+  - id: SEC-AUDIT-001
+    title: Audit actor scope and failure recording
+    product_areas: [audit, history]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: security and workflow audit requirements
+      expected: Success records identify canonical actor and scope; denials create no success audit and audit content contains no secrets.
+    known_issue_refs: [KNOWN-BOOTSTRAP-001]
+    status: NOT_TESTED
+  - id: SEC-DATA-001
+    title: Runtime file and API secret exposure
+    product_areas: [configuration, persistence, errors]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: repository secret-hygiene and API protection guidance
+      expected: Tracked files, responses, logs, and errors expose no passwords, tokens, provider credentials, personal paths, or runtime snapshots.
+    status: NOT_TESTED
+  - id: SEC-ERROR-001
+    title: Error status and foreign-resource concealment
+    product_areas: [api, errors, tenant_scope]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: security-tenant-stabilization canonical specification
+      expected: Authentication, authorization, missing scoped resources, malformed requests, and lifecycle conflicts preserve their defined status classes without exposing foreign identifiers, stack traces, or secrets.
+    status: NOT_TESTED
+  - id: SEC-MIG-001
+    title: Backfill authorization and unsafe-record preservation
+    product_areas: [migration, backfill]
+    modes: [source_inspection, automated_test]
+    oracle:
+      source: approved assignment-routing migration safety contract
+      expected: Dry run is non-mutating; apply requires explicit guards and backup; only deterministic safe records change; unresolved records remain unchanged.
+    status: NOT_TESTED
+  - id: SEC-PROVIDER-001
+    title: External provider credential and destination controls
+    product_areas: [external_integrations]
+    modes: [source_inspection, external_provider]
+    oracle:
+      source: sandbox authorization required
+      expected: Source inspection confirms local secret loading and destination controls; live behavior remains blocked until a separately authorized sandbox exists.
+    status: BLOCKED

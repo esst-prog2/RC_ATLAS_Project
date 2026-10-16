@@ -1,3 +1,5 @@
+from contextlib import closing
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -39,6 +41,52 @@ class RepositoryTests(unittest.TestCase):
             self.assertEqual(loaded["role"], "admin")
             self.assertEqual(loaded["team_id"], "team_demo")
             self.assertEqual(loaded["api_token_hash"], "tokenhash")
+
+    def test_users_repository_rejects_corrupt_permissions(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            db_path = str(Path(tmp_dir) / "repo.sqlite3")
+            user = {
+                "id": "user_corrupt",
+                "organization_id": "org_demo",
+                "username": "corrupt-user",
+                "role": "viewer",
+                "permissions": ["VIEW_PROJECTS"],
+                "is_active": True,
+            }
+            upsert_user(user, db_path=db_path)
+
+            with closing(sqlite3.connect(db_path)) as conn:
+                conn.execute(
+                    "UPDATE users SET permissions_json = ? WHERE user_id = ?",
+                    ("not-json", "user_corrupt"),
+                )
+                conn.commit()
+
+            with self.assertRaisesRegex(ValueError, "invalid JSON"):
+                get_user_by_username("corrupt-user", db_path=db_path)
+
+    def test_users_repository_rejects_non_array_permissions(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            db_path = str(Path(tmp_dir) / "repo.sqlite3")
+            user = {
+                "id": "user_wrong_shape",
+                "organization_id": "org_demo",
+                "username": "wrong-shape",
+                "role": "viewer",
+                "permissions": ["VIEW_PROJECTS"],
+                "is_active": True,
+            }
+            upsert_user(user, db_path=db_path)
+
+            with closing(sqlite3.connect(db_path)) as conn:
+                conn.execute(
+                    "UPDATE users SET permissions_json = ? WHERE user_id = ?",
+                    ('{"permission": "VIEW_PROJECTS"}', "user_wrong_shape"),
+                )
+                conn.commit()
+
+            with self.assertRaisesRegex(ValueError, "JSON array"):
+                get_user_by_username("wrong-shape", db_path=db_path)
 
     def test_notification_rules_repository_roundtrip(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

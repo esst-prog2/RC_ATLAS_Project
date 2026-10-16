@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rc-atlas.local/qa/finding.schema.json",
+  "title": "RC Atlas confirmed QA finding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "finding_id", "audit_id", "baseline_commit_sha", "owner", "severity", "scenario_ids", "expected", "observed", "reproduction_steps", "reproduction_count", "evidence_refs", "confidence"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "finding_id": {"type": "string", "pattern": "^FIND-[A-Z0-9._-]+$"},
+    "audit_id": {"type": "string"},
+    "baseline_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "owner": {"type": "string"},
+    "severity": {"enum": ["P0", "P1", "P2", "P3"]},
+    "scenario_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "expected": {"type": "string", "minLength": 1},
+    "observed": {"type": "string", "minLength": 1},
+    "reproduction_steps": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "reproduction_count": {"type": "integer", "minimum": 1},
+    "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "confidence": {"enum": ["HIGH", "MEDIUM", "LOW"]},
+    "impact": {"type": ["string", "null"]},
+    "duplicate_of": {"type": ["string", "null"]}
+  }
+}

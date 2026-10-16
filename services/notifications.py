@@ -462,7 +462,7 @@ class NotificationService:
             return self.deps.dispatch_notifications_to_sendgrid_email(
                 notifications=notifications,
                 api_key=sendgrid_api_key,
-                sender=sendgrid_from,
+                sender_email=sendgrid_from,
                 recipients=recipients,
                 subject=smtp_subject,
             ), provider

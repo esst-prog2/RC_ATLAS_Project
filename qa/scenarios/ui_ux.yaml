@@ -1,0 +1,139 @@
+schema_version: 1
+catalog: ui_ux
+primary_owner: ui_ux
+rules:
+  - Browser claims require rendered browser evidence, not source-string assertions alone.
+  - Shared browser access must be leased by the QA Lead.
+scenarios:
+  - id: UI-NAV-001
+    title: Studio navigation across all implemented primary views
+    product_areas: [studio, navigation]
+    modes: [source_inspection, real_browser]
+    oracle:
+      source: implemented Studio view inventory
+      expected: Each available navigation item opens exactly one intended view, preserves actor scope, and exposes no duplicate or stale primary view.
+    status: NOT_TESTED
+  - id: UI-PROJ-001
+    title: Project configuration form usability
+    product_areas: [project_configuration, forms]
+    modes: [real_browser]
+    oracle_class: APPROVED_OWNER
+    decision_ref: QA-006
+    oracle:
+      source: Project-owner decision QA-006 approved on 2026-10-09
+      expected: Project forms provide actionable validation, prevent accidental duplicate submissions, confirm saves, and preserve committed values after reload.
+    status: NOT_TESTED
+  - id: UI-WORK-001
+    title: Workplan activity and task creation controls
+    product_areas: [workplan, activities, tasks]
+    modes: [real_browser]
+    oracle:
+      source: operational task workflow specification
+      expected: Canonical member selectors, review controls, evidence policy, and errors reflect backend rules without role-based routing assumptions.
+    status: NOT_TESTED
+  - id: UI-TASK-001
+    title: Assignment-aware task drawer and action refresh
+    product_areas: [task_drawer, task_actions]
+    modes: [real_browser]
+    oracle:
+      source: operational task workflow specification
+      expected: Routing summary, stage label, and actions match canonical actor, policy, stage, and permissions and refresh after task or actor change.
+    status: NOT_TESTED
+  - id: UI-DATA-001
+    title: Dataset import mapping and quality feedback
+    product_areas: [datasets, semantic_mapping, data_quality]
+    modes: [real_browser]
+    oracle:
+      source: accepted fixture and error-display oracle required
+      expected: null
+    oracle_definition_required: Approve a safe upload fixture and expected mapping, progress, success, and rejection messages.
+    status: NOT_TESTED
+  - id: UI-ANL-001
+    title: KPI trend intelligence and narrative presentation
+    product_areas: [kpis, trends, indicator_intelligence, narratives]
+    modes: [real_browser]
+    oracle:
+      source: approved analytical fixture and expected labels required
+      expected: null
+    oracle_definition_required: Define expected values, labels, ordering, empty states, and narrative provenance before browser execution.
+    status: NOT_TESTED
+  - id: UI-DASH-001
+    title: Dashboard and executive responsive interaction
+    product_areas: [dashboards, executive, portfolio]
+    modes: [real_browser]
+    oracle:
+      source: approved viewport and dashboard fixture required
+      expected: null
+    oracle_definition_required: Define desktop/mobile viewports, expected modules, filter changes, and no-overlap acceptance rules.
+    status: NOT_TESTED
+  - id: UI-REPORT-001
+    title: Report preview and export feedback
+    product_areas: [reports, exports]
+    modes: [real_browser]
+    oracle:
+      source: report contract and browser download expectations required
+      expected: null
+    oracle_definition_required: Define expected preview content, disabled/loading/error states, and safe disposable download evidence.
+    status: NOT_TESTED
+  - id: UI-RISK-001
+    title: Risk view state and project-context clarity
+    product_areas: [risks, projects]
+    modes: [real_browser]
+    oracle:
+      source: approved risk workflow and presentation oracle required
+      expected: null
+    oracle_definition_required: Define expected risk fields, state labels, ordering, project context, empty state, and permitted actions before execution.
+    status: NOT_TESTED
+  - id: UI-LAB-001
+    title: Studio Lab visibility and enabled interaction boundary
+    product_areas: [studio_lab, experimental_surfaces]
+    modes: [source_inspection, real_browser]
+    oracle:
+      source: product-owner oracle required for the implemented Studio Lab surface
+      expected: null
+    oracle_definition_required: Identify supported versus experimental controls, authorized actors, persistence expectations, and user-facing disclaimers before execution.
+    status: NOT_TESTED
+  - id: UI-I18N-001
+    title: English Portuguese and French layout and fallback
+    product_areas: [localization]
+    modes: [source_inspection, real_browser]
+    oracle:
+      source: approved terminology glossary and core workflow equivalence
+      expected: EN, PT, and FR show equivalent actions and meaning with no clipped labels, raw keys, or language-induced authorization change.
+    status: NOT_TESTED
+  - id: UI-A11Y-001
+    title: Keyboard focus labels and error association
+    product_areas: [accessibility, forms, dialogs]
+    modes: [real_browser]
+    oracle_class: APPROVED_OWNER
+    decision_ref: QA-004
+    oracle:
+      source: Project-owner decision QA-004 approved on 2026-10-09
+      expected: Evaluate the authorized Studio surfaces against WCAG 2.2 AA success criteria and report evidence and gaps without representing the evaluation target as a claim of compliance.
+    status: NOT_TESTED
+  - id: UI-RESP-001
+    title: Responsive layout and text containment
+    product_areas: [responsive_design, all_primary_views]
+    modes: [real_browser]
+    oracle_class: APPROVED_OWNER
+    decision_ref: QA-005
+    oracle:
+      source: Project-owner decision QA-005 approved on 2026-10-09
+      expected: At 360x800, 768x1024, 1366x768, and 1920x1080, controls, labels, tables, dialogs, and navigation do not overlap, clip materially, or become unreachable.
+    status: NOT_TESTED
+  - id: UI-ERROR-001
+    title: Actionable backend error presentation
+    product_areas: [errors, workflow, imports]
+    modes: [real_browser]
+    oracle:
+      source: API error detail and safe presentation contract
+      expected: Actionable 4xx detail remains visible without stack traces, secrets, stale success state, or duplicated actions.
+    status: NOT_TESTED
+  - id: UI-STALE-001
+    title: Refresh logout multi-user and multi-tab stale-state control
+    product_areas: [session, browser_state]
+    modes: [real_browser]
+    oracle:
+      source: authenticated actor and tenant isolation contract
+      expected: Actor, project, task, controls, and routing refresh after logout/login or context change and never leak the prior user's actionable state.
+    status: NOT_TESTED

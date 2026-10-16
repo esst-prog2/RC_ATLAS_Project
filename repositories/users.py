@@ -14,8 +14,10 @@ def _row_to_user_dict(row: Any) -> Dict[str, Any]:
     permissions_raw = row["permissions_json"] if "permissions_json" in row.keys() else "[]"
     try:
         permissions = json.loads(str(permissions_raw or "[]"))
-    except Exception:
-        permissions = []
+    except json.JSONDecodeError as exc:
+        raise ValueError("Stored user permissions are invalid JSON.") from exc
+    if not isinstance(permissions, list):
+        raise ValueError("Stored user permissions must be a JSON array.")
     return {
         "id": str(row["user_id"]),
         "organization_id": str(row["organization_id"] or ""),
@@ -25,7 +27,7 @@ def _row_to_user_dict(row: Any) -> Dict[str, Any]:
         "email": str(row["email"] or ""),
         "role": str(row["role"] or "viewer"),
         "status": str(row["status"] or "active"),
-        "permissions": permissions if isinstance(permissions, list) else [],
+        "permissions": permissions,
         "password_salt": str(row["password_salt"] or ""),
         "password_hash": str(row["password_hash"] or ""),
         "api_token_hash": str(row["api_token_hash"] or ""),

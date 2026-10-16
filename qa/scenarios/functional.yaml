@@ -1,0 +1,91 @@
+schema_version: 1
+catalog: functional
+primary_owner: functional
+rules:
+  - Use isolated fictional data for every stateful scenario.
+  - Do not reinterpret authorization failures as functional success.
+scenarios:
+  - id: FUN-AUTH-001
+    title: Pristine demo initialization and fictional login journey
+    product_areas: [bootstrap, authentication]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: documented demo initialization contract
+      expected: A pristine workspace seeds once, then each documented fictional profile can authenticate and logout without changing another profile.
+    known_issue_refs: [KNOWN-BOOTSTRAP-001]
+    status: NOT_TESTED
+  - id: FUN-ADMIN-001
+    title: Organization user and team administration lifecycle
+    product_areas: [administration, organizations, users, teams]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: current administration API and Studio contract
+      expected: An authorized administrator can create, update, deactivate, and scope fictional members while unauthorized actors cannot perform those actions.
+    status: NOT_TESTED
+  - id: FUN-PROJ-001
+    title: Project creation configuration and membership lifecycle
+    product_areas: [projects, project_configuration]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: project lifecycle contract
+      expected: Valid project configuration persists, project membership controls eligible actors, and project-scoped views reload the same committed state.
+    status: NOT_TESTED
+  - id: FUN-WORK-001
+    title: Workplan activity and nested task creation
+    product_areas: [workplan, activities, tasks]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: operational task workflow specification
+      expected: Valid activities and nested tasks are created atomically; any invalid nested routing rejects the entire mutation.
+    status: NOT_TESTED
+  - id: FUN-TASK-001
+    title: Four assignment-aware review modes
+    product_areas: [tasks, evidence, review]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: operational-task-workflow canonical specification
+      expected: Direct tasks complete after assignee execution; validation and approval modes run only configured stages; two-stage tasks complete only after validation then approval.
+    status: NOT_TESTED
+  - id: FUN-TASK-002
+    title: Return resubmission and escalation semantics
+    product_areas: [tasks, returns, escalation]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: operational-task-workflow canonical specification
+      expected: Return restarts configured execution without changing routing, and escalation changes attention state without transferring ownership or reviewers.
+    status: NOT_TESTED
+  - id: FUN-LF-001
+    title: Logical Framework hierarchy and indicator-link lifecycle
+    product_areas: [logical_framework, indicators]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: logical-framework-persistence-boundary canonical specification
+      expected: Valid hierarchy and indicator links persist within project scope, while invalid references and cross-scope operations fail without partial mutation.
+    status: NOT_TESTED
+  - id: FUN-RISK-001
+    title: Project risk lifecycle and presentation
+    product_areas: [risks, projects]
+    modes: [automated_test, real_browser]
+    oracle:
+      source: oracle definition required from product owner before execution
+      expected: null
+    oracle_definition_required: Define permitted risk states, transitions, ownership, and visibility before execution.
+    status: NOT_TESTED
+  - id: FUN-NOTIFY-001
+    title: In-app notification rule and read lifecycle
+    product_areas: [notifications, rules]
+    modes: [automated_test, real_browser]
+    oracle_class: APPROVED_OWNER
+    decision_ref: QA-001
+    oracle:
+      source: Project-owner decision QA-001 approved on 2026-10-09
+      expected: A qualifying isolated event creates only intended in-app notifications, which remain scoped and can be acknowledged without changing business state.
+    status: NOT_TESTED
+  - id: FUN-I18N-001
+    title: Core workflow equivalence in English Portuguese and French
+    product_areas: [localization, core_workflows]
+    modes: [real_browser]
+    oracle:
+      source: preserve PT EN FR product support
+      expected: Language changes alter presentation but not available workflow actions, persisted values, tenant scope, or completion outcomes.
+    status: NOT_TESTED
