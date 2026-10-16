@@ -232,6 +232,7 @@ session_state/
 *.sqlite3-journal
 logitrack_data.json
 logitrack_data.json.bak
+logitrack_data.json.*.bak
 
 # RC Atlas generated output and temporary files
 logitrack_bi_export/
