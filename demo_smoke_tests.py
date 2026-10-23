@@ -105,6 +105,8 @@ def build_demo_service():
             find_tidy_dataset=MODULE.find_tidy_dataset,
             find_dashboard_template=MODULE.find_dashboard_template,
             parse_date_like_value=MODULE.parse_date_like_value,
+            demo_setup_enabled=lambda: True,
+            authorize_setup=lambda _: None,
         )
     )
 
@@ -135,6 +137,8 @@ def build_in_memory_demo_service(data):
             find_tidy_dataset=MODULE.find_tidy_dataset,
             find_dashboard_template=MODULE.find_dashboard_template,
             parse_date_like_value=MODULE.parse_date_like_value,
+            demo_setup_enabled=lambda: True,
+            authorize_setup=lambda _: None,
         )
     )
 
@@ -144,7 +148,7 @@ def issue_token_for_user(data, username):
     if user is None:
         raise AssertionError(f"User '{username}' is missing from the demo workspace.")
     token = MODULE.new_api_token()
-    user.api_token_hash = MODULE.hash_with_sha256(token)
+    MODULE.register_session_for_token(data, user, token)
     user.last_login_at = MODULE.now_iso_utc()
     user.updated_at = MODULE.now_iso_utc()
     return user, token
@@ -369,18 +373,20 @@ class DemoSmokeTests(unittest.TestCase):
             ):
                 seeded = demo_service.seed_workspace(None, None)
                 loaded = MODULE.load_data_from_path()
-                overview = demo_service.workspace_overview(None, seeded["login"]["token"])
-                snapshot = demo_service.project_executive_snapshot(overview["default_project_id"], x_auth_token=seeded["login"]["token"])
-                report = demo_service.report_preview("donor", overview["default_project_id"], x_auth_token=seeded["login"]["token"])
+                _, token = issue_token_for_user(loaded, "org.admin")
+                MODULE.save_data_to_path(loaded)
+                overview = demo_service.workspace_overview(None, token)
+                snapshot = demo_service.project_executive_snapshot(overview["default_project_id"], x_auth_token=token)
+                report = demo_service.report_preview("donor", overview["default_project_id"], x_auth_token=token)
                 simulation = demo_service.simulate_notifications(
                     {"scenario": "overdue_alerts", "project_id": overview["default_project_id"]},
                     None,
-                    seeded["login"]["token"],
+                    token,
                 )
 
-            self.assertEqual(seeded["login"]["email"], "amina.duarte@bluedelta.org")
-            self.assertEqual(seeded["login"]["username"], "org.admin")
-            self.assertTrue(seeded["login"]["token"])
+            self.assertNotIn("login", seeded)
+            self.assertNotIn("credentials", seeded)
+            self.assertNotIn("saved_to", seeded)
             self.assertGreaterEqual(len(loaded.projects), 3)
             self.assertTrue(overview["demo_ready"])
             self.assertGreaterEqual(len(overview["project_cards"]), 3)

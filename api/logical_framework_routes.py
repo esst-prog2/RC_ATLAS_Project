@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, Optional
 from api.common import header_default
 from repositories.logical_framework_repository import (
     LogicalFrameworkPersistenceError,
+    LogicalFrameworkConcurrentWriteError,
     LogicalFrameworkProjectionError,
     LogicalFrameworkScope,
 )
@@ -45,6 +46,8 @@ def register_logical_framework_routes(
         fail(400, str(exc))
 
     def map_persistence_error(exc: LogicalFrameworkPersistenceError) -> None:
+        if isinstance(exc, LogicalFrameworkConcurrentWriteError):
+            fail(409, "The workspace changed. Reload and retry.")
         if isinstance(exc, LogicalFrameworkProjectionError):
             fail(
                 500,

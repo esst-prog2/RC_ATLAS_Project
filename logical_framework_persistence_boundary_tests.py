@@ -75,7 +75,7 @@ class LogicalFrameworkHttpCharacterizationTests(unittest.TestCase):
         self.tokens = {}
         for user in data.users:
             token = f"contract-token-{user.username}"
-            user.api_token_hash = MODULE.hash_with_sha256(token)
+            MODULE.register_session_for_token(data, user, token)
             self.tokens[user.username] = token
         MODULE.save_data_to_path(data)
         self.client = TestClient(MODULE.app)

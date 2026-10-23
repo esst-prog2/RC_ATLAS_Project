@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from logitrack_platform.postgresql_store import VersionConflict
+from repositories.logical_framework_repository import LogicalFrameworkConcurrentWriteError
+
 from typing import Any, Callable, Dict, List, Optional
 
 from repositories.logical_framework_repository import (
@@ -410,6 +413,9 @@ class SnapshotLogicalFrameworkUnitOfWork:
             )
         try:
             self.canonical_path = self._save_canonical(self.__snapshot)
+        except VersionConflict as exc:
+            self._discarded = True
+            raise LogicalFrameworkConcurrentWriteError(str(exc)) from exc
         except Exception as exc:
             self._discarded = True
             raise LogicalFrameworkCanonicalPersistenceError(str(exc)) from exc

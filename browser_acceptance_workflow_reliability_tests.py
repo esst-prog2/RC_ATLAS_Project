@@ -36,6 +36,8 @@ class CoordinationActivityReliabilityTests(unittest.TestCase):
             LOGITRACK_ENABLE_RELATIONAL_MIRROR="false",
             LOGITRACK_ENABLE_REPOSITORY_DOMAINS="false",
             LOGITRACK_API_KEY=None,
+            LOGITRACK_ENVIRONMENT="development",
+            LOGITRACK_SESSION_COOKIE_SECURE="false",
         )
         self.environment.__enter__()
         self.service = build_demo_service()
@@ -201,6 +203,8 @@ class ProjectionAuthorityReliabilityTests(unittest.TestCase):
             LOGITRACK_ENABLE_REPOSITORY_DOMAINS="true",
             LOGITRACK_RELATIONAL_SYNC_STRICT="false",
             LOGITRACK_API_KEY=None,
+            LOGITRACK_ENVIRONMENT="development",
+            LOGITRACK_SESSION_COOKIE_SECURE="false",
         )
         self.environment.__enter__()
         self.bundle = build_demo_seed_bundle(MODULE.build_password_hash)
@@ -247,8 +251,9 @@ class ProjectionAuthorityReliabilityTests(unittest.TestCase):
             )
 
         self.assertEqual(login.status_code, 200, login.text)
-        token = login.json()["token"]
-        identity = self.client.get("/v1/auth/me", headers={"X-Auth-Token": token})
+        self.assertNotIn("token", login.json())
+        self.assertTrue(self.client.cookies.get("rcatlas_csrf_dev"))
+        identity = self.client.get("/v1/auth/me")
         self.assertEqual(identity.status_code, 200, identity.text)
         self.assertEqual(identity.json()["user"]["username"], "aline.duarte")
 

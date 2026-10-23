@@ -26,6 +26,9 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
                 'LOGITRACK_ENABLE_RELATIONAL_MIRROR',
                 'LOGITRACK_ENABLE_REPOSITORY_DOMAINS',
                 'LOGITRACK_API_KEY',
+                'LOGITRACK_SETUP_ENABLED',
+                'LOGITRACK_SETUP_TOKEN',
+                'LOGITRACK_DEMO_SETUP_ENABLED',
             )
         }
         os.environ['LOGITRACK_STORAGE_BACKEND'] = 'json'
@@ -34,6 +37,9 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
         os.environ['LOGITRACK_ENABLE_RELATIONAL_MIRROR'] = 'false'
         os.environ['LOGITRACK_ENABLE_REPOSITORY_DOMAINS'] = 'false'
         os.environ['LOGITRACK_API_KEY'] = 'technical-key'
+        os.environ['LOGITRACK_SETUP_ENABLED'] = 'true'
+        os.environ['LOGITRACK_SETUP_TOKEN'] = 'synthetic-security-setup-token'
+        os.environ['LOGITRACK_DEMO_SETUP_ENABLED'] = 'true'
 
         data = MODULE.from_serializable(build_demo_seed_bundle(MODULE.build_password_hash).payload)
         data.organizations.append(MODULE.OrganizationAccount(id='org_other', organization_name='Other Org'))
@@ -90,8 +96,8 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
             MODULE.DashboardTemplate(id='tpl_ambiguous', name='Ambiguous', organization_id='', scope='custom'),
         ])
         data.notification_rules.extend([
-            MODULE.NotificationRule(id='rule_collision', name='Local Rule', organization_id='org_blue_delta', channel='webhook'),
-            MODULE.NotificationRule(id='rule_collision', name='Foreign Rule', organization_id='org_other', channel='webhook'),
+            MODULE.NotificationRule(id='rule_collision', name='Local Rule', organization_id='org_blue_delta', channel='in_app'),
+            MODULE.NotificationRule(id='rule_collision', name='Foreign Rule', organization_id='org_other', channel='in_app'),
         ])
         data.audit_events.extend([
             MODULE.AuditEvent(
@@ -107,7 +113,7 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
         self.tokens = {}
         for user in data.users:
             token = f'security-token-{user.username}'
-            user.api_token_hash = MODULE.hash_with_sha256(token)
+            MODULE.register_session_for_token(data, user, token)
             self.tokens[user.username] = token
         MODULE.save_data_to_path(data)
         self.client = TestClient(MODULE.app)
@@ -300,7 +306,9 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
 
     def test_bootstrap_global_operations_and_health_contract(self):
         before = self.serialized()
-        denied_bootstrap = self.client.post('/v1/auth/bootstrap', json={
+        denied_bootstrap = self.client.post('/v1/auth/bootstrap', headers={
+            'X-Setup-Token': 'synthetic-security-setup-token',
+        }, json={
             'organization_name': 'Claimed', 'full_name': 'Claimed Admin',
             'email': 'claimed@example.test', 'password': 'CoursePass!123',
         })
@@ -320,7 +328,7 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
         self.assertEqual(self.client.post('/v1/data/import', headers=self.headers('org.admin'), json={}).status_code, 403)
         self.assertEqual(
             self.client.post('/v1/demo/seed', headers={'X-API-Key': 'technical-key'}).status_code,
-            401,
+            403,
         )
         self.assertEqual(self.client.post('/v1/demo/seed', headers=self.headers('org.admin')).status_code, 403)
         self.assertEqual(self.serialized(), before)
@@ -331,7 +339,9 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
         data.users = []
         MODULE.save_data_to_path(data)
         before = self.serialized()
-        response = self.client.post('/v1/auth/bootstrap', json={
+        response = self.client.post('/v1/auth/bootstrap', headers={
+            'X-Setup-Token': 'synthetic-security-setup-token',
+        }, json={
             'organization_name': 'Claim Attempt',
             'full_name': 'Claimed Admin',
             'email': 'claim.attempt@example.test',
@@ -342,7 +352,9 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
 
     def test_bootstrap_succeeds_only_for_a_pristine_workspace(self):
         MODULE.save_data_to_path(MODULE.LogiTrackData())
-        response = self.client.post('/v1/auth/bootstrap', json={
+        response = self.client.post('/v1/auth/bootstrap', headers={
+            'X-Setup-Token': 'synthetic-security-setup-token',
+        }, json={
             'organization_name': 'First Organization', 'organization_id': 'org_first',
             'full_name': 'First Admin', 'email': 'first.admin@example.test',
             'username': 'first.admin', 'password': 'CoursePass!123',
@@ -729,7 +741,7 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
         response = self.client.post(
             '/v1/notification_rules',
             headers=self.headers('org.admin'),
-            json={'id': 'rule_collision', 'name': 'Local Rule Updated', 'channel': 'webhook'},
+            json={'id': 'rule_collision', 'name': 'Local Rule Updated', 'channel': 'in_app'},
         )
         self.assertEqual(response.status_code, 200, response.text)
         rules = [item for item in self.load().notification_rules if item.id == 'rule_collision']

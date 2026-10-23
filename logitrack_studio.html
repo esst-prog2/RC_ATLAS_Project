@@ -6941,7 +6941,7 @@
   </style>
 </head>
 <body>
-  <div id="flash" class="flash"><div></div></div>
+  <div id="flash" class="flash" role="status" aria-live="polite" aria-atomic="true"><div></div></div>
   <div id="splashScreen" class="splash-screen">
     <div class="splash-content">
       <div class="splash-headline">
@@ -7050,7 +7050,7 @@
           <div class="trust-card">
             <div class="eyebrow-note">Workspace mode</div>
             <strong id="loginModeValue">Organization workspace</strong>
-            <span id="loginModeMeta">Seed sample projects after login from Administration or Studio Lab.</span>
+            <span id="loginModeMeta">Demo initialization is available only through explicitly enabled trusted setup.</span>
           </div>
         </div>
 
@@ -7093,9 +7093,9 @@
           </div>
           <button id="whoAmIBtn" class="ghost small" type="button">Use Existing Session</button>
         </div>
-        <div id="loginFlowNote" class="helper-inline">Use organization credentials or a seeded account. Advanced setup remains available below only when needed.</div>
+        <div id="loginFlowNote" class="helper-inline">Use organization credentials. Trusted setup is available below only when explicitly enabled.</div>
 
-        <details class="developer-drawer">
+        <details id="trustedSetupTools" class="developer-drawer" hidden data-trusted-setup="disabled">
           <summary id="developerToolsSummary">Advanced Setup / Demo Tools</summary>
           <div class="drawer-grid">
             <section class="dev-surface stack">
@@ -7113,35 +7113,36 @@
                   <input id="bootstrapEmail" placeholder="admin@example.org">
                 </div>
               </div>
+              <div>
+                <label for="setupToken">One-time setup authorization</label>
+                <input id="setupToken" type="password" autocomplete="off" placeholder="Setup token">
+              </div>
               <div class="toolbar">
                 <button id="bootstrapBtn" class="secondary" type="button">Bootstrap Admin</button>
+                <button id="seedSetupBtn" class="ghost" type="button">Initialize Demo Workspace</button>
               </div>
             </section>
 
             <section class="dev-surface stack">
               <div>
-                <h3 id="demoCredentialsTitle">Demo credentials</h3>
-                <div id="demoCredentialsNote" class="panel-note">Subtle helper access for internal demos. Credentials appear after the demo workspace is seeded.</div>
+                <h3 id="demoCredentialsTitle">Demo accounts</h3>
+                <div id="demoCredentialsNote" class="panel-note">Trusted setup can create fictional demo accounts, but passwords and session tokens are never displayed.</div>
               </div>
               <div data-demo-credentials class="cred-grid">
-                <div class="cred-item subtle">Seed the demo workspace after login to load ready-to-use sample accounts.</div>
+                <div class="cred-item subtle">Demo accounts are created only through trusted setup. Credentials are supplied through the approved setup channel.</div>
               </div>
             </section>
 
             <section class="dev-surface stack">
               <div>
-                <h3 id="sessionToolsTitle">Session overrides</h3>
-                <div id="sessionToolsNote" class="panel-note">Optional shared-key or token entry for technical validation, service checks, and controlled demos.</div>
+                <h3 id="sessionToolsTitle">Session security</h3>
+                <div id="sessionToolsNote" class="panel-note">Normal sign-in uses a protected browser session. Session credentials are not exposed to scripts or stored in this page.</div>
               </div>
               <div>
                 <label for="apiKey">X-API-Key</label>
                 <input id="apiKey" placeholder="Optional shared admin key">
               </div>
-              <div>
-                <label for="authToken">X-Auth-Token</label>
-                <input id="authToken" placeholder="Token from login, bootstrap, or demo seeding">
-              </div>
-              <div class="subtle">These fields are optional. In normal use, login and bootstrap will populate the token automatically.</div>
+              <div class="subtle">The shared key is reserved for explicitly configured technical validation. Interactive users should sign in normally.</div>
             </section>
 
             <section class="dev-surface stack">
@@ -7163,7 +7164,7 @@
                 <div class="auth-metric">
                   <span>Demo mode</span>
                   <strong id="loginModeValueMirror">Organization workspace</strong>
-                  <span id="loginModeMetaMirror">Seed sample projects after login from Administration or Studio Lab.</span>
+                  <span id="loginModeMetaMirror">Demo initialization is available only through explicitly enabled trusted setup.</span>
                 </div>
               </div>
             </section>
@@ -8317,9 +8318,8 @@
                     <div>
                       <label for="channel">Dispatch channel</label>
                       <select id="channel">
-                        <option value="webhook">Webhook</option>
+                        <option value="in_app">In-app</option>
                         <option value="email">Email</option>
-                        <option value="whatsapp">WhatsApp</option>
                       </select>
                     </div>
                     <div>
@@ -8337,9 +8337,9 @@
                 </div>
                 <div class="demo-box">
                   <h3>Demo Workspace Setup</h3>
-                  <div class="subtle" style="margin-top:6px">Use the demo seeder after login to load portfolio projects, indicators, reporting history, users, templates, and rules.</div>
+                  <div class="subtle" style="margin-top:6px">Demo initialization is a one-time trusted setup operation and is unavailable after sign-in.</div>
                   <div class="toolbar" style="margin-top:12px">
-                    <button id="seedAndRefreshBtn" class="ghost" type="button">Re-seed Demo Workspace</button>
+                    <button id="seedAndRefreshBtn" class="ghost" type="button" hidden disabled>Demo Setup Unavailable</button>
                   </div>
                   <div id="demoStatusBox" class="muted-box" style="margin-top:12px">No demo workspace loaded yet.</div>
                 </div>
@@ -8419,9 +8419,8 @@
                     <div>
                       <label for="ruleChannel">Channel</label>
                       <select id="ruleChannel">
+                        <option value="in_app">In-app</option>
                         <option value="email">Email</option>
-                        <option value="whatsapp">WhatsApp</option>
-                        <option value="webhook">Webhook</option>
                       </select>
                     </div>
                     <div>
@@ -8519,7 +8518,7 @@
                   <div class="panel-note">Manage your organization profile, users, teams, permissions, and audit visibility from inside the RC Atlas workspace.</div>
                 </div>
                 <div class="app-credentials">
-                  <button id="seedDemoBtn" type="button">Seed Demo Workspace</button>
+                  <button id="seedDemoBtn" type="button" hidden disabled>Demo Setup Unavailable</button>
                   <button id="refreshAuthBtn" class="ghost" type="button">Refresh Administration</button>
                 </div>
               </div>
@@ -8599,26 +8598,22 @@
                     <label for="adminApiKeyMirror">X-API-Key</label>
                     <input id="adminApiKeyMirror" placeholder="Mirrors the shared admin key">
                   </div>
-                  <div>
-                    <label for="adminAuthTokenMirror">X-Auth-Token</label>
-                    <input id="adminAuthTokenMirror" placeholder="Mirrors the current auth token">
-                  </div>
                 </div>
                 <div class="muted-box" id="adminSessionState">No authenticated user loaded.</div>
                 <section class="stack" style="gap:12px">
                   <div>
                     <h3>Notification Channels</h3>
-                    <div class="panel-note">Provider readiness for webhook, email, and WhatsApp dispatch.</div>
+                    <div class="panel-note">In-app notifications are active. Email remains disabled until its provider sandbox gate passes.</div>
                   </div>
                   <div id="channelStatusBox" class="status-grid"></div>
                 </section>
                 <section class="stack" style="gap:12px">
                   <div>
-                    <h3>Demo credentials</h3>
-                    <div class="panel-note">Presenter helper content remains available here without polluting operational mode.</div>
+                    <h3>Demo accounts</h3>
+                    <div class="panel-note">Only sanitized fictional account metadata is shown. Passwords and session tokens are never displayed.</div>
                   </div>
                   <div data-demo-credentials class="cred-grid">
-                    <div class="cred-item subtle">Seed the demo workspace to load ready-to-use sample accounts.</div>
+                    <div class="cred-item subtle">Demo accounts are created only through trusted setup.</div>
                   </div>
                 </section>
               </section>
@@ -9006,20 +9001,20 @@
         "auth.metric.access": "Access state",
         "auth.metric.demo": "Demo mode",
         "auth.metric.demo_value": "Organization workspace",
-        "auth.metric.demo_meta": "Seed sample projects after login from Administration or Studio Lab.",
+        "auth.metric.demo_meta": "Demo initialization is available only through explicitly enabled trusted setup.",
         "auth.secure_eyebrow": "Secure Access",
         "auth.sign_in": "Sign in to RC Atlas",
         "auth.sign_in_note": "The protected workspace opens only after a valid session is established.",
         "auth.banner": "Secure session required to open the workspace.",
         "auth.login_help": "Secure access for authorized teams.",
         "auth.bootstrap_help": "Bootstrap the first admin account to activate the workspace.",
-        "auth.flow_note": "Use organization credentials or a seeded account. Advanced setup remains available below only when needed.",
+        "auth.flow_note": "Use organization credentials. Trusted setup is available below only when explicitly enabled.",
         "auth.developer_tools": "Advanced Setup / Demo Tools",
         "auth.bootstrap_title": "Admin bootstrap",
         "auth.bootstrap_note": "Create the first admin account on a fresh workspace without exposing setup steps in the main sign-in flow.",
-        "auth.demo_note": "Subtle helper access for internal demos. Credentials appear after the demo workspace is seeded.",
-        "auth.session_tools_title": "Session overrides",
-        "auth.session_tools_note": "Optional shared-key or token entry for technical validation, service checks, and controlled demos.",
+        "auth.demo_note": "Trusted setup can create fictional demo accounts, but passwords and session tokens are never displayed.",
+        "auth.session_tools_title": "Session security",
+        "auth.session_tools_note": "Normal sign-in uses a protected browser session. Session credentials are not exposed to scripts or stored in this page.",
         "auth.runtime_title": "Workspace readiness",
         "auth.runtime_note": "Operational visibility for internal setup, demo seeding, and runtime confidence.",
         "auth.language": "Language",
@@ -9033,9 +9028,9 @@
         "auth.advanced": "Advanced session options",
         "auth.api_key": "X-API-Key",
         "auth.auth_token": "X-Auth-Token",
-        "auth.advanced_help": "These fields are optional. In normal use, login and bootstrap will populate the token automatically.",
-        "auth.demo_credentials": "Demo credentials",
-        "auth.demo_help": "A subtle helper section for internal demos. Credentials appear after the demo workspace is seeded.",
+        "auth.advanced_help": "The shared key is reserved for explicitly configured technical validation. Interactive users should sign in normally.",
+        "auth.demo_credentials": "Demo accounts",
+        "auth.demo_help": "Trusted setup can create fictional demo accounts, but passwords and session tokens are never displayed.",
         "sidebar.title": "Operational Intelligence Workspace",
         "sidebar.subtitle": "Secure workspace for oversight, reporting, coordination, and operational visibility.",
         "sidebar.navigation": "Navigation",
@@ -9071,12 +9066,13 @@
         "button.sim_donor": "Simulate Donor Reporting",
         "button.sim_risk": "Simulate Risk Spike",
         "button.dispatch": "Dispatch Current Notifications",
-        "button.reseed_demo": "Re-seed Demo Workspace",
+        "button.initialize_demo": "Initialize Demo Workspace",
+        "button.reseed_demo": "Demo Setup Unavailable",
         "button.import_dataset": "Import Dataset",
         "button.materialize": "Materialize History",
         "button.save_rule": "Save Rule",
         "button.save_template": "Save Custom Template",
-        "button.seed_demo": "Seed Demo Workspace",
+        "button.seed_demo": "Demo Setup Unavailable",
         "button.refresh_session": "Refresh Session Status",
         "button.create_task": "Create Task",
         "button.close": "Close",
@@ -9202,7 +9198,7 @@
         "lab.dispatch.provider": "Provider",
         "lab.dispatch.recipients": "Recipients or targets",
         "lab.setup.title": "Demo Workspace Setup",
-        "lab.setup.note": "Use the demo seeder after login to load portfolio projects, indicators, reporting history, users, templates, and rules.",
+        "lab.setup.note": "Demo initialization is a one-time trusted setup operation and is unavailable after sign-in.",
         "lab.intake.title": "Dataset Intake and Modeling",
         "lab.intake.note": "Import tidy data, materialize reporting history, inspect mappings, and preview narrative output.",
         "lab.intake.dataset_name": "Dataset name",
@@ -9278,20 +9274,20 @@
         "auth.metric.access": "Estado do acesso",
         "auth.metric.demo": "Modo demo",
         "auth.metric.demo_value": "Workspace organizacional",
-        "auth.metric.demo_meta": "Semear projetos de exemplo apos login a partir de Admin / Acesso ou Studio Lab.",
+        "auth.metric.demo_meta": "A inicializacao demo fica disponivel apenas atraves da configuracao de confianca ativada explicitamente.",
         "auth.secure_eyebrow": "Acesso Seguro",
         "auth.sign_in": "Entrar no RC Atlas",
         "auth.sign_in_note": "O workspace protegido abre apenas apos existir uma sessao valida.",
         "auth.banner": "E necessaria uma sessao segura para abrir o workspace.",
         "auth.login_help": "Acesso seguro para equipas autorizadas.",
         "auth.bootstrap_help": "Crie a primeira conta admin para ativar o workspace.",
-        "auth.flow_note": "Use credenciais da organizacao ou uma conta semeada. A configuracao avancada continua disponivel abaixo apenas quando necessario.",
+        "auth.flow_note": "Use credenciais da organizacao. A configuracao de confianca fica disponivel abaixo apenas quando ativada explicitamente.",
         "auth.developer_tools": "Configuracao Avancada / Ferramentas Demo",
         "auth.bootstrap_title": "Bootstrap admin",
         "auth.bootstrap_note": "Crie a primeira conta admin num workspace novo sem expor passos tecnicos no fluxo principal de entrada.",
-        "auth.demo_note": "Acesso auxiliar discreto para demos internas. As credenciais aparecem depois de semear o workspace demo.",
-        "auth.session_tools_title": "Sobreposicoes de sessao",
-        "auth.session_tools_note": "Entrada opcional de chave partilhada ou token para validacao tecnica, verificacoes de servico e demos controladas.",
+        "auth.demo_note": "A configuracao de confianca pode criar contas demo ficticias, mas nunca apresenta palavras-passe ou tokens de sessao.",
+        "auth.session_tools_title": "Seguranca da sessao",
+        "auth.session_tools_note": "O login normal usa uma sessao protegida do navegador. As credenciais da sessao nao sao expostas a scripts nem guardadas nesta pagina.",
         "auth.runtime_title": "Prontidao do workspace",
         "auth.runtime_note": "Visibilidade operacional para configuracao interna, seeding demo e confianca no runtime.",
         "auth.language": "Idioma",
@@ -9305,9 +9301,9 @@
         "auth.advanced": "Opcoes avancadas de sessao",
         "auth.api_key": "X-API-Key",
         "auth.auth_token": "X-Auth-Token",
-        "auth.advanced_help": "Estes campos sao opcionais. Em uso normal, o login e o bootstrap preenchem o token automaticamente.",
-        "auth.demo_credentials": "Credenciais da demo",
-        "auth.demo_help": "Uma secao discreta para demos internas. As credenciais aparecem depois de semear o workspace da demo.",
+        "auth.advanced_help": "A chave partilhada fica reservada para validacao tecnica configurada explicitamente. Os utilizadores interativos devem iniciar sessao normalmente.",
+        "auth.demo_credentials": "Contas demo",
+        "auth.demo_help": "A configuracao de confianca pode criar contas demo ficticias, mas nunca apresenta palavras-passe ou tokens de sessao.",
         "sidebar.title": "Operational Intelligence Workspace",
         "sidebar.subtitle": "Workspace seguro para supervisao, reporting, coordenacao e visibilidade operacional.",
         "sidebar.navigation": "Navegacao",
@@ -9343,12 +9339,13 @@
         "button.sim_donor": "Simular Reporte ao Doador",
         "button.sim_risk": "Simular Pico de Risco",
         "button.dispatch": "Enviar Notificacoes Atuais",
-        "button.reseed_demo": "Semear Novamente a Demo",
+        "button.initialize_demo": "Inicializar Workspace Demo",
+        "button.reseed_demo": "Configuracao Demo Indisponivel",
         "button.import_dataset": "Importar Dataset",
         "button.materialize": "Materializar Historico",
         "button.save_rule": "Guardar Regra",
         "button.save_template": "Guardar Template Personalizado",
-        "button.seed_demo": "Semear Workspace da Demo",
+        "button.seed_demo": "Configuracao Demo Indisponivel",
         "button.refresh_session": "Atualizar Estado da Sessao",
         "button.create_task": "Criar Tarefa",
         "button.close": "Fechar",
@@ -9474,7 +9471,7 @@
         "lab.dispatch.provider": "Fornecedor",
         "lab.dispatch.recipients": "Destinatarios ou alvos",
         "lab.setup.title": "Configuracao do Workspace Demo",
-        "lab.setup.note": "Use o seeder da demo apos o login para carregar projetos, indicadores, historico de reporte, utilizadores, templates e regras.",
+        "lab.setup.note": "A inicializacao demo e uma operacao unica de configuracao de confianca e nao fica disponivel apos o login.",
         "lab.intake.title": "Ingestao e Modelacao do Dataset",
         "lab.intake.note": "Importe dados tidy, materialize historico de reporte, inspecione mapeamentos e veja a narrativa.",
         "lab.intake.dataset_name": "Nome do dataset",
@@ -9551,9 +9548,24 @@
         "auth.banner": "Session securisee requise pour ouvrir l'espace de travail.",
         "auth.login_help": "Acces securise pour les equipes autorisees.",
         "auth.bootstrap_help": "Initialisez le premier compte admin pour activer l'espace de travail.",
-        "auth.flow_note": "Utilisez les identifiants de l'organisation ou un compte precharge. Les outils avances restent disponibles ci-dessous uniquement si necessaire.",
+        "auth.flow_note": "Utilisez les identifiants de l'organisation. La configuration de confiance reste disponible ci-dessous seulement lorsqu'elle est explicitement activee.",
         "auth.developer_tools": "Configuration Avancee / Outils Demo",
+        "auth.bootstrap_title": "Initialisation administrateur",
+        "auth.bootstrap_note": "Creez le premier compte administrateur sans exposer les etapes de configuration dans le parcours de connexion principal.",
+        "auth.demo_note": "La configuration de confiance peut creer des comptes de demonstration fictifs, mais n'affiche jamais les mots de passe ni les jetons de session.",
+        "auth.session_tools_title": "Securite de la session",
+        "auth.session_tools_note": "La connexion normale utilise une session de navigateur protegee. Les identifiants de session ne sont ni exposes aux scripts ni stockes dans cette page.",
+        "auth.runtime_title": "Etat de preparation du workspace",
+        "auth.runtime_note": "Visibilite operationnelle pour la configuration interne et les demonstrations controlees.",
         "auth.login": "Se connecter",
+        "auth.bootstrap": "Initialiser l'administrateur",
+        "auth.use_session": "Utiliser une session existante",
+        "auth.advanced": "Options de session avancees",
+        "auth.api_key": "X-API-Key",
+        "auth.auth_token": "X-Auth-Token",
+        "auth.advanced_help": "La cle partagee est reservee aux validations techniques explicitement configurees. Les utilisateurs interactifs doivent se connecter normalement.",
+        "auth.demo_credentials": "Comptes de demonstration",
+        "auth.demo_help": "La configuration de confiance peut creer des comptes fictifs, mais n'affiche jamais les mots de passe ni les jetons de session.",
         "sidebar.title": "Operational Intelligence Workspace",
         "sidebar.subtitle": "Espace securise pour supervision, reporting, coordination et visibilite operationnelle.",
         "auth.language": "Langue",
@@ -9690,6 +9702,7 @@
       { selector: "label[for='bootstrapEmail']", key: "auth.email" },
       { selector: "#loginBtn", key: "auth.login" },
       { selector: "#bootstrapBtn", key: "auth.bootstrap" },
+      { selector: "#seedSetupBtn", key: "button.initialize_demo" },
       { selector: "#whoAmIBtn", key: "auth.use_session" },
       { selector: "#bootstrapTitle", key: "auth.bootstrap_title" },
       { selector: "#bootstrapNote", key: "auth.bootstrap_note" },
@@ -9886,7 +9899,6 @@
       { selector: ".view[data-view='admin'] > .two-up:first-child > section:first-child h2", key: "admin.access.title" },
       { selector: ".view[data-view='admin'] > .two-up:first-child > section:first-child .panel-note", key: "admin.access.note" },
       { selector: ".view[data-view='admin'] label[for='adminApiKeyMirror']", key: "auth.api_key" },
-      { selector: ".view[data-view='admin'] label[for='adminAuthTokenMirror']", key: "auth.auth_token" },
       { selector: ".view[data-view='admin'] > .two-up:first-child > section:first-child h3", key: "auth.demo_credentials" },
       { selector: ".view[data-view='admin'] > .two-up:first-child > section:first-child .panel-note:last-of-type", key: "admin.demo.note" },
       { selector: ".view[data-view='admin'] > .two-up:first-child > section:last-child h2", key: "admin.channels.title" },
@@ -9910,7 +9922,6 @@
       { selector: "#bootstrapFullName", value: "System Administrator" },
       { selector: "#bootstrapEmail", value: "admin@example.org" },
       { selector: "#apiKey", value: "Optional shared admin key" },
-      { selector: "#authToken", value: "Token from login, bootstrap, or demo seeding" },
       { selector: "#channelRecipients", value: "email@example.org or +25884..., comma-separated" },
       { selector: "#datasetName", value: "Monthly KPI import" },
       { selector: "#datasetDescription", value: "One row per project, indicator, district, month" },
@@ -9922,7 +9933,6 @@
       { selector: "#templateDescription", value: "Purpose, audience, and review cadence" },
       { selector: "#templateNarrative", value: "summary, risks, actions" },
       { selector: "#adminApiKeyMirror", value: "Mirrors the shared admin key" },
-      { selector: "#adminAuthTokenMirror", value: "Mirrors the current auth token" },
       { selector: "#newUsername", value: "analyst.one" },
       { selector: "#newUserPassword", value: "Set a password" },
       { selector: "#newUserEmail", value: "analyst@example.org" },
@@ -9997,10 +10007,15 @@
       logicalFrameworkDrawer: null,
       presentationSlideIndex: 0,
       splashDismissed: false,
+      pendingOperations: {},
+      projectCreateIdempotencyKey: "",
+      workspaceVersion: 0,
+      csrfToken: "",
     };
 
-    const AUTH_TOKEN_STORAGE_KEY = "rcatlas.authToken";
-    const SESSION_USER_STORAGE_KEY = "rcatlas.sessionUser";
+    const SESSION_SIGNAL_STORAGE_KEY = "rcatlas.sessionSignal";
+    const LEGACY_AUTH_TOKEN_STORAGE_KEY = "rcatlas.authToken";
+    const LEGACY_SESSION_USER_STORAGE_KEY = "rcatlas.sessionUser";
     const PROJECT_STUDIO_STEPS = [
       { id: "details", title: "Project Details", note: "Identity and core metadata" },
       { id: "coverage", title: "Geographic Coverage", note: "Country, dates, and footprint" },
@@ -10152,9 +10167,7 @@
     const demoRoleSwitcherBar = document.getElementById("demoRoleSwitcherBar");
     const loginBanner = document.getElementById("loginBanner");
     const apiKeyInput = document.getElementById("apiKey");
-    const authTokenInput = document.getElementById("authToken");
     const adminApiKeyMirror = document.getElementById("adminApiKeyMirror");
-    const adminAuthTokenMirror = document.getElementById("adminAuthTokenMirror");
     const projectPicker = document.getElementById("projectPicker");
     const templatePicker = document.getElementById("templatePicker");
     const datasetPicker = document.getElementById("datasetPicker");
@@ -10314,21 +10327,51 @@
       });
     }
 
-    function showMessage(text, tone = "info") {
+    function showMessage(text, tone = "info", options = {}) {
       const box = flashBox.querySelector("div");
+      window.clearTimeout(showMessage.timer);
+      delete flashBox.dataset.operationKey;
       box.textContent = text;
       flashBox.className = `flash show ${tone}`;
-      window.clearTimeout(showMessage.timer);
-      showMessage.timer = window.setTimeout(() => {
-        flashBox.className = "flash";
-      }, 4200);
+      if (!options.persistent) {
+        showMessage.timer = window.setTimeout(() => {
+          flashBox.className = "flash";
+        }, 4200);
+      }
     }
 
     function clearFlash() {
       window.clearTimeout(showMessage.timer);
+      delete flashBox.dataset.operationKey;
       flashBox.className = "flash";
       const box = flashBox.querySelector("div");
       if (box) box.textContent = "";
+    }
+
+    function beginOperation(key, controlIds = [], pendingText = "Working...") {
+      if (state.pendingOperations[key]) return false;
+      state.pendingOperations[key] = true;
+      clearFlash();
+      controlIds.forEach(id => {
+        const control = document.getElementById(id);
+        if (!control) return;
+        control.disabled = true;
+        control.setAttribute("aria-busy", "true");
+      });
+      showMessage(presentText(pendingText), "info", { persistent: true });
+      flashBox.dataset.operationKey = key;
+      return true;
+    }
+
+    function endOperation(key, controlIds = []) {
+      delete state.pendingOperations[key];
+      controlIds.forEach(id => {
+        const control = document.getElementById(id);
+        if (!control) return;
+        control.disabled = false;
+        control.removeAttribute("aria-busy");
+      });
+      if (flashBox.dataset.operationKey === key) clearFlash();
     }
 
     function isObject(value) {
@@ -10652,7 +10695,6 @@
         ,"success": "sucesso"
         ,"Advanced session configured. Use Refresh Session Status to validate the current token.": "Sessao avancada configurada. Use Atualizar Estado da Sessao para validar o token atual."
         ,"No authenticated session. Login or bootstrap is required to open protected resources.": "Nao existe sessao autenticada. O login ou a criacao inicial sao necessarios para abrir recursos protegidos."
-        ,"Seed the demo workspace to load ready-to-use sample accounts.": "Semeie o workspace demo para carregar contas de exemplo prontas a usar."
         ,"Select a project to load its executive snapshot.": "Selecione um projeto para carregar o seu retrato executivo."
         ,"Login is required before simulation actions can run.": "E necessario iniciar sessao antes de executar simulacoes."
         ,"Login is required before importing datasets.": "E necessario iniciar sessao antes de importar datasets."
@@ -10663,7 +10705,7 @@
         ,"Login is required before saving custom templates.": "E necessario iniciar sessao antes de guardar templates personalizados."
         ,"Admin login is required before creating user accounts.": "E necessario um login admin antes de criar contas de utilizador."
         ,"Optional shared admin key": "Chave admin partilhada opcional"
-        ,"Token from login, bootstrap, or demo seeding": "Token do login, bootstrap ou seeding demo"
+        ,"Token from sign-in": "Token da sessao iniciada"
         ,"One workspace for delivery, donor reporting, and management follow-up.": "Um unico workspace para entrega, reporte ao doador e seguimento de gestao."
         ,"Move from scattered tracking files to a coherent operational picture.": "Passe de ficheiros dispersos de acompanhamento para uma imagem operacional coerente."
         ,"Turn data quality, alerts, and reporting trends into faster decisions.": "Transforme qualidade de dados, alertas e tendencias de reporte em decisoes mais rapidas."
@@ -10671,7 +10713,6 @@
         ,"Developer / Demo Tools": "Ferramentas de Desenvolvimento / Demo"
         ,"Admin bootstrap": "Bootstrap admin"
         ,"Create the first admin account on a fresh workspace without exposing setup steps in the main sign-in flow.": "Crie a primeira conta admin num workspace novo sem expor passos tecnicos no fluxo principal de entrada."
-        ,"Subtle helper access for internal demos. Credentials appear after the demo workspace is seeded.": "Acesso auxiliar discreto para demos internas. As credenciais aparecem depois de semear o workspace demo."
         ,"Session overrides": "Sobreposicoes de sessao"
         ,"Optional shared-key or token entry for technical validation, service checks, and controlled demos.": "Entrada opcional de chave partilhada ou token para validacao tecnica, verificacoes de servico e demos controladas."
         ,"Workspace readiness": "Prontidao do workspace"
@@ -10956,7 +10997,7 @@
         { pattern: /^(.+) - scheduler on$/, replace: (_, storage) => `${storage} - agendador ligado` },
         { pattern: /^(.+) - scheduler off$/, replace: (_, storage) => `${storage} - agendador desligado` },
         { pattern: /^Demo workspace ready: (\d+) projects, (\d+) reporting records, (\d+) notifications\.$/, replace: (_, projects, records, notifications) => `Workspace demo pronto: ${projects} projetos, ${records} registos de reporte, ${notifications} notificacoes.` },
-        { pattern: /^No demo workspace is loaded yet\. Seed the demo workspace from Admin \/ Access or Studio Lab after login\.$/, replace: () => "Ainda nao existe um workspace demo carregado. Semeie o workspace demo a partir de Admin / Acesso ou Studio Lab depois do login." },
+        { pattern: /^No demo workspace is loaded yet\. Demo initialization is available only through trusted setup\.$/, replace: () => "Ainda nao existe um workspace demo carregado. A inicializacao fica disponivel apenas atraves da configuracao de confianca." },
         { pattern: /^Last login (.+)$/, replace: (_, value) => `Ultimo login ${value}` },
         { pattern: /^Authenticated as (.+)\.$/, replace: (_, user) => `Autenticado como ${user}.` },
         { pattern: /^Logged in as (.+)\.$/, replace: (_, user) => `Sessao iniciada como ${user}.` },
@@ -10970,14 +11011,12 @@
         { pattern: /^Loaded template "(.+)" into the editor\.$/, replace: (_, name) => `O template "${name}" foi carregado no editor.` },
         { pattern: /^Renderable preview available for (.+)\.$/, replace: (_, chart) => `Existe uma pre-visualizacao renderizavel para ${translateLiteralText(chart)}.` },
         { pattern: /^A protected request requires a valid login\. The workspace stayed stable and the session can be refreshed from Admin \/ Access\.$/, replace: () => "Um pedido protegido exige um login valido. O workspace manteve-se estavel e a sessao pode ser atualizada em Admin / Acesso." },
-        { pattern: /^This workspace is fresh\. Bootstrap an admin account first, then seed the demo workspace from the authenticated shell\.$/, replace: () => "Este workspace esta novo. Crie primeiro uma conta admin e depois semeie o workspace demo a partir da shell autenticada." },
         { pattern: /^Secure access is required before the portfolio workspace loads\. Use login for existing users or a saved token from a previous demo setup\.$/, replace: () => "O acesso seguro e obrigatorio antes de carregar o workspace do portefolio. Use o login para utilizadores existentes ou um token guardado de uma demo anterior." },
         { pattern: /^No users exist yet\. Bootstrap an admin to continue\.$/, replace: () => "Ainda nao existem utilizadores. Crie um admin inicial para continuar." },
         { pattern: /^Login is required before the workspace shell loads\.$/, replace: () => "E necessario iniciar sessao antes de carregar a shell do workspace." },
-        { pattern: /^Demo workspace seeded successfully\. The organization admin session has been loaded\.$/, replace: () => "O workspace demo foi semeado com sucesso. A sessao do administrador da organizacao foi carregada." },
-        { pattern: /^Demo workspace seeded and ready\.$/, replace: () => "Workspace demo semeado e pronto." },
-        { pattern: /^The current session token is not valid anymore\. Please log in again\.$/, replace: () => "O token atual da sessao ja nao e valido. Inicie sessao novamente." },
-        { pattern: /^Provide a token or log in first to validate an existing session\.$/, replace: () => "Forneca um token ou inicie sessao primeiro para validar uma sessao existente." },
+        { pattern: /^Demo workspace initialized\. Sign in to continue\.$/, replace: () => "Workspace demo inicializado. Inicie sessao para continuar." },
+        { pattern: /^The current browser session is no longer valid\. Please log in again\.$/, replace: () => "A sessao atual do navegador ja nao e valida. Inicie sessao novamente." },
+        { pattern: /^Log in first to validate the current browser session\.$/, replace: () => "Inicie sessao primeiro para validar a sessao atual do navegador." },
         { pattern: /^Bootstrap completed\. Admin session is ready\.$/, replace: () => "Criacao inicial concluida. A sessao admin esta pronta." },
         { pattern: /^Session state refreshed\.$/, replace: () => "O estado da sessao foi atualizado." },
         { pattern: /^Narrative summary refreshed\.$/, replace: () => "O resumo narrativo foi atualizado." },
@@ -11049,6 +11088,8 @@
         { pattern: /^Delivery momentum is stable compared with the previous reporting cycle\.$/, replace: () => "O momento da entrega esta estavel face ao ciclo de reporte anterior." }
       ],
       FR: [
+        { pattern: /^The current browser session is no longer valid\. Please log in again\.$/, replace: () => "La session actuelle du navigateur n'est plus valide. Veuillez vous reconnecter." },
+        { pattern: /^Log in first to validate the current browser session\.$/, replace: () => "Connectez-vous d'abord pour valider la session actuelle du navigateur." },
         { pattern: /^Overall data quality score: (.+)\.$/, replace: (_, score) => `Score global de qualite des donnees : ${score}.` },
         { pattern: /^Suggested visuals: (.+)\.$/, replace: (_, visuals) => `Visuels suggeres : ${visuals}.` },
         { pattern: /^Latest reporting data is (\d+) day\(s\) old\.$/, replace: (_, days) => `Les donnees de reporting les plus recentes ont ${days} jour(s).` },
@@ -11462,8 +11503,16 @@
       const out = {};
       if (json) out["Content-Type"] = "application/json";
       if (apiKeyInput.value.trim()) out["X-API-Key"] = apiKeyInput.value.trim();
-      if (authTokenInput.value.trim()) out["X-Auth-Token"] = authTokenInput.value.trim();
       return out;
+    }
+
+    function readCsrfCookie() {
+      const names = ["__Host-rcatlas_csrf", "rcatlas_csrf_dev"];
+      for (const item of document.cookie.split(";")) {
+        const [rawName, ...rawValue] = item.trim().split("=");
+        if (names.includes(rawName)) return decodeURIComponent(rawValue.join("="));
+      }
+      return "";
     }
 
     function shouldLoadDatasetWorkbench(viewId = state.currentView) {
@@ -11529,6 +11578,13 @@
 
     async function callApi(url, options = {}) {
       const { audit = {}, ...fetchOptions } = options;
+      fetchOptions.credentials = "same-origin";
+      const method = String(fetchOptions.method || "GET").toUpperCase();
+      const requestHeaders = new Headers(fetchOptions.headers || {});
+      if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && state.csrfToken) {
+        requestHeaders.set("X-CSRF-Token", state.csrfToken);
+      }
+      fetchOptions.headers = Object.fromEntries(requestHeaders.entries());
       const response = await fetch(url, fetchOptions);
       const text = await response.text();
       let payload;
@@ -11570,7 +11626,6 @@
 
     function syncSessionMirrors() {
       adminApiKeyMirror.value = apiKeyInput.value;
-      adminAuthTokenMirror.value = authTokenInput.value;
     }
 
     function setLoginBanner(text, tone = "info") {
@@ -11590,42 +11645,16 @@
     }
 
     function hasAdvancedCredentials() {
-      return Boolean(authTokenInput.value.trim() || apiKeyInput.value.trim());
-    }
-
-    function persistSessionState() {
-      if (authTokenInput.value.trim()) {
-        window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, authTokenInput.value.trim());
-      } else {
-        window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-      }
-      if (state.currentUser) {
-        window.localStorage.setItem(SESSION_USER_STORAGE_KEY, JSON.stringify(state.currentUser));
-      } else {
-        window.localStorage.removeItem(SESSION_USER_STORAGE_KEY);
-      }
+      return Boolean(state.currentUser || apiKeyInput.value.trim());
     }
 
     function clearPersistedSessionState() {
-      window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-      window.localStorage.removeItem(SESSION_USER_STORAGE_KEY);
+      window.localStorage.removeItem(LEGACY_AUTH_TOKEN_STORAGE_KEY);
+      window.localStorage.removeItem(LEGACY_SESSION_USER_STORAGE_KEY);
     }
 
     function restorePersistedSessionState() {
-      const token = window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
-      if (token && !authTokenInput.value.trim()) {
-        authTokenInput.value = token;
-      }
-      const rawUser = window.localStorage.getItem(SESSION_USER_STORAGE_KEY);
-      if (!rawUser) return;
-      try {
-        const parsed = JSON.parse(rawUser);
-        if (parsed && typeof parsed === "object") {
-          state.currentUser = parsed;
-        }
-      } catch {
-        window.localStorage.removeItem(SESSION_USER_STORAGE_KEY);
-      }
+      clearPersistedSessionState();
     }
 
     function applyPresentationMode() {
@@ -11788,7 +11817,7 @@
         document.getElementById("demoStatusBox").textContent = presentText(
           state.workspace?.demo_ready
             ? `Demo workspace ready: ${state.workspace.counts.projects} projects, ${state.workspace.counts.reporting_records} reporting records, ${state.workspace.counts.notifications} notifications.`
-            : "No demo workspace is loaded yet. Seed the demo workspace from Admin / Access or Studio Lab after login."
+            : "No demo workspace is loaded yet. Demo initialization is available only through trusted setup."
         );
       }
       if (state.projectSnapshot?.dashboard?.available_templates) {
@@ -12038,7 +12067,7 @@
       targets.forEach(box => {
         box.innerHTML = "";
         if (!items || !items.length) {
-          box.innerHTML = `<div class='cred-item subtle'>${presentText("Seed the demo workspace to load ready-to-use sample accounts.")}</div>`;
+          box.innerHTML = `<div class='cred-item subtle'>${presentText("Demo accounts are created only through trusted setup. Credentials are never displayed.")}</div>`;
           return;
         }
         items.forEach(item => {
@@ -12048,7 +12077,6 @@
             <strong>${textSafe(item.full_name || item.username)}</strong>
             <div class="subtle">${textSafe(item.role_label || translateLiteralText(textSafe(item.role)))} - ${textSafe(item.email, translateLiteralText("No email"))}</div>
             <div class="subtle">${translateLiteralText("Username")}: ${textSafe(item.username)}</div>
-            ${item.password ? `<div class="subtle">${translateLiteralText("Password")}: ${textSafe(item.password)}</div>` : ""}
           `;
           box.appendChild(row);
         });
@@ -23515,6 +23543,7 @@
     function resetProjectStudioForm() {
       state.projectStudioMode = "create";
       state.selectedRegistryProjectId = "";
+      state.projectCreateIdempotencyKey = "";
       hydrateProjectStudioForm({
         id: "",
         project_name: "",
@@ -23580,32 +23609,45 @@
         showMessage(validation.message, "warn");
         return null;
       }
+      const operationControls = ["saveProjectBtn", "publishProjectBtn"];
+      if (!beginOperation("project-save", operationControls, "Saving project...")) return null;
       const editingProjectId = textSafe(payload.project_id || "", "");
       const endpoint = editingProjectId
         ? `/v1/admin/projects/${encodeURIComponent(editingProjectId)}`
         : "/v1/admin/projects";
       const method = editingProjectId ? "PATCH" : "POST";
-      const response = await callApi(endpoint, {
-        method,
-        headers: headers(),
-        body: JSON.stringify(payload),
-        audit: {
-          page: "project-config",
-          module: editingProjectId ? "project_registry_update" : "project_registry_create",
-        },
-      });
-      const savedProject = response?.project || null;
-      await loadProjectRegistryStudio("project-config", {
-        selectProjectId: savedProject?.project_id || savedProject?.id || editingProjectId,
-        resetStudio: false,
-        preserveDraft: false,
-      });
-      showMessage(localizedCopy({
-        EN: editingProjectId ? "Project registry record updated." : "Project registry record created.",
-        PT: editingProjectId ? "Registo do projeto atualizado." : "Registo do projeto criado.",
-        FR: editingProjectId ? "Fiche projet mise a jour." : "Fiche projet creee.",
-      }), "good");
-      return savedProject;
+      try {
+        const requestHeaders = headers();
+        if (!editingProjectId) {
+          state.projectCreateIdempotencyKey = state.projectCreateIdempotencyKey || window.crypto.randomUUID();
+          requestHeaders["X-Idempotency-Key"] = state.projectCreateIdempotencyKey;
+        }
+        if (state.workspaceVersion) requestHeaders["X-Workspace-Version"] = String(state.workspaceVersion);
+        const response = await callApi(endpoint, {
+          method,
+          headers: requestHeaders,
+          body: JSON.stringify(payload),
+          audit: {
+            page: "project-config",
+            module: editingProjectId ? "project_registry_update" : "project_registry_create",
+          },
+        });
+        const savedProject = response?.project || null;
+        if (!editingProjectId) state.projectCreateIdempotencyKey = "";
+        await loadProjectRegistryStudio("project-config", {
+          selectProjectId: savedProject?.project_id || savedProject?.id || editingProjectId,
+          resetStudio: false,
+          preserveDraft: false,
+        });
+        showMessage(localizedCopy({
+          EN: editingProjectId ? "Project registry record updated." : "Project registry record created.",
+          PT: editingProjectId ? "Registo do projeto atualizado." : "Registo do projeto criado.",
+          FR: editingProjectId ? "Fiche projet mise a jour." : "Fiche projet creee.",
+        }), "good");
+        return savedProject;
+      } finally {
+        endOperation("project-save", operationControls);
+      }
     }
 
     async function runProjectRegistryAction(action, projectId, options = {}) {
@@ -24062,13 +24104,13 @@
       const box = document.getElementById("channelStatusBox");
       box.innerHTML = "";
       [
-        ["Webhook", status?.webhook?.configured, status?.webhook?.provider || "generic_webhook"],
-        ["Email", status?.email?.configured, status?.email?.default_provider || "not configured"],
-        ["WhatsApp", status?.whatsapp?.configured, status?.whatsapp?.default_provider || "not configured"],
-      ].forEach(([label, configured, detail]) => {
+        ["In-app", true, true, "internal"],
+        ["Email", status?.email?.configured, status?.email?.enabled, status?.email?.default_provider || "not configured"],
+      ].forEach(([label, configured, enabled, detail]) => {
         const chip = document.createElement("div");
         chip.className = "status-chip";
-        chip.innerHTML = `<span><strong>${translateLiteralText(label)}</strong><div class="subtle">${translateLiteralText(textSafe(detail))}</div></span><span class="pill">${translateLiteralText(configured ? "Configured" : "Missing")}</span>`;
+        const stateLabel = enabled ? (configured ? "Enabled" : "Missing") : "Disabled";
+        chip.innerHTML = `<span><strong>${translateLiteralText(label)}</strong><div class="subtle">${translateLiteralText(textSafe(detail))}</div></span><span class="pill">${translateLiteralText(stateLabel)}</span>`;
         box.appendChild(chip);
       });
       if (!box.innerHTML) box.innerHTML = `<div class='muted-box'>${presentText("No notification channel status available.")}</div>`;
@@ -24078,15 +24120,10 @@
       const select = document.getElementById(selectId);
       const channels = state.channels || {};
       const defs = {
-        webhook: [{ value: "generic_webhook", label: translateLiteralText("Generic webhook") }],
+        in_app: [{ value: "internal", label: translateLiteralText("Internal") }],
         email: [
           { value: "smtp", label: "SMTP" },
           { value: "sendgrid", label: "SendGrid" },
-        ],
-        whatsapp: [
-          { value: "webhook", label: translateLiteralText("Webhook relay") },
-          { value: "twilio", label: "Twilio" },
-          { value: "meta_cloud", label: "Meta Cloud" },
         ],
       };
       select.innerHTML = "";
@@ -24098,8 +24135,7 @@
       });
       const defaultProvider =
         channel === "email" ? channels.email?.default_provider :
-        channel === "whatsapp" ? channels.whatsapp?.default_provider :
-        channels.webhook?.provider || "generic_webhook";
+        "internal";
       if (defaultProvider && [...select.options].some(option => option.value === defaultProvider)) {
         select.value = defaultProvider;
       }
@@ -24436,16 +24472,19 @@
         });
         return;
       }
-      const preservedDraft = options.preserveDraft !== false ? currentProjectStudioDraft() : null;
       try {
         const payload = await callApi("/v1/admin/projects", {
           headers: headers(false),
           audit: { page: normalizedView, module: "project_registry" },
         });
+        // Capture after the request: edits made while it was in flight belong
+        // to the current draft and must survive the registry refresh.
+        const preservedDraft = options.preserveDraft !== false ? currentProjectStudioDraft() : null;
         state.adminProjects = payload.items || [];
         state.projectRegistryUsers = payload.assignable_users || [];
         state.projectRegistryTeams = payload.teams || [];
         state.projectRegistrySummary = payload.summary || null;
+        state.workspaceVersion = Number(payload.workspace_version || 0);
         renderProjectRegistrySummary();
         renderProjectRegistry();
         const preferredProjectId = textSafe(options.selectProjectId || state.selectedRegistryProjectId || "", "");
@@ -24635,7 +24674,7 @@
                 PT: "O workspace de governanca da organizacao esta ativo. Os modulos operacionais de projeto nao sao carregados por defeito para este papel.",
                 FR: "Le workspace de gouvernance de l'organisation est actif. Les modules operationnels projet ne sont pas charges par defaut pour ce role.",
               })
-            : "No demo workspace is loaded yet. Seed the demo workspace from Admin / Access or Studio Lab after login."
+            : "No demo workspace is loaded yet. Demo initialization is available only through trusted setup."
       );
 
       renderOverviewCommandHeader(workspace);
@@ -24843,21 +24882,20 @@
 
     async function loadSecurityPanels() {
       renderCurrentUser();
-      if (authTokenInput.value.trim()) {
+      if (state.currentUser) {
         try {
           const me = await callApi("/v1/auth/me", {
             headers: headers(false),
             audit: { page: state.currentView || "overview", module: "session_identity" },
           });
           state.currentUser = me.user;
-          persistSessionState();
         } catch (error) {
           if (error.status === 401) {
             state.currentUser = null;
             clearPersistedSessionState();
             renderCurrentUser();
             showLoginShell();
-            setLoginBanner(presentText("The current session token is not valid anymore. Please log in again."), "warn");
+            setLoginBanner(presentText("The current browser session is no longer valid. Please log in again."), "warn");
             clearProtectedPanels();
             throw error;
           }
@@ -25094,7 +25132,7 @@
       } catch (error) {
         if (error.status === 401) {
           state.currentUser = null;
-          authTokenInput.value = "";
+          state.csrfToken = "";
           syncSessionMirrors();
           clearPersistedSessionState();
           clearProtectedPanels();
@@ -25176,26 +25214,34 @@
     }
 
     async function seedDemoWorkspace() {
+      if (!beginOperation("demo-seed", ["seedSetupBtn", "seedDemoBtn", "seedAndRefreshBtn"], "Initializing the trusted demo workspace...")) return;
+      const setupTokenField = document.getElementById("setupToken");
+      const setupToken = setupTokenField.value.trim();
+      setupTokenField.value = "";
       try {
-        const result = await callApi("/v1/demo/seed", {
+        if (!setupToken) {
+          throw new Error("Trusted setup authorization is required to initialize the demo workspace.");
+        }
+        await callApi("/v1/demo/seed", {
           method: "POST",
-          headers: headers(),
+          headers: { ...headers(), "X-Setup-Token": setupToken },
         });
-        authTokenInput.value = result.login?.token || "";
-        document.getElementById("bootstrapUsername").value = result.login?.email || result.login?.username || "amina.duarte@bluedelta.org";
-        document.getElementById("bootstrapPassword").value = result.login?.password || "";
-        state.currentUser = result.user || null;
-        state.demoCredentials = result.credentials || [];
+        state.csrfToken = "";
+        document.getElementById("bootstrapPassword").value = "";
+        state.currentUser = null;
+        state.demoCredentials = [];
         syncSessionMirrors();
-        persistSessionState();
+        clearPersistedSessionState();
+        clearProtectedPanels();
         renderCurrentUser();
-        renderDemoCredentials(result.credentials || []);
-        setLoginBanner(presentText("Demo workspace seeded successfully. The organization admin session has been loaded."), "good");
-        showMessage(presentText("Demo workspace seeded and ready."), "good");
-        showAppShell();
-        await refreshAll();
+        renderDemoCredentials([]);
+        setLoginBanner(presentText("Demo workspace initialized. Sign in with credentials supplied through the approved setup channel."), "good");
+        showMessage(presentText("Demo workspace initialized. Sign in to continue."), "good");
+        showLoginShell();
       } catch (error) {
         showMessage(error.message, "bad");
+      } finally {
+        endOperation("demo-seed", ["seedSetupBtn", "seedDemoBtn", "seedAndRefreshBtn"]);
       }
     }
 
@@ -25253,7 +25299,24 @@
       }
     }
 
-    function logoutSession() {
+    async function logoutSession(options = {}) {
+      if (state.pendingOperations.logout) return;
+      const remote = Boolean(options.remote);
+      let revocationWarning = "";
+      if (!remote) beginOperation("logout", ["logoutBtn", "pmSidebarLogoutBtn"], "Signing out...");
+      if (!remote && state.currentUser) {
+        try {
+          await callApi("/v1/auth/logout", {
+            method: "POST",
+            headers: headers(false),
+            audit: { page: state.currentView, module: "session_logout" },
+          });
+        } catch (error) {
+          if (error.status !== 401) {
+            revocationWarning = presentText("The local session was cleared, but server revocation could not be confirmed.");
+          }
+        }
+      }
       state.currentUser = null;
       state.lastAuthenticatedRoleId = "";
       state.users = [];
@@ -25266,7 +25329,9 @@
       closeLogicalFrameworkDrawer();
       state.programmePortfolioWorkplans = [];
       state.programmePortfolioLoadState = "idle";
-      authTokenInput.value = "";
+      state.workspaceVersion = 0;
+      state.projectCreateIdempotencyKey = "";
+      state.csrfToken = "";
       apiKeyInput.value = "";
       syncSessionMirrors();
       clearPersistedSessionState();
@@ -25274,9 +25339,22 @@
       renderCurrentUser();
       renderTaskDrawer();
       setSessionWarning("");
-      setLoginBanner(presentText("You have been logged out. Sign in again to continue."), "info");
+      setLoginBanner(
+        revocationWarning || presentText("You have been logged out. Sign in again to continue."),
+        revocationWarning ? "warn" : "info",
+      );
       showLoginShell();
+      if (!remote) {
+        window.localStorage.setItem(SESSION_SIGNAL_STORAGE_KEY, `logout:${Date.now()}`);
+      }
+      if (!remote) endOperation("logout", ["logoutBtn", "pmSidebarLogoutBtn"]);
     }
+
+    window.addEventListener("storage", event => {
+      if (event.key === SESSION_SIGNAL_STORAGE_KEY && String(event.newValue || "").startsWith("logout:") && state.currentUser) {
+        logoutSession({ remote: true });
+      }
+    });
 
     function focusWorkspaceSection(sectionTarget) {
       const safeTarget = textSafe(sectionTarget || "", "");
@@ -25346,12 +25424,7 @@
       apiKeyInput.value = event.target.value;
       syncSessionMirrors();
     });
-    adminAuthTokenMirror.addEventListener("input", event => {
-      authTokenInput.value = event.target.value;
-      syncSessionMirrors();
-    });
     apiKeyInput.addEventListener("input", syncSessionMirrors);
-    authTokenInput.addEventListener("input", syncSessionMirrors);
     document.addEventListener("click", async event => {
       const trigger = event.target.closest("[data-overview-action]");
       if (!trigger) return;
@@ -25589,6 +25662,7 @@
       }
     });
     document.getElementById("logoutBtn").addEventListener("click", logoutSession);
+    document.getElementById("seedSetupBtn").addEventListener("click", seedDemoWorkspace);
     document.getElementById("seedDemoBtn").addEventListener("click", seedDemoWorkspace);
     document.getElementById("seedAndRefreshBtn").addEventListener("click", seedDemoWorkspace);
     document.getElementById("previewReportBtn").addEventListener("click", previewReport);
@@ -25711,11 +25785,11 @@
 
     document.getElementById("whoAmIBtn").addEventListener("click", async () => {
       if (!hasAdvancedCredentials()) {
-        setLoginBanner(presentText("Provide a token or log in first to validate an existing session."), "warn");
+        setLoginBanner(presentText("Log in first to validate the current browser session."), "warn");
         return;
       }
       try {
-        if (authTokenInput.value.trim()) {
+        if (state.currentUser) {
           const payload = await callApi("/v1/auth/me", { headers: headers(false) });
           state.currentUser = payload.user;
         } else {
@@ -25732,7 +25806,6 @@
           };
         }
         syncSessionMirrors();
-        persistSessionState();
         renderCurrentUser();
         setLoginBanner(presentText(`Authenticated as ${state.currentUser.full_name || state.currentUser.email || state.currentUser.username}.`), "good");
         showAppShell();
@@ -25746,6 +25819,7 @@
     });
 
     document.getElementById("bootstrapBtn").addEventListener("click", async () => {
+      if (!beginOperation("bootstrap", ["bootstrapBtn", "loginBtn"], "Completing secure setup...")) return;
       try {
         const payload = {
           username: document.getElementById("bootstrapUsername").value.trim(),
@@ -25757,23 +25831,27 @@
         };
         const result = await callApi("/v1/auth/bootstrap", {
           method: "POST",
-          headers: headers(),
+          headers: { ...headers(), "X-Setup-Token": document.getElementById("setupToken").value.trim() },
           body: JSON.stringify(payload),
         });
-        authTokenInput.value = result.token || "";
-        state.currentUser = result.user;
+        state.csrfToken = "";
+        state.currentUser = null;
         syncSessionMirrors();
-        persistSessionState();
+        clearPersistedSessionState();
         renderCurrentUser();
-        setLoginBanner(presentText("Bootstrap completed. Admin session is ready."), "good");
-        showAppShell();
-        await refreshAll();
+        document.getElementById("bootstrapPassword").value = "";
+        document.getElementById("setupToken").value = "";
+        setLoginBanner(presentText("Initial setup completed. Sign in with the administrator account."), "good");
+        showLoginShell();
       } catch (error) {
         showMessage(error.message, "bad");
+      } finally {
+        endOperation("bootstrap", ["bootstrapBtn", "loginBtn"]);
       }
     });
 
     document.getElementById("loginBtn").addEventListener("click", async () => {
+      if (!beginOperation("login", ["loginBtn", "bootstrapBtn"], "Signing in...")) return;
       try {
         const payload = {
           email: document.getElementById("bootstrapUsername").value.trim(),
@@ -25784,10 +25862,9 @@
           headers: headers(),
           body: JSON.stringify(payload),
         });
-        authTokenInput.value = result.token || "";
+        state.csrfToken = readCsrfCookie();
         state.currentUser = result.user;
         syncSessionMirrors();
-        persistSessionState();
         renderCurrentUser();
         setLoginBanner(presentText(`Logged in as ${result.user.full_name || result.user.email || result.user.username}.`), "good");
         showAppShell();
@@ -25795,6 +25872,8 @@
       } catch (error) {
         clearPersistedSessionState();
         showMessage(error.message, "bad");
+      } finally {
+        endOperation("login", ["loginBtn", "bootstrapBtn"]);
       }
     });
 
@@ -25859,7 +25938,6 @@
           max_items: 10,
         };
         if (channel === "email") payload.email_to = recipients;
-        if (channel === "whatsapp") payload.whatsapp_to = recipients;
         const result = await callApi("/v1/notifications/dispatch", {
           method: "POST",
           headers: headers(),
@@ -26111,7 +26189,37 @@
       }
     });
 
-    restorePersistedSessionState();
+    async function restoreBrowserSession() {
+      restorePersistedSessionState();
+      try {
+        const me = await callApi("/v1/auth/me", {
+          headers: headers(false),
+          audit: { page: "overview", module: "session_restore" },
+        });
+        state.currentUser = me.user;
+        state.csrfToken = readCsrfCookie();
+        if (!state.csrfToken) {
+          await callApi("/v1/auth/csrf", {
+            headers: headers(false),
+            audit: { page: "overview", module: "csrf_restore" },
+          });
+          state.csrfToken = readCsrfCookie();
+        }
+        renderCurrentUser();
+        showAppShell();
+        await refreshAll();
+      } catch (error) {
+        state.currentUser = null;
+        state.csrfToken = "";
+        clearProtectedPanels();
+        renderCurrentUser();
+        showLoginShell();
+        if (error.status && error.status !== 401) {
+          setLoginBanner(error.message, "warn");
+        }
+      }
+    }
+
     syncSessionMirrors();
     syncUiLanguage({ rerender: false });
     applyPresentationMode();
@@ -26121,14 +26229,8 @@
     resetUserForm();
     resetTeamForm();
     setActiveView("overview");
-    if (authTokenInput.value.trim()) {
-      showAppShell();
-      refreshAll().catch(() => {
-        showLoginShell();
-      });
-    } else {
-      showLoginShell();
-    }
+    showLoginShell();
+    restoreBrowserSession();
     splashScreen.addEventListener("click", dismissSplash);
     window.setTimeout(dismissSplash, 3200);
     window.addEventListener("keydown", event => {

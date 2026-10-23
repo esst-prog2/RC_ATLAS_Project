@@ -123,11 +123,15 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn("window.localStorage.setItem(\"logitrack.uiLanguage\"", self.html)
 
     def test_session_persistence_and_multi_org_auth_shell_present(self):
-        self.assertIn('const AUTH_TOKEN_STORAGE_KEY = "rcatlas.authToken";', self.html)
-        self.assertIn('const SESSION_USER_STORAGE_KEY = "rcatlas.sessionUser";', self.html)
-        self.assertIn("function persistSessionState()", self.html)
+        self.assertIn('const SESSION_SIGNAL_STORAGE_KEY = "rcatlas.sessionSignal";', self.html)
+        self.assertIn('const LEGACY_AUTH_TOKEN_STORAGE_KEY = "rcatlas.authToken";', self.html)
         self.assertIn("function clearPersistedSessionState()", self.html)
         self.assertIn("function restorePersistedSessionState()", self.html)
+        self.assertIn('fetchOptions.credentials = "same-origin";', self.html)
+        self.assertIn('requestHeaders.set("X-CSRF-Token", state.csrfToken);', self.html)
+        self.assertNotIn("localStorage.setItem(AUTH_TOKEN_STORAGE_KEY", self.html)
+        self.assertNotIn("localStorage.setItem(SESSION_USER_STORAGE_KEY", self.html)
+        self.assertNotIn('id="authToken"', self.html)
         self.assertIn('payload = {', self.html)
         self.assertIn('email: document.getElementById("bootstrapUsername").value.trim(),', self.html)
         self.assertIn('organization_name: state.workspace?.organization?.organization_name || "Blue Delta Consortium",', self.html)
@@ -1040,6 +1044,33 @@ class StudioUiTests(unittest.TestCase):
         self.assertIn('id="pmWorkplanTable"', self.html)
         self.assertIn('class="task-drawer-shell hidden"', self.html)
         self.assertNotIn("progress_weighted_pct =", self.html)
+
+    def test_wave_one_session_operation_and_channel_contracts_are_visible_in_source(self):
+        self.assertIn('role="status" aria-live="polite" aria-atomic="true"', self.html)
+        self.assertIn("function beginOperation", self.html)
+        self.assertIn('showMessage(presentText(pendingText), "info", { persistent: true })', self.html)
+        self.assertIn('if (flashBox.dataset.operationKey === key) clearFlash();', self.html)
+        self.assertIn('beginOperation("project-save"', self.html)
+        self.assertIn('requestHeaders["X-Idempotency-Key"]', self.html)
+        self.assertIn('requestHeaders["X-Workspace-Version"]', self.html)
+        self.assertIn('await callApi("/v1/auth/logout"', self.html)
+        self.assertIn('revocationWarning ? "warn" : "info"', self.html)
+        self.assertIn('window.addEventListener("storage"', self.html)
+        self.assertIn('hidden data-trusted-setup="disabled"', self.html)
+        self.assertIn('"X-Setup-Token": document.getElementById("setupToken").value.trim()', self.html)
+        self.assertIn('beginOperation("demo-seed"', self.html)
+        self.assertIn('headers: { ...headers(), "X-Setup-Token": setupToken }', self.html)
+        self.assertIn("Credentials are never displayed.", self.html)
+        self.assertNotIn("result.login", self.html)
+        self.assertNotIn("result.credentials", self.html)
+        self.assertNotIn("item.password", self.html)
+        self.assertIn('<option value="in_app">In-app</option>', self.html)
+        channel_markup = self.html.split('id="channel"', 1)[1].split('</select>', 1)[0]
+        rule_markup = self.html.split('id="ruleChannel"', 1)[1].split('</select>', 1)[0]
+        self.assertNotIn('value="webhook"', channel_markup)
+        self.assertNotIn('value="whatsapp"', channel_markup)
+        self.assertNotIn('value="webhook"', rule_markup)
+        self.assertNotIn('value="whatsapp"', rule_markup)
 
 
 if __name__ == "__main__":

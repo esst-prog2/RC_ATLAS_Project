@@ -1,4 +1,5 @@
 import copy
+import sqlite3
 import tempfile
 import unittest
 from datetime import date, timedelta
@@ -23,9 +24,12 @@ class AssignmentAwareTaskWorkflowTests(unittest.TestCase):
             LOGITRACK_ENABLE_RELATIONAL_MIRROR="false",
             LOGITRACK_ENABLE_REPOSITORY_DOMAINS="false",
             LOGITRACK_API_KEY=None,
+            LOGITRACK_SETUP_ENABLED="true",
+            LOGITRACK_SETUP_TOKEN="synthetic-assignment-setup-token",
+            LOGITRACK_DEMO_SETUP_ENABLED="true",
         )
         self.environment.__enter__()
-        MODULE.demo_workspace_service.seed_workspace(None, None)
+        MODULE.demo_workspace_service.seed_workspace(None, None, "synthetic-assignment-setup-token")
         data = MODULE.load_data_from_path()
         self.tokens = {}
         for username in ("org.admin", "teresa.mbanze", "aline.duarte", "raimundo.cumba", "executive.director"):
@@ -379,6 +383,86 @@ class AssignmentAwareTaskWorkflowTests(unittest.TestCase):
             (task.assignee_user_id, task.review_mode, task.evidence_required, task.review_stage),
             (self.ids["teresa.mbanze"], "direct_completion", False, "execution"),
         )
+
+    def test_standalone_activity_retains_tenant_ownership_for_later_task(self):
+        data = MODULE.load_data_from_path()
+        project = MODULE.find_project(data, self.project_id)
+        indicator_id = project.indicators[0].id
+        created = self.client.post(
+            f"/v1/projects/{self.project_id}/activities",
+            headers=self.headers("teresa.mbanze"),
+            json={
+                "id": "activity_standalone_owned",
+                "name": "Standalone owned activity",
+                "organization_id": "org_payload_must_not_override",
+                "linked_indicator_ids": [indicator_id],
+            },
+        )
+        self.assertEqual(created.status_code, 200, created.text)
+        reloaded = MODULE.load_data_from_path()
+        activity = MODULE.find_activity(reloaded.ops_by_project[self.project_id], "activity_standalone_owned")
+        self.assertEqual(activity.organization_id, project.organization_id)
+
+        task = self.client.post(
+            f"/v1/projects/{self.project_id}/activities/activity_standalone_owned/tasks",
+            headers=self.headers("teresa.mbanze"),
+            json={
+                "id": "task_standalone_owned",
+                "name": "Later standalone task",
+                "assignee_user_id": self.ids["teresa.mbanze"],
+                "assignee_username": "teresa.mbanze",
+                "review_mode": "direct_completion",
+                "evidence_required": False,
+            },
+        )
+        self.assertEqual(task.status_code, 200, task.text)
+        self.assertEqual(task.json()["activity_id"], "activity_standalone_owned")
+
+        persisted = MODULE.load_data_from_path()
+        persisted_activity = MODULE.find_activity(
+            persisted.ops_by_project[self.project_id],
+            "activity_standalone_owned",
+        )
+        self.assertEqual(persisted_activity.organization_id, project.organization_id)
+
+        sqlite_path = str(Path(self.temp_dir.name) / "activity-ownership.sqlite3")
+        MODULE.save_sqlite(persisted, sqlite_path)
+        sqlite_reloaded = MODULE.load_sqlite(sqlite_path)
+        sqlite_activity = MODULE.find_activity(
+            sqlite_reloaded.ops_by_project[self.project_id],
+            "activity_standalone_owned",
+        )
+        self.assertEqual(sqlite_activity.organization_id, project.organization_id)
+
+        projection_path = str(Path(self.temp_dir.name) / "activity-projection.sqlite3")
+        MODULE.sync_snapshot_to_relational_store(
+            MODULE.to_serializable(sqlite_reloaded),
+            db_path=projection_path,
+            source_backend="sqlite",
+            source_path=sqlite_path,
+        )
+        connection = sqlite3.connect(projection_path)
+        try:
+            row = connection.execute(
+                """
+                SELECT projects.organization_id,
+                       operational_activities.organization_id,
+                       tasks.organization_id,
+                       operational_activities.project_id
+                FROM operational_activities
+                JOIN projects ON projects.project_id = operational_activities.project_id
+                JOIN tasks ON tasks.activity_id = operational_activities.activity_id
+                WHERE operational_activities.activity_id = ?
+                """,
+                ("activity_standalone_owned",),
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual(
+            row,
+            (project.organization_id, project.organization_id, project.organization_id, self.project_id),
+        )
+
     def test_escalation_preserves_routing(self):
         task_id = self.start("Escalation")
         before = self.task_record(task_id)[2]

@@ -24,6 +24,9 @@ import sqlite3
 import smtplib
 import tempfile
 import threading
+from logitrack_platform.postgresql_store import (
+    PostgreSQLStore, ConfigurationError, PersistenceError, VersionConflict,
+)
 import time
 from io import StringIO
 from pathlib import Path
@@ -85,8 +88,10 @@ from services import (
 )
 try:
     from shared import (
+        ApiSession,
         AuditEvent,
         DashboardTemplate,
+        IdempotencyRecord,
         IndicatorResultLink,
         NotificationRule,
         OrganizationAccount,
@@ -99,8 +104,10 @@ try:
     )
 except ImportError:
     from shared import (
+        ApiSession,
         AuditEvent,
         DashboardTemplate,
+        IdempotencyRecord,
         IndicatorResultLink,
         NotificationRule,
         OrganizationAccount,
@@ -128,15 +135,17 @@ except ImportError:
 # OPTIONAL API IMPORTS
 # ----------------------------
 try:
-    from fastapi import FastAPI, Header, HTTPException
+    from fastapi import FastAPI, Header, HTTPException, Request
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import HTMLResponse, Response
+    from fastapi.responses import HTMLResponse, JSONResponse, Response
 except Exception:
     FastAPI = None
     Header = None
     HTTPException = None
+    Request = None
     CORSMiddleware = None
     HTMLResponse = None
+    JSONResponse = None
     Response = None
 
 # ----------------------------
@@ -723,6 +732,9 @@ class LogiTrackData:
     notification_rules: List[NotificationRule] = field(default_factory=list)
     users: List[UserAccount] = field(default_factory=list)
     audit_events: List[AuditEvent] = field(default_factory=list)
+    sessions: List[ApiSession] = field(default_factory=list)
+    idempotency_records: List[IdempotencyRecord] = field(default_factory=list)
+    workspace_version: int = 0
 
 def new_id(prefix: str) -> str:
     return f"{prefix}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
@@ -1095,6 +1107,43 @@ def from_serializable(d: dict) -> LogiTrackData:
             details=details if isinstance(details, dict) else {},
         ))
 
+    sessions: List[ApiSession] = []
+    for item in d.get("sessions", []) or []:
+        if not isinstance(item, dict):
+            continue
+        sessions.append(ApiSession(
+            id=str(item.get("id", "")),
+            token_hash=str(item.get("token_hash", "")),
+            user_id=str(item.get("user_id", "")),
+            organization_id=str(item.get("organization_id", "")),
+            created_at=str(item.get("created_at", "")),
+            last_seen_at=str(item.get("last_seen_at", "")),
+            idle_expires_at=str(item.get("idle_expires_at", "")),
+            absolute_expires_at=str(item.get("absolute_expires_at", "")),
+            csrf_token_hash=str(item.get("csrf_token_hash", "")),
+            revoked_at=str(item.get("revoked_at", "")),
+            revocation_reason=str(item.get("revocation_reason", "")),
+            version=max(1, int(item.get("version", 1) or 1)),
+        ))
+
+    idempotency_records: List[IdempotencyRecord] = []
+    for item in d.get("idempotency_records", []) or []:
+        if not isinstance(item, dict):
+            continue
+        response_payload = item.get("response_payload", {})
+        idempotency_records.append(IdempotencyRecord(
+            id=str(item.get("id", "")),
+            organization_id=str(item.get("organization_id", "")),
+            actor_user_id=str(item.get("actor_user_id", "")),
+            operation=str(item.get("operation", "")),
+            key_hash=str(item.get("key_hash", "")),
+            request_hash=str(item.get("request_hash", "")),
+            response_payload=response_payload if isinstance(response_payload, dict) else {},
+            resource_id=str(item.get("resource_id", "")),
+            created_at=str(item.get("created_at", "")),
+            expires_at=str(item.get("expires_at", "")),
+        ))
+
     loaded = LogiTrackData(
         organizations=organizations,
         teams=teams,
@@ -1109,6 +1158,9 @@ def from_serializable(d: dict) -> LogiTrackData:
         notification_rules=notification_rules,
         users=users,
         audit_events=audit_events,
+        sessions=sessions,
+        idempotency_records=idempotency_records,
+        workspace_version=max(0, int(d.get("workspace_version", 0) or 0)),
     )
     if loaded.logical_framework_results or loaded.indicator_result_links:
         validate_snapshot_logical_framework(loaded)
@@ -1116,8 +1168,12 @@ def from_serializable(d: dict) -> LogiTrackData:
 
 def get_storage_backend() -> str:
     raw = (os.getenv("LOGITRACK_STORAGE_BACKEND", "") or "").strip().lower()
-    if raw in {"json", "sqlite"}:
+    if os.getenv("LOGITRACK_ENVIRONMENT", "").strip().lower() == "production" and not raw:
+        raise ConfigurationError("Production requires an explicitly selected persistence backend.")
+    if raw in {"json", "sqlite", "postgresql"}:
         return raw
+    if raw:
+        raise ConfigurationError("Unknown persistence backend.")
     if (os.getenv("LOGITRACK_SQLITE_PATH", "") or "").strip():
         return "sqlite"
     return "json"
@@ -1140,6 +1196,8 @@ def get_data_path(path: Optional[str] = None) -> str:
 
 def get_storage_target_path(path: Optional[str] = None, backend: Optional[str] = None) -> str:
     selected_backend = backend or get_storage_backend()
+    if selected_backend == "postgresql":
+        return "postgresql"
     if selected_backend == "sqlite":
         return get_sqlite_data_path(path)
     return get_json_data_path(path)
@@ -1294,6 +1352,8 @@ def load_sqlite(path: str) -> LogiTrackData:
 
 def load_data_from_path(path: Optional[str] = None) -> LogiTrackData:
     backend = get_storage_backend()
+    if backend == "postgresql":
+        return from_serializable(PostgreSQLStore().load())
     target = get_storage_target_path(path, backend=backend)
     serialized_snapshot: Dict[str, Any]
     if backend == "sqlite":
@@ -1329,12 +1389,15 @@ def load_data_from_path(path: Optional[str] = None) -> LogiTrackData:
     return loaded
 
 def get_cors_origins() -> List[str]:
-    raw = (os.getenv("LOGITRACK_API_ALLOW_ORIGINS", "*") or "").strip()
+    raw = (os.getenv("LOGITRACK_API_ALLOW_ORIGINS", "") or "").strip()
     origins = [item.strip() for item in raw.split(",") if item.strip()]
-    return origins or ["*"]
+    return origins
 
 def save_canonical_data_to_path(data: LogiTrackData, path: Optional[str] = None) -> str:
     backend = get_storage_backend()
+    if backend == "postgresql":
+        data.workspace_version = PostgreSQLStore().save(to_serializable(data), data.workspace_version)
+        return "postgresql"
     target = get_storage_target_path(path, backend=backend)
     if backend == "sqlite":
         save_sqlite(data, target)
@@ -1349,6 +1412,8 @@ def save_data_to_path(data: LogiTrackData, path: Optional[str] = None) -> str:
 
 def get_storage_status(path: Optional[str] = None) -> Dict[str, Any]:
     backend = get_storage_backend()
+    if backend == "postgresql":
+        return PostgreSQLStore().status()
     target = get_storage_target_path(path, backend=backend)
     exists = os.path.exists(target)
     size_bytes = os.path.getsize(target) if exists else 0
@@ -1446,6 +1511,8 @@ def update_relational_store_from_data(data: LogiTrackData, source_path: str = ""
     return result
 
 def safe_get_relational_store_status(source_path: str = "") -> Dict[str, Any]:
+    if get_storage_backend() == "postgresql":
+        return {"mirror_enabled": False, "exists": False, "canonical_backend": "postgresql"}
     try:
         status = get_relational_store_status(get_relational_store_path(source_path or get_storage_target_path()))
         status["mirror_enabled"] = relational_mirror_enabled_setting()
@@ -1461,6 +1528,8 @@ def safe_get_relational_store_status(source_path: str = "") -> Dict[str, Any]:
         }
 
 def safe_get_repository_domain_status(source_path: str = "") -> Dict[str, Any]:
+    if get_storage_backend() == "postgresql":
+        return {"enabled": False, "canonical_backend": "postgresql"}
     status = safe_get_repository_sync_status(
         db_path=get_relational_store_path(source_path or get_storage_target_path()),
     )
@@ -1610,6 +1679,111 @@ def env_flag(name: str, default: bool = False) -> bool:
         return default
     return str(raw).strip().lower() in {"1", "true", "yes", "on"}
 
+def bounded_int_setting(name: str, default: int, minimum: int, maximum: int) -> int:
+    raw = (os.getenv(name, str(default)) or str(default)).strip()
+    try:
+        value = int(raw)
+    except Exception:
+        return default
+    return max(minimum, min(maximum, value))
+
+def setup_enabled_setting() -> bool:
+    return env_flag("LOGITRACK_SETUP_ENABLED", False)
+
+def setup_access_token_setting() -> str:
+    return str(os.getenv("LOGITRACK_SETUP_TOKEN", "") or "").strip()
+
+def trusted_setup_enabled_setting() -> bool:
+    return setup_enabled_setting() and bool(setup_access_token_setting())
+
+def require_trusted_setup(x_setup_token: Optional[str]) -> None:
+    if not setup_enabled_setting():
+        raise HTTPException(status_code=403, detail="Initial setup is disabled for this deployment.")
+    configured_token = setup_access_token_setting()
+    if not configured_token:
+        raise HTTPException(status_code=503, detail="Initial setup is not securely configured.")
+    supplied_token = str(x_setup_token or "").strip()
+    if not supplied_token or not secrets.compare_digest(supplied_token, configured_token):
+        raise HTTPException(status_code=403, detail="Initial setup authorization failed.")
+
+def demo_setup_enabled_setting() -> bool:
+    return env_flag("LOGITRACK_DEMO_SETUP_ENABLED", False)
+
+def session_idle_minutes_setting() -> int:
+    return bounded_int_setting("LOGITRACK_SESSION_IDLE_MINUTES", 30, 5, 1440)
+
+def session_absolute_hours_setting() -> int:
+    return bounded_int_setting("LOGITRACK_SESSION_ABSOLUTE_HOURS", 8, 1, 168)
+
+def runtime_environment_setting() -> str:
+    return str(os.getenv("LOGITRACK_ENVIRONMENT", "production") or "production").strip().lower()
+
+def session_cookie_secure_setting() -> bool:
+    return env_flag("LOGITRACK_SESSION_COOKIE_SECURE", True)
+
+def session_cookie_samesite_setting() -> str:
+    configured = str(os.getenv("LOGITRACK_SESSION_COOKIE_SAMESITE", "lax") or "lax").strip().lower()
+    return configured if configured in {"lax", "strict"} else "lax"
+
+def session_cookie_name_setting() -> str:
+    return "__Host-rcatlas_session" if session_cookie_secure_setting() else "rcatlas_session_dev"
+
+def csrf_cookie_name_setting() -> str:
+    return "__Host-rcatlas_csrf" if session_cookie_secure_setting() else "rcatlas_csrf_dev"
+
+def api_token_login_enabled_setting() -> bool:
+    return env_flag("LOGITRACK_API_TOKEN_LOGIN_ENABLED", False)
+
+def validate_browser_cookie_configuration(request: Request) -> None:
+    if session_cookie_secure_setting():
+        return
+    hostname = str(request.url.hostname or "").strip().lower()
+    if runtime_environment_setting() != "development" or hostname not in {"localhost", "127.0.0.1", "::1", "testserver"}:
+        raise HTTPException(
+            status_code=503,
+            detail="Insecure browser session cookies are allowed only for explicit loopback development.",
+        )
+
+def set_browser_session_cookie(response: Response, request: Request, token: str, csrf_token: str) -> None:
+    validate_browser_cookie_configuration(request)
+    response.set_cookie(
+        key=session_cookie_name_setting(),
+        value=token,
+        max_age=session_absolute_hours_setting() * 3600,
+        httponly=True,
+        secure=session_cookie_secure_setting(),
+        samesite=session_cookie_samesite_setting(),
+        path="/",
+    )
+    response.set_cookie(
+        key=csrf_cookie_name_setting(),
+        value=csrf_token,
+        max_age=session_absolute_hours_setting() * 3600,
+        httponly=False,
+        secure=session_cookie_secure_setting(),
+        samesite=session_cookie_samesite_setting(),
+        path="/",
+    )
+
+def clear_browser_session_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key=session_cookie_name_setting(),
+        httponly=True,
+        secure=session_cookie_secure_setting(),
+        samesite=session_cookie_samesite_setting(),
+        path="/",
+    )
+    response.delete_cookie(
+        key=csrf_cookie_name_setting(),
+        httponly=False,
+        secure=session_cookie_secure_setting(),
+        samesite=session_cookie_samesite_setting(),
+        path="/",
+    )
+
+def idempotency_retention_hours_setting() -> int:
+    return bounded_int_setting("LOGITRACK_IDEMPOTENCY_RETENTION_HOURS", 72, 1, 720)
+
 def scheduler_enabled_setting() -> bool:
     return env_flag("LOGITRACK_RUN_SCHEDULER", False)
 
@@ -1621,6 +1795,8 @@ def scheduler_interval_seconds_setting() -> int:
         return 300
 
 def relational_mirror_enabled_setting() -> bool:
+    if get_storage_backend() == "postgresql":
+        return False
     return env_flag("LOGITRACK_ENABLE_RELATIONAL_MIRROR", True)
 
 def relational_sync_strict_setting() -> bool:
@@ -2351,11 +2527,158 @@ def assign_team_members(data: LogiTrackData, organization_id: str, team_id: str,
             user.updated_at = now_iso_utc()
 
 def find_user_by_token(data: LogiTrackData, token: str) -> Optional[UserAccount]:
+    session = find_session_by_token(data, token)
+    if session is None or not session_is_active(session):
+        return None
+    return next((user for user in data.users if user.id == session.user_id), None)
+
+def session_is_active(session: ApiSession, now: Optional[datetime] = None) -> bool:
+    if session.revoked_at:
+        return False
+    current = now or utc_now()
+    idle_expires_at = normalize_utc_datetime(session.idle_expires_at)
+    absolute_expires_at = normalize_utc_datetime(session.absolute_expires_at)
+    return bool(
+        idle_expires_at
+        and absolute_expires_at
+        and current < idle_expires_at
+        and current < absolute_expires_at
+    )
+
+def find_session_by_token(data: LogiTrackData, token: str) -> Optional[ApiSession]:
     token_hash = hash_with_sha256(token)
-    for user in data.users:
-        if user.api_token_hash and secrets.compare_digest(user.api_token_hash, token_hash):
-            return user
+    for session in data.sessions:
+        if session.token_hash and secrets.compare_digest(session.token_hash, token_hash):
+            return session
     return None
+
+def issue_api_session(data: LogiTrackData, user: UserAccount, now: Optional[datetime] = None) -> Tuple[str, ApiSession]:
+    current = (now or utc_now()).astimezone(timezone.utc)
+    token = new_api_token()
+    session = ApiSession(
+        id=new_id("session"),
+        token_hash=hash_with_sha256(token),
+        user_id=user.id,
+        organization_id=user.organization_id,
+        created_at=current.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        last_seen_at=current.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        idle_expires_at=(current + timedelta(minutes=session_idle_minutes_setting())).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        absolute_expires_at=(current + timedelta(hours=session_absolute_hours_setting())).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    )
+    data.sessions.append(session)
+    return token, session
+
+def rotate_session_csrf_token(session: ApiSession) -> str:
+    token = secrets.token_urlsafe(32)
+    session.csrf_token_hash = hash_with_sha256(token)
+    session.version = max(1, int(session.version or 1)) + 1
+    return token
+
+def register_session_for_token(
+    data: LogiTrackData,
+    user: UserAccount,
+    token: str,
+    now: Optional[datetime] = None,
+) -> ApiSession:
+    """Create a persisted test/migration session without retaining a raw token."""
+    current = (now or utc_now()).astimezone(timezone.utc)
+    session = ApiSession(
+        id=new_id("session"),
+        token_hash=hash_with_sha256(token),
+        user_id=user.id,
+        organization_id=user.organization_id,
+        created_at=current.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        last_seen_at=current.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        idle_expires_at=(current + timedelta(minutes=session_idle_minutes_setting())).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        absolute_expires_at=(current + timedelta(hours=session_absolute_hours_setting())).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    )
+    data.sessions.append(session)
+    return session
+
+def revoke_session(session: ApiSession, reason: str = "logout") -> None:
+    session.revoked_at = now_iso_utc()
+    session.revocation_reason = str(reason or "revoked").strip() or "revoked"
+    session.version = max(1, int(session.version or 1)) + 1
+
+def touch_session(session: ApiSession, now: Optional[datetime] = None) -> bool:
+    current = (now or utc_now()).astimezone(timezone.utc)
+    last_seen_at = normalize_utc_datetime(session.last_seen_at)
+    if last_seen_at is not None and current - last_seen_at < timedelta(minutes=1):
+        return False
+    absolute_expires_at = normalize_utc_datetime(session.absolute_expires_at)
+    proposed_idle = current + timedelta(minutes=session_idle_minutes_setting())
+    if absolute_expires_at is not None:
+        proposed_idle = min(proposed_idle, absolute_expires_at)
+    session.last_seen_at = current.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    session.idle_expires_at = proposed_idle.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    session.version = max(1, int(session.version or 1)) + 1
+    return True
+
+def request_fingerprint(payload: Dict[str, Any]) -> str:
+    serialized = json.dumps(payload or {}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hash_with_sha256(serialized)
+
+def enforce_expected_workspace_version(data: LogiTrackData, raw_version: Optional[str]) -> None:
+    if raw_version in (None, ""):
+        return
+    try:
+        expected = int(str(raw_version).strip())
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="X-Workspace-Version must be an integer.") from exc
+    actual = max(0, int(getattr(data, "workspace_version", 0) or 0))
+    if expected != actual:
+        raise HTTPException(
+            status_code=409,
+            detail="The workspace changed after this view was loaded. Reload and retry.",
+        )
+
+def find_idempotency_record(
+    data: LogiTrackData,
+    organization_id: str,
+    actor_user_id: str,
+    operation: str,
+    key: str,
+) -> Optional[IdempotencyRecord]:
+    key_hash = hash_with_sha256(key)
+    now = utc_now()
+    for record in data.idempotency_records:
+        expires_at = normalize_utc_datetime(record.expires_at)
+        if expires_at is not None and expires_at <= now:
+            continue
+        if (
+            record.organization_id == organization_id
+            and record.actor_user_id == actor_user_id
+            and record.operation == operation
+            and secrets.compare_digest(record.key_hash, key_hash)
+        ):
+            return record
+    return None
+
+def append_idempotency_record(
+    data: LogiTrackData,
+    organization_id: str,
+    actor_user_id: str,
+    operation: str,
+    key: str,
+    payload: Dict[str, Any],
+    response_payload: Dict[str, Any],
+    resource_id: str,
+) -> IdempotencyRecord:
+    current = utc_now()
+    record = IdempotencyRecord(
+        id=new_id("idem"),
+        organization_id=organization_id,
+        actor_user_id=actor_user_id,
+        operation=operation,
+        key_hash=hash_with_sha256(key),
+        request_hash=request_fingerprint(payload),
+        response_payload=json.loads(json.dumps(response_payload, ensure_ascii=False)),
+        resource_id=resource_id,
+        created_at=current.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        expires_at=(current + timedelta(hours=idempotency_retention_hours_setting())).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    )
+    data.idempotency_records.append(record)
+    return record
 
 def append_audit_event(
     data: LogiTrackData,
@@ -3433,12 +3756,15 @@ def build_notification_rule_from_payload(payload: Dict[str, Any], existing: Opti
     else:
         is_active = bool(is_active_raw)
 
+    channel = optional_text_field(payload, "channel", existing.channel if existing else "in_app").lower() or "in_app"
+    if channel not in {"in_app", "email"}:
+        raise ValueError("Unsupported notification channel for v1. Use 'in_app' or 'email'.")
     return NotificationRule(
         id=str(payload.get("id") or (existing.id if existing else new_id("rule"))),
         name=require_text_field(payload, "name"),
         is_active=is_active,
         schedule=optional_text_field(payload, "schedule", existing.schedule if existing else "manual") or "manual",
-        channel=optional_text_field(payload, "channel", existing.channel if existing else "webhook") or "webhook",
+        channel=channel,
         provider=optional_text_field(payload, "provider", existing.provider if existing else ""),
         min_severity=optional_text_field(payload, "min_severity", existing.min_severity if existing else "medium") or "medium",
         condition_type=optional_text_field(payload, "condition_type", existing.condition_type if existing else ""),
@@ -5349,9 +5675,10 @@ def notification_channels_status() -> Dict[str, Any]:
     meta_token = (os.getenv("LOGITRACK_META_WHATSAPP_TOKEN", "") or "").strip()
     meta_phone_id = (os.getenv("LOGITRACK_META_WHATSAPP_PHONE_NUMBER_ID", "") or "").strip()
     return {
-        "webhook": {"configured": bool(generic_webhook), "provider": "generic_webhook"},
+        "in_app": {"configured": True, "enabled": True, "provider": "internal"},
         "email": {
             "configured": bool(smtp_host and smtp_from) or bool(sendgrid_key and sendgrid_from),
+            "enabled": env_flag("LOGITRACK_EMAIL_ENABLED", False),
             "default_provider": "smtp" if (smtp_host and smtp_from) else ("sendgrid" if (sendgrid_key and sendgrid_from) else ""),
             "providers": {
                 "smtp": bool(smtp_host and smtp_from),
@@ -5359,14 +5686,18 @@ def notification_channels_status() -> Dict[str, Any]:
             },
         },
         "whatsapp": {
-            "configured": bool(whatsapp_webhook) or bool(twilio_sid and twilio_token and twilio_from) or bool(meta_token and meta_phone_id),
-            "default_provider": "webhook" if whatsapp_webhook else ("twilio" if (twilio_sid and twilio_token and twilio_from) else ("meta_cloud" if (meta_token and meta_phone_id) else "")),
-            "providers": {
-                "webhook": bool(whatsapp_webhook),
-                "twilio": bool(twilio_sid and twilio_token and twilio_from),
-                "meta_cloud": bool(meta_token and meta_phone_id),
-            },
+            "configured": False,
+            "enabled": False,
+            "deferred": True,
+            "migration_required": bool(whatsapp_webhook or twilio_sid or twilio_token or twilio_from or meta_token or meta_phone_id),
         },
+        "webhook": {
+            "configured": False,
+            "enabled": False,
+            "deferred": True,
+            "migration_required": bool(generic_webhook),
+        },
+        "sms": {"configured": False, "enabled": False, "deferred": True},
     }
 
 def parse_recipients(value: Any) -> List[str]:
@@ -5667,6 +5998,7 @@ def build_activity_from_payload(payload: Dict[str, Any], project: Project) -> Op
 
     activity = OperationalActivity(
         id=str(payload.get("id") or new_id("act")),
+        organization_id=project.organization_id,
         name=require_text_field(payload, "name"),
         owner=optional_text_field(payload, "owner"),
         start_date=parse_optional_date_value(payload.get("start_date"), "start_date"),
@@ -5967,15 +6299,19 @@ def build_health_payload(
     data_error: Optional[str],
 ) -> Dict[str, Any]:
     channels = notification_channels_status()
+    safe_storage = {
+        "backend": storage.get("backend", get_storage_backend()),
+        "exists": bool(storage.get("exists")),
+        "size_bytes": int(storage.get("size_bytes", 0) or 0),
+    }
     return {
         "ok": data_error is None,
         "system": CONFIG["system_name"],
         "version": CONFIG["version"],
-        "data_path": storage["target_path"],
-        "data_file_exists": storage["exists"],
-        "data_file_valid": data_error is None if storage["exists"] else True,
-        "data_error": data_error,
-        "storage": storage,
+        "data_file_exists": safe_storage["exists"],
+        "data_file_valid": data_error is None if safe_storage["exists"] else True,
+        "data_error": "Workspace data unavailable." if data_error else "",
+        "storage": safe_storage,
         "cors_origins": cors_origins,
         "cors_allow_credentials": allow_credentials,
         "write_auth_enabled": bool((os.getenv("LOGITRACK_API_KEY", "") or "").strip()),
@@ -5985,11 +6321,10 @@ def build_health_payload(
         "scheduler_thread_alive": runtime_status["scheduler"]["thread_alive"],
         "scheduler_last_run_at": runtime_status["scheduler"]["last_run_at"],
         "scheduler_last_error": runtime_status["scheduler"]["last_error"],
-        "relational_store": runtime_status["relational_store"],
-        "repository_domains": runtime_status["repository_domains"],
-        "notify_webhook_configured": bool((os.getenv("LOGITRACK_NOTIFY_WEBHOOK_URL", "") or "").strip()),
+        "relational_store": {"enabled": bool(runtime_status["relational_store"].get("enabled"))},
+        "repository_domains": {"enabled": bool(runtime_status["repository_domains"].get("enabled"))},
+        "in_app_notifications_enabled": channels["in_app"]["enabled"],
         "smtp_email_configured": channels["email"]["configured"],
-        "whatsapp_configured": channels["whatsapp"]["configured"],
         "tidy_dataset_count": len(loaded_data.tidy_datasets) if loaded_data else 0,
         "reporting_record_count": len(loaded_data.reporting_records) if loaded_data else 0,
         "semantic_mapping_count": len(loaded_data.semantic_mappings) if loaded_data else 0,
@@ -6052,29 +6387,179 @@ if FastAPI is not None:
         }
 
     def _load_for_api() -> LogiTrackData:
-        path = get_data_path()
         try:
-            return load_data_from_path(path)
-        except json.JSONDecodeError as exc:
-            raise HTTPException(status_code=500, detail=f"Invalid JSON in data file '{path}': {exc}") from exc
+            return load_data_from_path(get_data_path())
         except Exception as exc:
-            raise HTTPException(status_code=500, detail=f"Failed to load data from '{path}': {exc}") from exc
+            LOGGER.error("Canonical workspace load failed (%s).", type(exc).__name__)
+            raise HTTPException(status_code=503 if get_storage_backend() == "postgresql" else 500,
+                                detail="The workspace data is unavailable or invalid.") from exc
 
     def _save_for_api(data: LogiTrackData) -> str:
+        if get_storage_backend() == "postgresql":
+            try:
+                save_canonical_data_to_path(data)
+                return "canonical_store"
+            except VersionConflict as exc:
+                raise HTTPException(status_code=409, detail="The workspace changed. Reload and retry.") from exc
+            except Exception as exc:
+                LOGGER.error("PostgreSQL workspace save failed (%s).", type(exc).__name__)
+                raise HTTPException(status_code=503, detail="The workspace could not be saved.") from exc
+        with DATA_STORE_LOCK:
+            try:
+                persisted = load_data_from_path(get_data_path())
+            except Exception as exc:
+                LOGGER.error("Canonical workspace pre-save check failed (%s).", type(exc).__name__)
+                raise HTTPException(status_code=500, detail="The workspace could not be saved.") from exc
+
+            expected_version = max(0, int(getattr(data, "workspace_version", 0) or 0))
+            actual_version = max(0, int(getattr(persisted, "workspace_version", 0) or 0))
+            if actual_version != expected_version:
+                raise HTTPException(
+                    status_code=409,
+                    detail="The workspace changed after this request began. Reload and retry.",
+                )
+
+            committed_version = expected_version + 1
+            data.workspace_version = committed_version
+            try:
+                save_data_to_path(data)
+            except Exception as exc:
+                canonical_committed = False
+                try:
+                    if get_storage_backend() == "sqlite":
+                        on_disk = load_sqlite(get_sqlite_data_path())
+                    else:
+                        on_disk = load_json(get_json_data_path())
+                    canonical_committed = int(getattr(on_disk, "workspace_version", 0) or 0) == committed_version
+                except Exception:
+                    canonical_committed = False
+                if not canonical_committed:
+                    data.workspace_version = expected_version
+                LOGGER.error("Workspace save failed (%s; canonical_committed=%s).", type(exc).__name__, canonical_committed)
+                if canonical_committed:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Canonical data was committed, but a derived projection could not be refreshed.",
+                    ) from exc
+                raise HTTPException(status_code=500, detail="The workspace could not be saved.") from exc
+        return "canonical_store"
+
+    def _normalized_origin(value: str) -> str:
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
         try:
-            return save_data_to_path(data)
-        except Exception as exc:
-            raise HTTPException(status_code=500, detail=f"Failed to save data: {exc}") from exc
+            parsed = urlparse.urlsplit(raw)
+        except Exception:
+            return ""
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            return ""
+        return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}"
+
+    def _request_origin_is_allowed(request: Request, origin: str) -> bool:
+        supplied = _normalized_origin(origin)
+        if not supplied:
+            return False
+        allowed = {
+            _normalized_origin(str(request.base_url)),
+            *(_normalized_origin(item) for item in get_cors_origins()),
+        }
+        public_origin = _normalized_origin(os.getenv("LOGITRACK_PUBLIC_ORIGIN", ""))
+        if public_origin:
+            allowed.add(public_origin)
+        allowed.discard("")
+        return supplied in allowed
+
+    @app.middleware("http")
+    async def browser_session_security(request: Request, call_next: Any):
+        method = request.method.upper()
+        unsafe = method in {"POST", "PUT", "PATCH", "DELETE"}
+        origin = str(request.headers.get("origin", "") or "").strip()
+        fetch_site = str(request.headers.get("sec-fetch-site", "") or "").strip().lower()
+        if unsafe and (fetch_site == "cross-site" or (origin and not _request_origin_is_allowed(request, origin))):
+            return JSONResponse(status_code=403, content={"detail": "Request origin is not allowed."})
+
+        cookie_token = str(request.cookies.get(session_cookie_name_setting(), "") or "").strip()
+        header_token = str(request.headers.get("x-auth-token", "") or "").strip()
+        if cookie_token and header_token and not secrets.compare_digest(cookie_token, header_token):
+            return JSONResponse(status_code=400, content={"detail": "Conflicting authentication credentials."})
+
+        cookie_exempt = request.url.path in {
+            "/v1/auth/login",
+            "/v1/auth/bootstrap",
+            "/v1/demo/seed",
+        }
+        if cookie_token and request.url.path.startswith("/v1/") and not cookie_exempt:
+            try:
+                data = _load_for_api()
+            except HTTPException as exc:
+                return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail},
+                                    headers={"Cache-Control": "no-store"})
+            session = find_session_by_token(data, cookie_token)
+            if session is None or not session_is_active(session):
+                return JSONResponse(status_code=401, content={"detail": "Invalid or expired session."})
+            request.scope["headers"] = list(request.scope.get("headers", [])) + [
+                (b"x-auth-token", cookie_token.encode("latin-1")),
+            ] if not header_token else list(request.scope.get("headers", []))
+            request.state.auth_transport = "cookie"
+
+            if unsafe:
+                csrf_token = str(request.headers.get("x-csrf-token", "") or "").strip()
+                csrf_cookie = str(request.cookies.get(csrf_cookie_name_setting(), "") or "").strip()
+                valid_csrf = bool(
+                    csrf_token
+                    and csrf_cookie
+                    and secrets.compare_digest(csrf_token, csrf_cookie)
+                    and session.csrf_token_hash
+                    and secrets.compare_digest(session.csrf_token_hash, hash_with_sha256(csrf_token))
+                )
+                if not valid_csrf:
+                    return JSONResponse(status_code=403, content={"detail": "Valid CSRF evidence is required."})
+        else:
+            request.state.auth_transport = "header" if header_token else "anonymous"
+
+        response = await call_next(request)
+        response.headers.setdefault("Cache-Control", "no-store")
+        return response
+
+    def _save_with_idempotency_replay(
+        data: LogiTrackData,
+        organization_id: str,
+        actor_user_id: str,
+        operation: str,
+        key: str,
+        payload: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        try:
+            _save_for_api(data)
+            return None
+        except HTTPException as exc:
+            if exc.status_code != 409 or not key:
+                raise
+            latest = _load_for_api()
+            record = find_idempotency_record(latest, organization_id, actor_user_id, operation, key)
+            if record is None or record.request_hash != request_fingerprint(payload):
+                raise
+            return json.loads(json.dumps(record.response_payload, ensure_ascii=False))
 
     def _resolve_authenticated_user(data: LogiTrackData, x_auth_token: Optional[str]) -> Optional[UserAccount]:
         token = (x_auth_token or "").strip()
         if not token:
             return None
-        user = find_user_by_token(data, token)
+        session = find_session_by_token(data, token)
+        if session is None or not session_is_active(session):
+            raise HTTPException(status_code=401, detail="Invalid or expired X-Auth-Token.")
+        user = next((item for item in data.users if item.id == session.user_id), None)
         if user is None or not user.is_active or str(user.status or '').strip().lower() != 'active':
             raise HTTPException(status_code=401, detail="Invalid or inactive X-Auth-Token.")
-        if not str(user.organization_id or '').strip() or find_organization_by_id(data, user.organization_id) is None:
+        if (
+            not str(user.organization_id or '').strip()
+            or user.organization_id != session.organization_id
+            or find_organization_by_id(data, user.organization_id) is None
+        ):
             raise HTTPException(status_code=401, detail="Authenticated user has no valid organization context.")
+        if touch_session(session):
+            _save_for_api(data)
         return user
 
     def _authorize_request(
@@ -6193,6 +6678,9 @@ if FastAPI is not None:
 
     @app.on_event("startup")
     def on_startup() -> None:
+        if get_storage_backend() == "postgresql":
+            # Fail before background work starts. Never initialize or migrate here.
+            PostgreSQLStore().status()
         runtime_state["storage_backend"] = get_storage_backend()
         runtime_state["relational_mirror_enabled"] = relational_mirror_enabled_setting()
         runtime_state["repository_domains_enabled"] = repository_domains_enabled()
@@ -6359,6 +6847,8 @@ if FastAPI is not None:
             find_tidy_dataset=find_tidy_dataset,
             find_dashboard_template=find_dashboard_template,
             parse_date_like_value=parse_date_like_value,
+            demo_setup_enabled=demo_setup_enabled_setting,
+            authorize_setup=require_trusted_setup,
         )
     )
 
@@ -6420,7 +6910,11 @@ if FastAPI is not None:
         return build_dashboard_summary(scope_snapshot_for_tenant(data, actor))
 
     @app.post("/v1/auth/bootstrap")
-    def v1_auth_bootstrap(payload: Dict[str, Any]):
+    def v1_auth_bootstrap(
+        payload: Dict[str, Any],
+        x_setup_token: Optional[str] = Header(default=None, alias="X-Setup-Token"),
+    ):
+        require_trusted_setup(x_setup_token)
         data = _load_for_api()
         if not workspace_is_uninitialized(data):
             raise HTTPException(status_code=409, detail="Bootstrap is only allowed for an uninitialized workspace.")
@@ -6449,9 +6943,6 @@ if FastAPI is not None:
             raise HTTPException(status_code=409, detail=f"Username '{user.username}' already exists.")
         if user.email and find_user_by_email(data, user.email) is not None:
             raise HTTPException(status_code=409, detail=f"Email '{user.email}' already exists.")
-        token = new_api_token()
-        user.api_token_hash = hash_with_sha256(token)
-        user.last_login_at = now_iso_utc()
         user.updated_at = now_iso_utc()
         data.users.append(user)
         append_audit_event(
@@ -6463,16 +6954,27 @@ if FastAPI is not None:
             endpoint="/v1/auth/bootstrap",
             details={"username": user.username, "role": user.role},
         )
-        saved_path = _save_for_api(data)
+        _save_for_api(data)
         return {
             "ok": True,
-            "saved_to": saved_path,
-            "token": token,
             "user": build_user_session_payload(data, user),
         }
 
     @app.post("/v1/auth/login")
-    def v1_auth_login(payload: Dict[str, Any]):
+    def v1_auth_login(
+        payload: Dict[str, Any],
+        request: Request,
+        response: Response,
+        x_auth_transport: Optional[str] = Header(default=None, alias="X-Auth-Transport"),
+    ):
+        requested_transport = str(x_auth_transport or "browser-cookie").strip().lower()
+        if requested_transport not in {"browser-cookie", "api-token"}:
+            raise HTTPException(status_code=400, detail="Unsupported authentication transport.")
+        api_token_transport = requested_transport == "api-token"
+        if api_token_transport and not api_token_login_enabled_setting():
+            raise HTTPException(status_code=403, detail="API token login is disabled for this deployment.")
+        if not api_token_transport:
+            validate_browser_cookie_configuration(request)
         data = _load_for_api()
         login_email = str(payload.get("email") or "").strip().lower()
         login_username = str(payload.get("username") or "").strip().lower()
@@ -6506,8 +7008,15 @@ if FastAPI is not None:
             )
             _save_for_api(data)
             raise HTTPException(status_code=401, detail="Invalid email or password.")
-        token = new_api_token()
-        user.api_token_hash = hash_with_sha256(token)
+        previous_session = None
+        if not api_token_transport:
+            previous_token = str(request.cookies.get(session_cookie_name_setting(), "") or "").strip()
+            previous_session = find_session_by_token(data, previous_token) if previous_token else None
+            if previous_session is not None and not previous_session.revoked_at:
+                revoke_session(previous_session, "login_rotation")
+        token, session = issue_api_session(data, user)
+        csrf_token = "" if api_token_transport else rotate_session_csrf_token(session)
+        user.api_token_hash = ""
         user.last_login_at = now_iso_utc()
         user.updated_at = now_iso_utc()
         append_audit_event(
@@ -6517,15 +7026,29 @@ if FastAPI is not None:
             target_id=user.id,
             actor=user,
             endpoint="/v1/auth/login",
-            details={"username": user.username, "email": user.email, "organization_id": user.organization_id},
+            details={
+                "username": user.username,
+                "email": user.email,
+                "organization_id": user.organization_id,
+                "transport": requested_transport,
+                "rotated_session": bool(previous_session),
+            },
         )
-        saved_path = _save_for_api(data)
-        return {
+        _save_for_api(data)
+        if not api_token_transport:
+            set_browser_session_cookie(response, request, token, csrf_token)
+        result = {
             "ok": True,
-            "saved_to": saved_path,
-            "token": token,
+            "session": {
+                "id": session.id,
+                "idle_expires_at": session.idle_expires_at,
+                "absolute_expires_at": session.absolute_expires_at,
+            },
             "user": build_user_session_payload(data, user),
         }
+        if api_token_transport:
+            result["token"] = token
+        return result
 
     @app.get("/v1/auth/me")
     def v1_auth_me(x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
@@ -6541,6 +7064,65 @@ if FastAPI is not None:
             "role": normalize_role(user.role),
             "permissions": effective_permissions(user),
         }
+
+    @app.get("/v1/auth/csrf")
+    def v1_auth_csrf(
+        request: Request,
+        response: Response,
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
+        token = str(x_auth_token or "").strip()
+        if not token:
+            raise HTTPException(status_code=401, detail="Missing session credentials.")
+        data = _load_for_api()
+        user = _resolve_authenticated_user(data, token)
+        if user is None:
+            raise HTTPException(status_code=401, detail="Missing session credentials.")
+        session = find_session_by_token(data, token)
+        if session is None or session.user_id != user.id:
+            raise HTTPException(status_code=401, detail="Invalid session credentials.")
+        csrf_token = rotate_session_csrf_token(session)
+        _save_for_api(data)
+        validate_browser_cookie_configuration(request)
+        response.set_cookie(
+            key=csrf_cookie_name_setting(),
+            value=csrf_token,
+            max_age=session_absolute_hours_setting() * 3600,
+            httponly=False,
+            secure=session_cookie_secure_setting(),
+            samesite=session_cookie_samesite_setting(),
+            path="/",
+        )
+        return {"ok": True}
+
+    @app.post("/v1/auth/logout")
+    def v1_auth_logout(
+        response: Response,
+        x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+    ):
+        clear_browser_session_cookie(response)
+        token = (x_auth_token or "").strip()
+        if not token:
+            raise HTTPException(status_code=401, detail="Missing X-Auth-Token.")
+        data = _load_for_api()
+        session = find_session_by_token(data, token)
+        if session is None:
+            raise HTTPException(status_code=401, detail="Invalid X-Auth-Token.")
+        user = next((item for item in data.users if item.id == session.user_id), None)
+        if session.revoked_at:
+            return {"ok": True, "revoked": True}
+        revoke_session(session, "logout")
+        append_audit_event(
+            data,
+            action="auth.logout",
+            target_type="session",
+            target_id=session.id,
+            actor=user,
+            endpoint="/v1/auth/logout",
+            details={},
+        )
+        _save_for_api(data)
+        return {"ok": True, "revoked": True}
 
     @app.get("/v1/admin/organization")
     def v1_admin_organization(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
@@ -6820,6 +7402,7 @@ if FastAPI is not None:
         items.sort(key=lambda item: ((item.get("status") or ""), (item.get("project_name") or "").lower()))
         return {
             "ok": True,
+            "workspace_version": data.workspace_version,
             "count": len(items),
             "summary": project_registry_summary(projects),
             "items": items,
@@ -6834,12 +7417,28 @@ if FastAPI is not None:
         payload: Dict[str, Any],
         x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+        x_idempotency_key: Optional[str] = Header(default=None, alias="X-Idempotency-Key"),
+        x_workspace_version: Optional[str] = Header(default=None, alias="X-Workspace-Version"),
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
         organization_id = actor.organization_id if actor is not None else optional_text_field(payload, "organization_id", "")
         if actor is not None:
             ensure_organization_scope(actor, organization_id)
+        idempotency_key = str(x_idempotency_key or "").strip()
+        if idempotency_key:
+            existing_record = find_idempotency_record(
+                data,
+                organization_id,
+                actor.id,
+                "POST:/v1/admin/projects",
+                idempotency_key,
+            )
+            if existing_record is not None:
+                if existing_record.request_hash != request_fingerprint(payload):
+                    raise HTTPException(status_code=409, detail="Idempotency key was already used with a different request.")
+                return json.loads(json.dumps(existing_record.response_payload, ensure_ascii=False))
+        enforce_expected_workspace_version(data, x_workspace_version)
         try:
             project = build_project_from_payload(data, payload or {}, actor, organization_id, existing=None)
         except ValueError as exc:
@@ -6854,8 +7453,27 @@ if FastAPI is not None:
             endpoint="/v1/admin/projects",
             details={"project_code": project.project_code, "status": project.status, "team_assignments": len(project.team_assignments)},
         )
-        saved_path = _save_for_api(data)
-        return {"ok": True, "saved_to": saved_path, "project": sanitize_project(data, project)}
+        response_payload = {"ok": True, "saved_to": "canonical_store", "project": sanitize_project(data, project)}
+        if idempotency_key:
+            append_idempotency_record(
+                data,
+                organization_id,
+                actor.id,
+                "POST:/v1/admin/projects",
+                idempotency_key,
+                payload,
+                response_payload,
+                project.id,
+            )
+        replay = _save_with_idempotency_replay(
+            data,
+            organization_id,
+            actor.id,
+            "POST:/v1/admin/projects",
+            idempotency_key,
+            payload,
+        )
+        return replay or response_payload
 
     @app.patch("/v1/admin/projects/{project_id}")
     def v1_admin_update_project(
@@ -6863,9 +7481,11 @@ if FastAPI is not None:
         payload: Dict[str, Any],
         x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+        x_workspace_version: Optional[str] = Header(default=None, alias="X-Workspace-Version"),
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
+        enforce_expected_workspace_version(data, x_workspace_version)
         existing = find_scoped_project(data, actor.organization_id, project_id)
         if existing is None:
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -7326,7 +7946,13 @@ if FastAPI is not None:
         studio_path = Path(__file__).with_name("logitrack_studio.html")
         if not studio_path.exists():
             raise HTTPException(status_code=404, detail="Studio UI file not found.")
-        return studio_path.read_text(encoding="utf-8")
+        markup = studio_path.read_text(encoding="utf-8")
+        if trusted_setup_enabled_setting():
+            markup = markup.replace(
+                'hidden data-trusted-setup="disabled"',
+                'data-trusted-setup="enabled"',
+            )
+        return markup
 
     @app.get("/favicon.ico")
     def favicon():
@@ -7476,9 +8102,25 @@ if FastAPI is not None:
         payload: Dict[str, Any],
         x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+        x_idempotency_key: Optional[str] = Header(default=None, alias="X-Idempotency-Key"),
+        x_workspace_version: Optional[str] = Header(default=None, alias="X-Workspace-Version"),
     ):
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_PROJECTS")
+        idempotency_key = str(x_idempotency_key or "").strip()
+        if idempotency_key:
+            existing_record = find_idempotency_record(
+                data,
+                actor.organization_id,
+                actor.id,
+                "POST:/v1/projects",
+                idempotency_key,
+            )
+            if existing_record is not None:
+                if existing_record.request_hash != request_fingerprint(payload):
+                    raise HTTPException(status_code=409, detail="Idempotency key was already used with a different request.")
+                return json.loads(json.dumps(existing_record.response_payload, ensure_ascii=False))
+        enforce_expected_workspace_version(data, x_workspace_version)
         indicators_payload = payload.get("indicators") or []
         activities_payload = payload.get("activities") or []
 
@@ -7548,14 +8190,33 @@ if FastAPI is not None:
             endpoint="/v1/projects",
             details={"name": project.name, "indicators_total": len(project.indicators), "activities_total": len(data.ops_by_project.get(project.id, OpsLite()).activities)},
         )
-        saved_path = _save_for_api(data)
-        return {
+        response_payload = {
             "ok": True,
-            "saved_to": saved_path,
+            "saved_to": "canonical_store",
             "project_id": project.id,
             "indicator_ids": [indicator.id for indicator in project.indicators],
             "activities_total": len(data.ops_by_project.get(project.id, OpsLite()).activities),
         }
+        if idempotency_key:
+            append_idempotency_record(
+                data,
+                actor.organization_id,
+                actor.id,
+                "POST:/v1/projects",
+                idempotency_key,
+                payload,
+                response_payload,
+                project.id,
+            )
+        replay = _save_with_idempotency_replay(
+            data,
+            actor.organization_id,
+            actor.id,
+            "POST:/v1/projects",
+            idempotency_key,
+            payload,
+        )
+        return replay or response_payload
 
     @app.post("/v1/projects/{project_id}/indicators")
     def v1_add_indicator(

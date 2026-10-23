@@ -150,6 +150,8 @@ class DemoWorkspaceServiceDependencies:
     find_tidy_dataset: Callable[[Any, str], Any]
     find_dashboard_template: Callable[[Any, str], Any]
     parse_date_like_value: Callable[[Any], Any]
+    demo_setup_enabled: Callable[[], bool]
+    authorize_setup: Callable[[Optional[str]], None]
 
 
 class DemoWorkspaceService:
@@ -1016,7 +1018,18 @@ class DemoWorkspaceService:
         self,
         x_api_key: Optional[str],
         x_auth_token: Optional[str],
+        x_setup_token: Optional[str] = None,
     ) -> Dict[str, Any]:
+        if not self.deps.demo_setup_enabled():
+            raise ServiceError(403, "Demo setup is disabled for this deployment.")
+        try:
+            self.deps.authorize_setup(x_setup_token)
+        except ServiceError:
+            raise
+        except Exception as exc:
+            status_code = int(getattr(exc, "status_code", 403) or 403)
+            detail = str(getattr(exc, "detail", "Demo setup authorization failed."))
+            raise ServiceError(status_code, detail) from exc
         current_data = self.deps.load_data()
         actor = None
         if not workspace_is_uninitialized(current_data):
@@ -1028,8 +1041,6 @@ class DemoWorkspaceService:
         if default_user is None:
             raise ServiceError(500, "Demo seed bundle did not create the default admin user.")
 
-        demo_token = self.deps.new_api_token()
-        default_user.api_token_hash = self.deps.hash_with_sha256(demo_token)
         default_user.updated_at = self.deps.now_iso_utc()
 
         self.deps.append_audit_event(
@@ -1041,25 +1052,17 @@ class DemoWorkspaceService:
             endpoint="/v1/demo/seed",
             details=bundle.to_summary(),
         )
-        saved_path = self.deps.save_data(data)
+        self.deps.save_data(data)
         summary = self.deps.build_dashboard_summary(data)
         return {
             "ok": True,
-            "saved_to": saved_path,
             "counts": summary["counts"],
             "default_project_id": bundle.default_project_id,
             "default_dataset_id": bundle.default_dataset_id,
-            "login": {
-                "email": bundle.default_email,
-                "username": bundle.default_username,
-                "password": next(item.password for item in bundle.credentials if item.username == bundle.default_username),
-                "token": demo_token,
-            },
             "user": {
                 **self.deps.sanitize_user(default_user),
                 "organization_name": bundle.payload.get("organizations", [{}])[0].get("organization_name", ""),
             },
-            "credentials": [asdict(item) for item in bundle.credentials],
         }
 
     def workspace_overview(

@@ -21,9 +21,12 @@ class WorkplanProjectMembersContractTests(unittest.TestCase):
             LOGITRACK_ENABLE_RELATIONAL_MIRROR="false",
             LOGITRACK_ENABLE_REPOSITORY_DOMAINS="false",
             LOGITRACK_API_KEY=None,
+            LOGITRACK_SETUP_ENABLED="true",
+            LOGITRACK_SETUP_TOKEN="synthetic-workplan-setup-token",
+            LOGITRACK_DEMO_SETUP_ENABLED="true",
         )
         self.environment.__enter__()
-        MODULE.demo_workspace_service.seed_workspace(None, None)
+        MODULE.demo_workspace_service.seed_workspace(None, None, "synthetic-workplan-setup-token")
         data = MODULE.load_data_from_path()
         _, self.token = issue_token_for_user(data, "teresa.mbanze")
         MODULE.save_data_to_path(data)

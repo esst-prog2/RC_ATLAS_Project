@@ -109,7 +109,7 @@ class NotificationRule:
     is_active: bool = True
     organization_id: str = ""
     schedule: str = "manual"
-    channel: str = "webhook"
+    channel: str = "in_app"
     provider: str = ""
     min_severity: str = "medium"
     condition_type: str = ""
@@ -205,6 +205,36 @@ class UserAccount:
     updated_at: str = ""
     last_login_at: str = ""
     team_id: str = ""
+
+
+@dataclass
+class ApiSession:
+    id: str
+    token_hash: str
+    user_id: str
+    organization_id: str
+    created_at: str
+    last_seen_at: str
+    idle_expires_at: str
+    absolute_expires_at: str
+    csrf_token_hash: str = ""
+    revoked_at: str = ""
+    revocation_reason: str = ""
+    version: int = 1
+
+
+@dataclass
+class IdempotencyRecord:
+    id: str
+    organization_id: str
+    actor_user_id: str
+    operation: str
+    key_hash: str
+    request_hash: str
+    response_payload: Dict[str, Any] = field(default_factory=dict)
+    resource_id: str = ""
+    created_at: str = ""
+    expires_at: str = ""
 
 
 @dataclass

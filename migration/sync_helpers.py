@@ -16,6 +16,8 @@ SUPPORTED_REPOSITORY_DOMAINS = ("users", "notification_rules", "reporting_record
 
 
 def repository_domains_enabled() -> bool:
+    if os.getenv("LOGITRACK_STORAGE_BACKEND", "").strip().lower() == "postgresql":
+        return False
     raw = os.getenv("LOGITRACK_ENABLE_REPOSITORY_DOMAINS")
     if raw is None:
         return True

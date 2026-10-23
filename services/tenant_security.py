@@ -244,10 +244,19 @@ def scope_snapshot_for_tenant(
     scoped.audit_events = [
         item for item in getattr(scoped, 'audit_events', []) if audit_event_organization_id(data, item) == organization_id
     ]
+    # Session and replay-control records are never part of a tenant snapshot.
+    scoped.sessions = []
+    scoped.idempotency_records = []
     return scoped
 
 
 def workspace_is_uninitialized(data: Any) -> bool:
+    """Return whether no business workspace has been initialized.
+
+    Security telemetry, revoked sessions, and replay-control records are
+    deliberately excluded. They can exist before the first organization is
+    created and must not consume the one-time initialization state.
+    """
     collection_names = (
         'organizations',
         'users',
@@ -260,6 +269,5 @@ def workspace_is_uninitialized(data: Any) -> bool:
         'semantic_mappings',
         'dashboard_templates',
         'notification_rules',
-        'audit_events',
     )
     return not any(getattr(data, name, None) for name in collection_names) and not bool(getattr(data, 'ops_by_project', {}))
