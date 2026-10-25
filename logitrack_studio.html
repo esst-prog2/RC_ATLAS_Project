@@ -7626,6 +7626,22 @@
                   <button id="indicatorReportBtn" class="secondary small" type="button">Preview Report Export</button>
                 </div>
               </div>
+              <section class="panel stack" aria-labelledby="methodologyHeading" id="methodologyPanel">
+                <h3 id="methodologyHeading">Methodology calculation</h3>
+                <form id="methodologyForm" class="stack">
+                  <label for="methodologySelect" id="methodologySelectLabel">Approved method and version</label>
+                  <select id="methodologySelect"></select>
+                  <div class="inline" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+                    <div><label for="methodologyStart" id="methodologyStartLabel">Reporting start</label><input id="methodologyStart" type="date" required></div>
+                    <div><label for="methodologyEnd" id="methodologyEndLabel">Reporting end</label><input id="methodologyEnd" type="date" required></div>
+                    <div><label for="methodologyAsOf" id="methodologyAsOfLabel">As of (UTC)</label><input id="methodologyAsOf" type="datetime-local" step="1" required></div>
+                  </div>
+                  <button id="methodologyExplainBtn" type="submit" class="secondary">How is this calculated?</button>
+                </form>
+                <div id="methodologyFeedback" role="status" aria-live="polite"></div>
+                <div id="methodologyResult" style="overflow-wrap:anywhere"></div>
+              </section>
+              <p id="methodologyLegacyNotice" class="muted">The legacy analytics below are not validated under the approved Wave 2 methodology.</p>
               <div id="indicatorHero" class="intelligence-hero"></div>
             </section>
 
@@ -15211,7 +15227,149 @@
       return widgets.slice(0, 5);
     }
 
+    let methodologyGeneration = 0;
+    let methodologyScopeGeneration = 0;
+    let methodologyLoading = false;
+    let methodologyDefinitions = [];
+    const methodologyCopy = {
+      heading: {EN: "Methodology calculation", PT: "Cálculo metodológico", FR: "Calcul méthodologique"},
+      method: {EN: "Approved method and version", PT: "Método aprovado e versão", FR: "Méthode approuvée et version"},
+      start: {EN: "Reporting start", PT: "Início do período", FR: "Début de période"},
+      end: {EN: "Reporting end", PT: "Fim do período", FR: "Fin de période"},
+      asOf: {EN: "As of (UTC)", PT: "Data de referência (UTC)", FR: "Date de référence (UTC)"},
+      explain: {EN: "How is this calculated?", PT: "Como é calculado?", FR: "Comment est-ce calculé ?"},
+      legacy: {EN: "The legacy analytics below are not validated under the approved Wave 2 methodology.", PT: "As análises anteriores abaixo não foram validadas segundo a metodologia aprovada da Fase 2.", FR: "Les anciennes analyses ci-dessous ne sont pas validées selon la méthodologie approuvée de la phase 2."},
+      empty: {EN: "UNCONFIGURED — an approved indicator definition is required.", PT: "UNCONFIGURED — é necessária uma definição aprovada do indicador.", FR: "UNCONFIGURED — une définition approuvée de l’indicateur est nécessaire."},
+      ready: {EN: "Enter the reporting period and explicit UTC reference time, then inspect the calculation.", PT: "Indique o período e a data de referência UTC para consultar o cálculo.", FR: "Indiquez la période et la date de référence UTC pour consulter le calcul."},
+      loading: {EN: "Loading calculation…", PT: "A carregar o cálculo…", FR: "Chargement du calcul…"},
+      error: {EN: "The calculation is unavailable. Check the period and access, then retry.", PT: "O cálculo está indisponível. Verifique o período e o acesso e tente novamente.", FR: "Le calcul est indisponible. Vérifiez la période et l’accès, puis réessayez."},
+      value: {EN: "Result", PT: "Resultado", FR: "Résultat"},
+      formula: {EN: "Method / formula", PT: "Método / fórmula", FR: "Méthode / formule"},
+      period: {EN: "Reporting period", PT: "Período de reporte", FR: "Période de rapport"},
+      version: {EN: "Methodology version", PT: "Versão metodológica", FR: "Version méthodologique"},
+      coverage: {EN: "Included / applicable observations", PT: "Observações incluídas / aplicáveis", FR: "Observations incluses / applicables"},
+      exclusions: {EN: "Exclusions", PT: "Exclusões", FR: "Exclusions"},
+      limitations: {EN: "Limitations", PT: "Limitações", FR: "Limites"},
+      details: {EN: "Calculation details and quality dimensions", PT: "Detalhes do cálculo e dimensões de qualidade", FR: "Détails du calcul et dimensions de qualité"},
+      numerator: {EN: "Numerator / denominator", PT: "Numerador / denominador", FR: "Numérateur / dénominateur"},
+      none: {EN: "None", PT: "Nenhuma", FR: "Aucune"},
+      meaning: {EN: "Meaning", PT: "Significado", FR: "Signification"},
+      final_target_achievement: {EN: "Achievement against the final target", PT: "Realização face à meta final", FR: "Réalisation par rapport à la cible finale"},
+      schedule_attainment: {EN: "Attainment of the approved planned target at the reference date", PT: "Realização da meta planeada aprovada na data de referência", FR: "Réalisation de la cible planifiée approuvée à la date de référence"},
+      maintenance_state: {EN: "Position relative to the approved maintenance band", PT: "Posição face ao intervalo aprovado", FR: "Position par rapport à la plage approuvée"},
+      completeness: {EN: "Completeness", PT: "Completude", FR: "Complétude"},
+      conformance: {EN: "Conformance", PT: "Conformidade", FR: "Conformité"},
+      uniqueness: {EN: "Uniqueness", PT: "Unicidade", FR: "Unicité"},
+      timeliness: {EN: "Timeliness", PT: "Atualidade", FR: "Actualité"},
+      traceability: {EN: "Traceability", PT: "Rastreabilidade", FR: "Traçabilité"},
+    };
+    function methodText(key) { return localizedCopy(methodologyCopy[key] || {EN: key, PT: key, FR: key}); }
+    function resetMethodologyPanel() {
+      methodologyGeneration += 1;
+      methodologyScopeGeneration += 1;
+      methodologyLoading = false;
+      methodologyDefinitions = [];
+      document.getElementById("methodologyResult").replaceChildren();
+      document.getElementById("methodologyFeedback").textContent = "";
+      document.getElementById("methodologySelect").replaceChildren();
+      document.getElementById("methodologyExplainBtn").disabled = true;
+      for (const [id, key] of Object.entries({methodologyHeading:"heading", methodologySelectLabel:"method", methodologyStartLabel:"start", methodologyEndLabel:"end", methodologyAsOfLabel:"asOf", methodologyExplainBtn:"explain", methodologyLegacyNotice:"legacy"})) {
+        document.getElementById(id).textContent = methodText(key);
+      }
+    }
+    function methodologyUrl() {
+      return `/v1/projects/${encodeURIComponent(state.projectId)}/indicators/${encodeURIComponent(state.indicatorId)}`;
+    }
+    async function loadMethodologyDefinitions() {
+      if (!state.currentUser || !state.projectId || !state.indicatorId || !hasPermission("VIEW_INDICATORS") || !hasPermission("VIEW_REPORTS")) return;
+      const generation = methodologyScopeGeneration;
+      methodologyLoading = true;
+      try {
+        const data = await callApi(`${methodologyUrl()}/methodology`);
+        if (generation !== methodologyScopeGeneration || !state.currentUser) return;
+        methodologyLoading = false;
+        methodologyDefinitions = data.definitions || [];
+        const select = document.getElementById("methodologySelect");
+        for (const definition of methodologyDefinitions) {
+          const option = document.createElement("option");
+          option.value = String(select.options.length);
+          option.textContent = `${definition.profile} · ${definition.version} · ${definition.status}`;
+          select.append(option);
+        }
+        document.getElementById("methodologyFeedback").textContent = methodText(methodologyDefinitions.length ? "ready" : "empty");
+        document.getElementById("methodologyExplainBtn").disabled = false;
+      } catch {
+        if (generation === methodologyScopeGeneration) {
+          methodologyLoading = false;
+          document.getElementById("methodologyFeedback").textContent = methodText("error");
+        }
+      }
+    }
+    function renderMethodologyResult(envelope) {
+      const result = envelope.result;
+      const host = document.getElementById("methodologyResult");
+      host.replaceChildren();
+      const list = document.createElement("dl");
+      const add = (parent, key, value) => {
+        const term = document.createElement("dt"); term.textContent = methodText(key);
+        const description = document.createElement("dd"); description.textContent = value;
+        parent.append(term, description);
+      };
+      const fraction = value => value ? `${value.numerator}/${value.denominator}` : "—";
+      add(list, "value", result.display_value !== null && result.display_value !== undefined ? `${result.display_value} ${result.unit} (${result.state})` : `${result.band_state || result.state}`);
+      add(list, "meaning", methodText(result.metric_kind || "empty"));
+      add(list, "formula", result.formula || "—");
+      add(list, "period", `${result.context.reporting_period.start} — ${result.context.reporting_period.end}`);
+      add(list, "asOf", result.context.as_of);
+      add(list, "version", result.methodology_version || "—");
+      if (result.coverage) add(list, "coverage", `${result.coverage.included} / ${result.coverage.applicable}`);
+      const exclusions = Object.entries({...result.exclusions, ...result.period_exclusions}).map(([key, count]) => `${key}: ${count}`).join("; ");
+      add(list, "exclusions", exclusions || methodText("none"));
+      add(list, "limitations", [...(result.warnings || []), ...(result.limitations || [])].join(" "));
+      host.append(list);
+      if (result.quality) {
+        const disclosure = document.createElement("details");
+        const summary = document.createElement("summary"); summary.textContent = methodText("details");
+        const details = document.createElement("dl");
+        add(details, "numerator", `${fraction(result.numerator)} / ${fraction(result.denominator)}`);
+        for (const [name, dimension] of Object.entries(result.quality.dimensions)) {
+          add(details, name, dimension.display_percent === null ? dimension.state : `${dimension.display_percent}% (${dimension.numerator}/${dimension.denominator})`);
+        }
+        add(details, "limitations", result.quality.fitness);
+        disclosure.append(summary, details); host.append(disclosure);
+      }
+    }
+    document.getElementById("methodologyForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const generation = ++methodologyGeneration;
+      const button = document.getElementById("methodologyExplainBtn");
+      button.disabled = true;
+      document.getElementById("methodologyResult").replaceChildren();
+      document.getElementById("methodologyFeedback").textContent = methodText("loading");
+      const definition = methodologyDefinitions[Number(document.getElementById("methodologySelect").value)];
+      const timestamp = document.getElementById("methodologyAsOf").value;
+      const query = new URLSearchParams({start: document.getElementById("methodologyStart").value, end: document.getElementById("methodologyEnd").value, as_of: timestamp + (timestamp.length === 16 ? ":00Z" : "Z"), locale: state.uiLanguage});
+      if (definition) { query.set("methodology_id", definition.methodology_id); query.set("version", definition.version); }
+      try {
+        const envelope = await callApi(`${methodologyUrl()}/calculation?${query}`);
+        if (generation !== methodologyGeneration || !state.currentUser) return;
+        renderMethodologyResult(envelope);
+        document.getElementById("methodologyFeedback").textContent = envelope.result.state;
+      } catch {
+        if (generation === methodologyGeneration) document.getElementById("methodologyFeedback").textContent = methodText("error");
+      } finally {
+        if (generation === methodologyGeneration) button.disabled = false;
+      }
+    });
+    document.getElementById("methodologyForm").addEventListener("input", () => {
+      methodologyGeneration += 1;
+      document.getElementById("methodologyResult").replaceChildren();
+      document.getElementById("methodologyFeedback").textContent = methodText("ready");
+      document.getElementById("methodologyExplainBtn").disabled = !state.currentUser || methodologyLoading;
+    });
+
     function renderIndicatorIntelligence(snapshot) {
+      resetMethodologyPanel();
       const hero = document.getElementById("indicatorHero");
       const visualGrid = document.getElementById("indicatorVisualGrid");
       const insightSummary = document.getElementById("indicatorInsightSummary");
@@ -15232,6 +15390,7 @@
         return;
       }
       state.indicatorId = populateSelect(indicatorPicker, snapshot.indicators || [], "indicator_id", item => item.indicator_name, state.indicatorId || snapshot.indicators?.[0]?.indicator_id || "");
+      loadMethodologyDefinitions();
       const model = buildIndicatorAnalyticsModel(snapshot, state.indicatorId);
       if (!model) {
         hero.innerHTML = `<div class='muted-box'>${presentText(localizedCopy({
@@ -24625,6 +24784,8 @@
 
     async function hydrateCurrentRoleWorkspace(viewId = state.currentView, options = {}) {
       if (!state.currentUser) return;
+      resetMethodologyPanel();
+      methodologyLoading = true;
       const targetView = textSafe(viewId || state.currentView || "overview", "overview");
       if (options.resetAudit !== false) {
         resetRequestAudit(`${currentPermissionContext().actualRoleId || sessionOperationalRoleId()}:${targetView}`);
@@ -25300,6 +25461,7 @@
     }
 
     async function logoutSession(options = {}) {
+      resetMethodologyPanel();
       if (state.pendingOperations.logout) return;
       const remote = Boolean(options.remote);
       let revocationWarning = "";
@@ -25377,6 +25539,7 @@
     document.getElementById("channel").addEventListener("change", event => setProviderOptions("provider", event.target.value));
     document.getElementById("ruleChannel").addEventListener("change", event => setProviderOptions("ruleProvider", event.target.value));
     projectPicker.addEventListener("change", async () => {
+      resetMethodologyPanel();
       state.projectId = projectPicker.value;
       await refreshProjectExperience();
     });

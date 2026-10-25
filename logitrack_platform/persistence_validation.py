@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import re
+from services.methodology import MethodologyError, validate_history
 
 
 DOMAINS = (
@@ -201,6 +202,14 @@ def validate_snapshot(payload, *, complete=False):
         if kind == 'activities':
             for target in items(row.get('linked_indicator_ids', []), f'activities/{identifier}/links'):
                 edges.append((kind, identifier, org, 'indicator', 'indicators', target))
+        if kind == 'indicators':
+            extension = row.get('methodology', {})
+            try:
+                validate_history(extension, {'organization_id': org, 'project_id': project, 'indicator_id': identifier})
+                for definition in extension.get('definitions', []):
+                    edges.append((kind, identifier, org, 'methodology_source', 'tidy_datasets', definition['source_dataset_id']))
+            except (MethodologyError, TypeError, KeyError, AttributeError, ValueError):
+                issue(f'indicators/{identifier}', 'INVALID_METHODOLOGY_HISTORY')
 
     for source_kind, source_id, org, field, target_kind, target_id in edges:
         if not isinstance(target_id, str):

@@ -7,6 +7,7 @@ import math
 import os
 
 from logitrack_platform.persistence_validation import fingerprint, validate_snapshot
+from services.methodology import validate_transition
 
 
 class PersistenceError(RuntimeError):
@@ -166,11 +167,12 @@ class PostgreSQLStore:
         graph = validate_snapshot(payload, complete=True)
         with connection() as conn:
             check_schema(conn)
-            row = conn.execute('SELECT version FROM rcatlas.workspace WHERE singleton FOR UPDATE').fetchone()
+            row = conn.execute('SELECT version,payload FROM rcatlas.workspace WHERE singleton FOR UPDATE').fetchone()
             if row is None:
                 raise ConfigurationError('Canonical PostgreSQL workspace is missing.')
             if row[0] != expected_version:
                 raise VersionConflict('The workspace changed. Reload and retry.')
+            validate_transition(row[1], payload)
             version = expected_version + 1
             saved = dict(payload, workspace_version=version)
             _write_graph(conn, graph)

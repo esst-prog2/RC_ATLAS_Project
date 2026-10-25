@@ -42,6 +42,8 @@ from api import (
     register_notification_routes,
     register_reporting_routes,
 )
+from api.methodology_routes import register_methodology_routes
+from services.methodology import validate_history as validate_methodology_history, validate_transition as validate_methodology_transition
 from logitrack_platform import (
     RepeatingRuntimeWorker,
     get_relational_store_path,
@@ -586,6 +588,7 @@ class Indicator:
     locations: List[LocationEntry] = field(default_factory=list)
     organization_id: str = ""
     project_id: str = ""
+    methodology: Dict[str, Any] = field(default_factory=dict)
 
     def progress_for(self, actual: Optional[float], target: Optional[float]) -> Optional[float]:
         if actual is None or target is None:
@@ -836,6 +839,7 @@ def from_serializable(d: dict) -> LogiTrackData:
                 locations=locs,
                 organization_id=declared_organization_id or project_organization_id,
                 project_id=declared_project_id or project_id,
+                methodology=i.get("methodology", {}),
             ))
         assignments: List[ProjectTeamAssignment] = []
         for assignment in p.get("team_assignments", []) or []:
@@ -1399,6 +1403,14 @@ def save_canonical_data_to_path(data: LogiTrackData, path: Optional[str] = None)
         data.workspace_version = PostgreSQLStore().save(to_serializable(data), data.workspace_version)
         return "postgresql"
     target = get_storage_target_path(path, backend=backend)
+    for project in data.projects:
+        for indicator in project.indicators:
+            validate_methodology_history(indicator.methodology, {
+                "organization_id": project.organization_id, "project_id": project.id, "indicator_id": indicator.id,
+            })
+    if os.path.exists(target):
+        previous = load_sqlite(target) if backend == "sqlite" else load_json(target)
+        validate_methodology_transition(to_serializable(previous), to_serializable(data))
     if backend == "sqlite":
         save_sqlite(data, target)
     else:
@@ -6520,6 +6532,14 @@ if FastAPI is not None:
 
         response = await call_next(request)
         response.headers.setdefault("Cache-Control", "no-store")
+        legacy_analytics = (
+            request.url.path.startswith(("/v1/kpi/", "/v1/trends/", "/v1/narratives/"))
+            or request.url.path.endswith(("/quality", "/trends", "/narrative", "/dashboard"))
+        )
+        if legacy_analytics:
+            response.headers["Deprecation"] = "true"
+            response.headers["X-RCAtlas-Methodology-State"] = "LEGACY_UNVALIDATED"
+            response.headers["Warning"] = '299 RCAtlas "Legacy analytics; not validated under Wave 2 methodology"'
         return response
 
     def _save_with_idempotency_replay(
@@ -7969,6 +7989,10 @@ if FastAPI is not None:
         reporting_service,
         header_factory=Header,
         http_exception_cls=HTTPException,
+    )
+    register_methodology_routes(
+        app, load=_load_for_api, save=_save_for_api, authorize=_authorize_request,
+        audit=append_audit_event, now=now_iso_utc, header=Header, error=HTTPException,
     )
     register_logical_framework_routes(
         app,
