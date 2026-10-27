@@ -7640,6 +7640,7 @@
                 </form>
                 <div id="methodologyFeedback" role="status" aria-live="polite"></div>
                 <div id="methodologyResult" style="overflow-wrap:anywhere"></div>
+                <button id="methodologyTableBtn" type="button" class="secondary" disabled>View indicator table</button>
               </section>
               <p id="methodologyLegacyNotice" class="muted">The legacy analytics below are not validated under the approved Wave 2 methodology.</p>
               <div id="indicatorHero" class="intelligence-hero"></div>
@@ -12122,6 +12123,9 @@
     }
 
     function numericValue(value) {
+      if (value === null || value === undefined || typeof value === "boolean"
+          || !["number", "string"].includes(typeof value)
+          || (typeof value === "string" && value.trim() === "")) return null;
       const numeric = Number(value);
       return Number.isFinite(numeric) ? numeric : null;
     }
@@ -12395,6 +12399,9 @@
     }
 
     function reportingProgressPct(actualValue, targetValue, fallback = null) {
+      return null; // Only a versioned server calculation can supply analytical progress.
+    }
+    function legacyReportingProgressPct(actualValue, targetValue, fallback = null) {
       const explicit = numericValue(fallback);
       if (explicit !== null) {
         return explicit;
@@ -12590,6 +12597,7 @@
     }
 
     function toneFromPercent(value, inverse = false) {
+      if (numericValue(value) === null) return "info";
       const normalized = clampNumber(numericValue(value) ?? 0, 0, 100);
       if (!inverse) {
         if (normalized >= 80) return "good";
@@ -13415,11 +13423,11 @@
       const projectCards = toArray(workspace?.project_cards);
       const notifications = toArray(workspace?.notifications);
       const trend = latestTrendMetrics(uniquePortfolioTrendSeries(workspace?.portfolio_trend || []), "value");
-      const qualityScore = clampNumber(numericValue(state.dataQuality?.average_score ?? workspace?.data_quality?.average_score) ?? 0, 0, 100);
+      const qualityScore = numericValue(state.dataQuality?.average_score ?? workspace?.data_quality?.average_score);
       const quality = qualityAssessmentFromScore(qualityScore);
       const highAlerts = notifications.filter(item => ["high", "critical"].includes(String(item.severity || "").toLowerCase()));
       const projectCount = numericValue(workspace?.counts?.projects) ?? projectCards.length;
-      const deliveryHealth = clampNumber(numericValue(summary?.delivery_health_avg_pct ?? summary?.progress_weighted_pct ?? trend.current?.value) ?? 0, 0, 100);
+      const deliveryHealth = numericValue(summary?.delivery_health_avg_pct ?? summary?.progress_weighted_pct ?? trend.current?.value);
       const deliveryTone = toneFromPercent(deliveryHealth);
       const donorsCount = [...new Set(projectCards.map(item => textSafe(item.donor, "")).filter(Boolean))].length;
       const districts = projectCards.reduce((sum, item) => sum + (numericValue(item.district_count) ?? 0), 0);
@@ -13512,6 +13520,7 @@
     }
 
     function kpiStatusText(tone, mode = "default") {
+      if (tone === "info") return "NOT_ASSESSED";
       if (mode === "confidence") {
         return translateLiteralText(tone === "good" ? "Strong" : tone === "warn" ? "Monitor" : "Weak");
       }
@@ -15232,13 +15241,18 @@
     let methodologyLoading = false;
     let methodologyDefinitions = [];
     const methodologyCopy = {
+      table: {EN: "View indicator table", PT: "Ver tabela do indicador", FR: "Voir le tableau de l’indicateur"},
+      tableTitle: {EN: "Indicator table", PT: "Tabela do indicador", FR: "Tableau de l’indicateur"},
+      consistent: {EN: "The table and explanation use the same calculation, source revision and scope.", PT: "A tabela e a explicação usam o mesmo cálculo, revisão da fonte e âmbito.", FR: "Le tableau et l’explication utilisent le même calcul, la même révision et le même périmètre."},
+      deferred: {EN: "NOT_ASSESSED — district comparisons, portfolio aggregation and statistical trends require approved methods.", PT: "NOT_ASSESSED — comparações distritais, agregação de carteira e tendências estatísticas exigem métodos aprovados.", FR: "NOT_ASSESSED — comparaisons des districts, agrégations du portefeuille et tendances statistiques nécessitent des méthodes approuvées."},
+      qualityScope: {EN: "Quality applies to the selected indicator population and period. No overall score or fitness classification is configured.", PT: "A qualidade aplica-se à população e período do indicador selecionado. Sem pontuação global ou classificação de aptidão.", FR: "La qualité concerne la population et la période de l’indicateur sélectionné. Aucun score global ni classement d’aptitude n’est configuré."},
       heading: {EN: "Methodology calculation", PT: "Cálculo metodológico", FR: "Calcul méthodologique"},
       method: {EN: "Approved method and version", PT: "Método aprovado e versão", FR: "Méthode approuvée et version"},
       start: {EN: "Reporting start", PT: "Início do período", FR: "Début de période"},
       end: {EN: "Reporting end", PT: "Fim do período", FR: "Fin de période"},
       asOf: {EN: "As of (UTC)", PT: "Data de referência (UTC)", FR: "Date de référence (UTC)"},
       explain: {EN: "How is this calculated?", PT: "Como é calculado?", FR: "Comment est-ce calculé ?"},
-      legacy: {EN: "The legacy analytics below are not validated under the approved Wave 2 methodology.", PT: "As análises anteriores abaixo não foram validadas segundo a metodologia aprovada da Fase 2.", FR: "Les anciennes analyses ci-dessous ne sont pas validées selon la méthodologie approuvée de la phase 2."},
+      legacy: {EN: "Select an approved method and reporting context. Unsupported aggregations remain NOT_ASSESSED.", PT: "Selecione um método aprovado e contexto de reporte. Agregações não suportadas permanecem NOT_ASSESSED.", FR: "Sélectionnez une méthode approuvée et un contexte de rapport. Les agrégations non prises en charge restent NOT_ASSESSED."},
       empty: {EN: "UNCONFIGURED — an approved indicator definition is required.", PT: "UNCONFIGURED — é necessária uma definição aprovada do indicador.", FR: "UNCONFIGURED — une définition approuvée de l’indicateur est nécessaire."},
       ready: {EN: "Enter the reporting period and explicit UTC reference time, then inspect the calculation.", PT: "Indique o período e a data de referência UTC para consultar o cálculo.", FR: "Indiquez la période et la date de référence UTC pour consulter le calcul."},
       loading: {EN: "Loading calculation…", PT: "A carregar o cálculo…", FR: "Chargement du calcul…"},
@@ -15269,14 +15283,56 @@
       methodologyScopeGeneration += 1;
       methodologyLoading = false;
       methodologyDefinitions = [];
+      renderConsumerIndicator(null);
       document.getElementById("methodologyResult").replaceChildren();
       document.getElementById("methodologyFeedback").textContent = "";
       document.getElementById("methodologySelect").replaceChildren();
       document.getElementById("methodologyExplainBtn").disabled = true;
-      for (const [id, key] of Object.entries({methodologyHeading:"heading", methodologySelectLabel:"method", methodologyStartLabel:"start", methodologyEndLabel:"end", methodologyAsOfLabel:"asOf", methodologyExplainBtn:"explain", methodologyLegacyNotice:"legacy"})) {
+      for (const [id, key] of Object.entries({methodologyHeading:"heading", methodologySelectLabel:"method", methodologyStartLabel:"start", methodologyEndLabel:"end", methodologyAsOfLabel:"asOf", methodologyExplainBtn:"explain", methodologyLegacyNotice:"legacy", methodologyTableBtn:"table"})) {
         document.getElementById(id).textContent = methodText(key);
       }
     }
+    function renderConsumerIndicator(row) {
+      const hero = document.getElementById("indicatorHero");
+      const grid = document.getElementById("indicatorVisualGrid");
+      const notes = document.getElementById("indicatorInsightSummary");
+      if (!hero || !grid || !notes) return;
+      hero.replaceChildren(); grid.replaceChildren(); notes.replaceChildren();
+      const result = row?.calculation?.result;
+      const value = result?.display_value !== null && result?.display_value !== undefined
+        ? `${result.display_value} ${result.unit}` : result?.band_state || result?.state || "UNCONFIGURED";
+      const card = document.createElement("div"); card.className = "metric-card";
+      card.id = "canonicalIndicatorCard";
+      const title = document.createElement("h3"); title.textContent = row?.indicator_name || methodText("heading");
+      const metric = document.createElement("div"); metric.className = "metric-value"; metric.textContent = value;
+      const meaning = document.createElement("p"); meaning.textContent = result ? methodText(result.metric_kind || "empty") : methodText("ready");
+      card.append(title, metric, meaning); hero.append(card);
+      const table = document.createElement("table"); table.id = "canonicalIndicatorTable"; table.tabIndex = -1;
+      table.style.cssText = "width:100%;table-layout:fixed;overflow-wrap:anywhere;grid-column:1/-1";
+      const caption = table.createCaption(); caption.textContent = methodText("tableTitle");
+      for (const [label, text] of [
+        [methodText("value"), value], [methodText("meaning"), result ? methodText(result.metric_kind || "empty") : methodText("ready")],
+        [methodText("version"), result?.methodology_version || "—"],
+        [methodText("period"), result?.context ? `${result.context.reporting_period.start} — ${result.context.reporting_period.end}` : "—"],
+        [methodText("asOf"), result?.context?.as_of || "—"],
+        [methodText("coverage"), result?.coverage ? `${result.coverage.included} / ${result.coverage.applicable}` : "—"],
+        ["Calculation ID", result?.calculation_id || "—"], ["Source revision", result?.source?.revision || "—"],
+      ]) {
+        const tr = table.insertRow(); const th = document.createElement("th"); th.scope = "row"; th.textContent = label;
+        const td = document.createElement("td"); td.textContent = text; tr.append(th, td);
+      }
+      grid.append(table);
+      const detail = document.createElement("p"); detail.textContent = result ? methodText("consistent") : methodText("ready");
+      const limit = document.createElement("p"); limit.textContent = methodText("deferred");
+      const warnings = document.createElement("p"); warnings.textContent = [...(result?.warnings || []), ...(result?.limitations || [])].join(" ");
+      notes.append(detail, limit, warnings);
+      document.getElementById("methodologyTableBtn").disabled = !row;
+    }
+    document.getElementById("methodologyTableBtn").addEventListener("click", () => {
+      const table = document.getElementById("canonicalIndicatorTable");
+      table?.scrollIntoView({block:"center"}); table?.focus({preventScroll:true});
+    });
+
     function methodologyUrl() {
       return `/v1/projects/${encodeURIComponent(state.projectId)}/indicators/${encodeURIComponent(state.indicatorId)}`;
     }
@@ -15346,14 +15402,23 @@
       button.disabled = true;
       document.getElementById("methodologyResult").replaceChildren();
       document.getElementById("methodologyFeedback").textContent = methodText("loading");
+      renderConsumerIndicator(null);
       const definition = methodologyDefinitions[Number(document.getElementById("methodologySelect").value)];
       const timestamp = document.getElementById("methodologyAsOf").value;
       const query = new URLSearchParams({start: document.getElementById("methodologyStart").value, end: document.getElementById("methodologyEnd").value, as_of: timestamp + (timestamp.length === 16 ? ":00Z" : "Z"), locale: state.uiLanguage});
       if (definition) { query.set("methodology_id", definition.methodology_id); query.set("version", definition.version); }
       try {
-        const envelope = await callApi(`${methodologyUrl()}/calculation?${query}`);
+        const kpiQuery = new URLSearchParams(query);
+        kpiQuery.set("project_id", state.projectId); kpiQuery.set("indicator_id", state.indicatorId);
+        const [envelope, rows] = await Promise.all([
+          callApi(`${methodologyUrl()}/calculation?${query}`),
+          callApi(`/v1/kpi/indicator?${kpiQuery}`),
+        ]);
         if (generation !== methodologyGeneration || !state.currentUser) return;
+        const row = rows.find(item => item.indicator_id === state.indicatorId && item.project_id === state.projectId);
+        if (!row || JSON.stringify(row.calculation.result) !== JSON.stringify(envelope.result)) throw new Error("Calculation source changed; retry the same context.");
         renderMethodologyResult(envelope);
+        renderConsumerIndicator(row);
         document.getElementById("methodologyFeedback").textContent = envelope.result.state;
       } catch {
         if (generation === methodologyGeneration) document.getElementById("methodologyFeedback").textContent = methodText("error");
@@ -15363,6 +15428,7 @@
     });
     document.getElementById("methodologyForm").addEventListener("input", () => {
       methodologyGeneration += 1;
+      renderConsumerIndicator(null);
       document.getElementById("methodologyResult").replaceChildren();
       document.getElementById("methodologyFeedback").textContent = methodText("ready");
       document.getElementById("methodologyExplainBtn").disabled = !state.currentUser || methodologyLoading;
@@ -15391,6 +15457,10 @@
       }
       state.indicatorId = populateSelect(indicatorPicker, snapshot.indicators || [], "indicator_id", item => item.indicator_name, state.indicatorId || snapshot.indicators?.[0]?.indicator_id || "");
       loadMethodologyDefinitions();
+      if (snapshot.analytical_contract) {
+        renderConsumerIndicator(null);
+        return;
+      }
       const model = buildIndicatorAnalyticsModel(snapshot, state.indicatorId);
       if (!model) {
         hero.innerHTML = `<div class='muted-box'>${presentText(localizedCopy({
@@ -17311,7 +17381,7 @@
       const tasksOpen = numericValue(executive.open_tasks ?? workplan?.summary?.open_tasks) ?? Math.max(tasksTotal - tasksDone, 0);
       const alertsCount = notifications.length;
       const highAlerts = notifications.filter(item => severityRank(item.severity) >= 3).length;
-      const progressPct = numericValue(executive.delivery_health_score ?? executive.progress_weighted_pct) ?? 0;
+      const progressPct = numericValue(executive.delivery_health_score ?? executive.progress_weighted_pct);
       const coveragePct = numericValue(executive.reporting_confidence_score ?? executive.workplan_coverage_pct) ?? 0;
       const reportingAgeDays = daysSinceDate(executive.latest_reporting_period);
       const statusKey = canonicalStatus(executive.status_mean_canon || executive.status_weighted_canon || "SEM DADOS");
@@ -19892,13 +19962,13 @@
           <div class="subtle">${presentText(localizedCopy({
             EN: profile.id === "organization_admin"
               ? `${adminModel.organizationName} is currently operating with ${formatValue(adminModel.activeUsers)} active user(s), ${formatValue(adminModel.activeTeams)} active team(s), and ${formatValue(adminModel.pendingAdminActions)} governance watchpoint(s).`
-              : `${currentProjectLabel()} is currently operating with ${formatValue(summary.delivery_health_score || state.projectSnapshot?.executive?.delivery_health_score || 0, { suffix: "%" })} delivery health and ${board.pending_validation || 0} validation checkpoint(s) in motion.`,
+              : `${currentProjectLabel()} is currently operating with ${formatValue(summary.delivery_health_score ?? state.projectSnapshot?.executive?.delivery_health_score ?? null, { suffix: "%" })} delivery health and ${board.pending_validation || 0} validation checkpoint(s) in motion.`,
             PT: profile.id === "organization_admin"
               ? `${adminModel.organizationName} opera atualmente com ${formatValue(adminModel.activeUsers)} utilizador(es) ativos, ${formatValue(adminModel.activeTeams)} equipa(s) ativas e ${formatValue(adminModel.pendingAdminActions)} ponto(s) de governanca.`
-              : `${currentProjectLabel()} opera atualmente com ${formatValue(summary.delivery_health_score || state.projectSnapshot?.executive?.delivery_health_score || 0, { suffix: "%" })} de saude de entrega e ${board.pending_validation || 0} checkpoint(s) de validacao em movimento.`,
+              : `${currentProjectLabel()} opera atualmente com ${formatValue(summary.delivery_health_score ?? state.projectSnapshot?.executive?.delivery_health_score ?? null, { suffix: "%" })} de saude de entrega e ${board.pending_validation || 0} checkpoint(s) de validacao em movimento.`,
             FR: profile.id === "organization_admin"
               ? `${adminModel.organizationName} fonctionne actuellement avec ${formatValue(adminModel.activeUsers)} utilisateur(s) actif(s), ${formatValue(adminModel.activeTeams)} equipe(s) active(s) et ${formatValue(adminModel.pendingAdminActions)} point(s) de gouvernance.`
-              : `${currentProjectLabel()} fonctionne actuellement avec ${formatValue(summary.delivery_health_score || state.projectSnapshot?.executive?.delivery_health_score || 0, { suffix: "%" })} de sante de livraison et ${board.pending_validation || 0} point(s) de validation en mouvement.`,
+              : `${currentProjectLabel()} fonctionne actuellement avec ${formatValue(summary.delivery_health_score ?? state.projectSnapshot?.executive?.delivery_health_score ?? null, { suffix: "%" })} de sante de livraison et ${board.pending_validation || 0} point(s) de validation en mouvement.`,
           }))}</div>
           <div class="role-home-metrics">
             ${profile.id === "organization_admin"
@@ -20024,13 +20094,13 @@
                   : localizedCopy({ EN: "Delivery health", PT: "Saude da entrega", FR: "Sante de la livraison" }),
               value: profile.id === "field_coordinator"
                 ? formatValue(averageTaskProgress(tasksForRoleWorkspace(profile.id, tasks)), { suffix: "%" })
-                : formatValue(summary.delivery_health_score || state.projectSnapshot?.executive?.delivery_health_score || 0, { suffix: "%" }),
+                : formatValue(summary.delivery_health_score ?? state.projectSnapshot?.executive?.delivery_health_score ?? null, { suffix: "%" }),
               note: profile.id === "meal_officer"
                 ? localizedCopy({ EN: "Validation-sensitive", PT: "Sensivel a validacao", FR: "Sensible a la validation" })
                 : profile.id === "field_coordinator"
                   ? localizedCopy({ EN: "Assigned work in motion", PT: "Trabalho atribuido em movimento", FR: "Travail assigne en mouvement" })
                   : localizedCopy({ EN: "Live execution score", PT: "Score de execucao vivo", FR: "Score d'execution en direct" }),
-              tone: toneFromPercent(profile.id === "field_coordinator" ? averageTaskProgress(tasksForRoleWorkspace(profile.id, tasks)) : (summary.delivery_health_score || state.projectSnapshot?.executive?.delivery_health_score || 0)),
+              tone: toneFromPercent(profile.id === "field_coordinator" ? averageTaskProgress(tasksForRoleWorkspace(profile.id, tasks)) : (summary.delivery_health_score ?? state.projectSnapshot?.executive?.delivery_health_score ?? null)),
             },
             {
               label: profile.id === "executive_viewer"
@@ -21585,6 +21655,20 @@
         return;
       }
 
+      if (quality.profile) {
+        cardsBox.textContent = `${quality.state} · ${quality.profile.fitness}`;
+        interpretationBox.textContent = methodText("qualityScope") + " " + quality.profile.scope;
+        issueSummary.textContent = [...(quality.warnings || []), ...(quality.limitations || [])].join(" ");
+        for (const [name, dimension] of Object.entries(quality.profile.dimensions)) {
+          const row = document.createElement("tr");
+          const value = dimension.display_percent === null ? dimension.state : `${dimension.display_percent}% (${dimension.numerator}/${dimension.denominator})`;
+          for (const text of [methodText(name), value, `population: ${dimension.population}; ${dimension.limitation || ""}; exclusions: ${JSON.stringify(dimension.exclusions)}`]) {
+            const cell = document.createElement("td"); cell.textContent = text; row.append(cell);
+          }
+          tableBody.append(row);
+        }
+        return;
+      }
       [
         { label: "Overall score", value: quality.overall_score, meta: "Composite quality signal", toneValue: quality.overall_score },
         { label: "Freshness", value: quality.data_freshness_days ?? "-", meta: freshnessLabel(quality.data_freshness_days), suffix: quality.data_freshness_days === null || quality.data_freshness_days === undefined ? "" : ` ${t("labels.days")}` },
@@ -21714,7 +21798,7 @@
       }
       const assessment = qualityAssessmentFromScore(payload?.average_score);
       [
-        [translateLiteralText("Average quality score"), payload?.average_score ?? "-", translateLiteralText("Portfolio-wide signal")],
+        [translateLiteralText("Quality"), payload?.state || "NOT_ASSESSED", "FITNESS_NOT_CONFIGURED"],
         [translateLiteralText("Datasets"), payload?.datasets?.length ?? 0, translateLiteralText("Tracked dataset inventory")],
         [translateLiteralText("Issues surfaced"), payload?.issue_count ?? 0, translateLiteralText("Current quality friction points")],
         [translateLiteralText("Selected dataset"), state.datasetId || "n/a", translateLiteralText("Current analysis context")],

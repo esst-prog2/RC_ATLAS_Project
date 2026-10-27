@@ -3,6 +3,10 @@ from copy import deepcopy
 from typing import Any, Dict, Optional
 
 from services import methodology as core
+from services.analytical_consumers import calculate_indicator, selection
+from services.errors import ServiceError
+from fastapi import Depends
+from api.analytical_context import analytical_query
 from services.tenant_security import find_scoped_project, find_scoped_dataset
 
 
@@ -41,25 +45,10 @@ def register_methodology_routes(app, *, load, save, authorize, audit, now, heade
 
     def compute(data, actor, indicator, method_id, version, start, end, as_of, locale):
         try:
-            ctx = core.context(start, end, as_of, locale)
-        except core.MethodologyError as exc:
-            fail(400, str(exc))
-        d = next((d for d in history(indicator)['definitions'] if d['methodology_id'] == method_id and d['version'] == version), None)
-        if d is None:
-            if method_id or version:
-                fail(404, 'Methodology version not found.')
-            return {'definition': None, 'result': {'state': 'UNCONFIGURED', 'display_value': None,
-                    'methodology_version': None, 'formula': None, 'context': ctx,
-                    'warnings': ['APPROVED_INDICATOR_DEFINITION_REQUIRED'],
-                    'limitations': ['No method or target is inferred from legacy indicator values.']}, 'historical': False}
-        dataset = find_scoped_dataset(data, actor.organization_id, d['source_dataset_id'])
-        if dataset is None:
-            fail(404, 'Calculation source is unavailable.')
-        try:
-            result = core.calculate(d, dataset.rows, ctx)
-        except core.MethodologyError:
-            fail(409, 'Methodology calculation is unavailable or invalid.')
-        return {'definition': deepcopy(d), 'result': result, 'historical': False}
+            selected = selection(start, end, as_of, method_id, version, locale)
+            return calculate_indicator(data, actor.organization_id, indicator.project_id, indicator.id, selected)
+        except ServiceError as exc:
+            fail(exc.status_code, exc.detail)
 
     @app.get(PREFIX + '/methodology')
     def get_methodology(project_id: str, indicator_id: str,
@@ -105,7 +94,8 @@ def register_methodology_routes(app, *, load, save, authorize, audit, now, heade
     def get_calculation(project_id: str, indicator_id: str, start: str, end: str, as_of: str,
                         methodology_id: str = '', version: str = '', locale: str = 'EN',
                         x_api_key: Optional[str] = header(default=None, alias='X-API-Key'),
-                        x_auth_token: Optional[str] = header(default=None, alias='X-Auth-Token')):
+                        x_auth_token: Optional[str] = header(default=None, alias='X-Auth-Token'),
+                        analysis: Dict[str, Any] = Depends(analytical_query)):
         data, actor, indicator, _ = scope(project_id, indicator_id, x_api_key, x_auth_token)
         return compute(data, actor, indicator, methodology_id, version, start, end, as_of, locale)
 

@@ -43,6 +43,8 @@ from api import (
     register_reporting_routes,
 )
 from api.methodology_routes import register_methodology_routes
+from api.analytical_context import analytical_query
+from services import analytical_consumers as analytical
 from services.methodology import validate_history as validate_methodology_history, validate_transition as validate_methodology_transition
 from logitrack_platform import (
     RepeatingRuntimeWorker,
@@ -137,7 +139,7 @@ except ImportError:
 # OPTIONAL API IMPORTS
 # ----------------------------
 try:
-    from fastapi import FastAPI, Header, HTTPException, Request
+    from fastapi import FastAPI, Header, HTTPException, Request, Depends
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import HTMLResponse, JSONResponse, Response
 except Exception:
@@ -591,6 +593,11 @@ class Indicator:
     methodology: Dict[str, Any] = field(default_factory=dict)
 
     def progress_for(self, actual: Optional[float], target: Optional[float]) -> Optional[float]:
+        # Location records have no versioned population/period binding. Never infer
+        # an approved profile from legacy baseline/target fields.
+        return None
+
+    def _legacy_progress_for(self, actual: Optional[float], target: Optional[float]) -> Optional[float]:
         if actual is None or target is None:
             return None
         d = (self.direction or "up").lower()
@@ -616,6 +623,9 @@ class Indicator:
         return ((actual - self.baseline) / denom) * 100
 
     def status_canon_for(self, progress: Optional[float]) -> str:
+        return "NOT_ASSESSED"
+
+    def _legacy_status_canon_for(self, progress: Optional[float]) -> str:
         if progress is None:
             return "SEM DADOS"
         t = CONFIG["status_thresholds"]
@@ -3459,7 +3469,11 @@ def percentile(values: List[float], q: float) -> Optional[float]:
     frac = idx - lo
     return values[lo] * (1 - frac) + values[hi] * frac
 
-def build_tidy_dataset_quality_report(data: LogiTrackData, dataset: TidyDataset) -> Dict[str, Any]:
+def build_tidy_dataset_quality_report(data: LogiTrackData, dataset: TidyDataset, selected=None,
+                                    *, project_id='', indicator_id='') -> Dict[str, Any]:
+    return analytical.quality_report(data, dataset, selected, project_id=project_id, indicator_id=indicator_id)
+
+def _legacy_build_tidy_dataset_quality_report(data: LogiTrackData, dataset: TidyDataset) -> Dict[str, Any]:
     rows = dataset.rows
     schema = build_dataset_schema(rows)
     mapping = effective_semantic_mapping(data, dataset)
@@ -3575,15 +3589,26 @@ def build_tidy_dataset_quality_report(data: LogiTrackData, dataset: TidyDataset)
         },
     }
 
-def build_dataset_narrative_summary(data: LogiTrackData, dataset: TidyDataset) -> Dict[str, Any]:
+def build_dataset_narrative_summary(data: LogiTrackData, dataset: TidyDataset, selected=None, *, project_id='', indicator_id='') -> Dict[str, Any]:
+    if selected is not None:
+        quality = build_tidy_dataset_quality_report(data, dataset, selected, project_id=project_id, indicator_id=indicator_id)
+        envelope = quality['calculation']
+        result = envelope['result']
+        value = (result['display_value'] + ' ' + result.get('unit', '')) if result['display_value'] is not None else result.get('band_state') or result['state']
+        return {'dataset_id': dataset.id, 'analytical_contract': analytical.CONTRACT,
+                'summary': f"{result.get('metric_kind', 'Indicator calculation')}: {value} ({result['state']}).",
+                'insights': [result.get('formula') or 'APPROVED_INDICATOR_DEFINITION_REQUIRED',
+                             *result.get('warnings', []), *result.get('limitations', [])],
+                'quality': quality, 'calculation': envelope,
+                'recommendation': {'state': 'NOT_ASSESSED', 'recommended_visuals': []}}
     recommendation = build_dashboard_recommendation_for_rows(dataset.rows, dataset.name)
-    quality = build_tidy_dataset_quality_report(data, dataset)
+    quality = build_tidy_dataset_quality_report(data, dataset, selected, project_id=project_id, indicator_id=indicator_id)
     notifications = build_tidy_dataset_notifications(dataset)
     top_visuals = [item["chart_type"] for item in recommendation["recommended_visuals"][:4]]
 
     summary = f"{dataset.name} contains {len(dataset.rows)} rows. The recommended dashboard type is {recommendation['dashboard_type']}."
     insights = [
-        f"Overall data quality score: {quality['overall_score']}.",
+        "Quality is a five-dimensional profile; overall score is UNSUPPORTED and fitness is not configured.",
         f"Suggested visuals: {', '.join(top_visuals) if top_visuals else 'data_table'}.",
     ]
     if quality["data_freshness_days"] is not None:
@@ -3598,6 +3623,8 @@ def build_dataset_narrative_summary(data: LogiTrackData, dataset: TidyDataset) -
         "summary": summary,
         "insights": insights,
         "quality": quality,
+        "calculation": quality.get("calculation"),
+        "analytical_contract": analytical.CONTRACT,
         "recommendation": recommendation,
     }
 
@@ -4094,6 +4121,10 @@ def get_mapped_row_value(row: Dict[str, Any], mapping: Dict[str, Any], field_nam
     return row.get(column_name)
 
 def calculate_reporting_record_progress(record: ReportingPeriodRecord, indicator: Optional[Indicator] = None) -> Optional[float]:
+    # Reported progress is source metadata, not a registered calculation instance.
+    return None
+
+def _legacy_calculate_reporting_record_progress(record: ReportingPeriodRecord, indicator: Optional[Indicator] = None) -> Optional[float]:
     if record.progress_value is not None:
         return float(record.progress_value)
     if record.actual_value is None or record.target_value is None:
@@ -4126,6 +4157,9 @@ def reporting_record_to_dict(record: ReportingPeriodRecord, data: Optional[LogiT
         "actual_value": record.actual_value,
         "target_value": record.target_value,
         "progress_value": (round(progress, 3) if progress is not None else None),
+        "reported_progress_value": record.progress_value,
+        "calculation_state": "NOT_ASSESSED",
+        "limitations": [analytical.LEGACY_LIMIT],
         "budget_value": record.budget_value,
         "currency": record.currency,
         "status": record.status,
@@ -4380,6 +4414,16 @@ def group_reporting_records_by_period(records: List[ReportingPeriodRecord]) -> L
     return [(period, grouped[period]) for period in periods]
 
 def build_reporting_trend_series(data: LogiTrackData, records: List[ReportingPeriodRecord]) -> List[Dict[str, Any]]:
+    # Preserve period membership/counts. An unbound history is not a comparable
+    # indicator series; do not pool units, currencies or unapproved percentages.
+    return [analytical.guard_aggregate({
+        'reporting_period': period, 'records_count': len(rows),
+        'actual_total': None, 'target_total': None, 'budget_total': None,
+        'dimensions_count': len({(r.country, r.province, r.district) for r in rows}),
+        'statistical_trend': 'NOT_ASSESSED', 'source_binding_state': 'UNCONFIGURED',
+    }, analytical.LEGACY_LIMIT) for period, rows in group_reporting_records_by_period(records)]
+
+def _legacy_build_reporting_trend_series(data: LogiTrackData, records: List[ReportingPeriodRecord]) -> List[Dict[str, Any]]:
     series: List[Dict[str, Any]] = []
     for period, rows in group_reporting_records_by_period(records):
         progress_list: List[float] = []
@@ -4735,6 +4779,9 @@ def weighted_mean(pairs: List[Tuple[Optional[float], Optional[float]]]) -> Optio
     return nume / deno
 
 def canon_status_from_progress(progress: Optional[float]) -> str:
+    return "NOT_ASSESSED"
+
+def _legacy_canon_status_from_progress(progress: Optional[float]) -> str:
     if progress is None:
         return "SEM DADOS"
     t = CONFIG["status_thresholds"]
@@ -4749,7 +4796,7 @@ def canon_status_from_progress(progress: Optional[float]) -> str:
 # ----------------------------
 # BI Flattening (tables + bridge + KPIs)
 # ----------------------------
-def build_bi_tables(data: LogiTrackData):
+def build_bi_tables(data: LogiTrackData, selected=None, *, project_id='', indicator_id=''):
     projects = []
     indicators = []
     indicator_locations = []
@@ -4860,6 +4907,8 @@ def build_bi_tables(data: LogiTrackData):
                     "has_target": bool(has_target),
                     "has_actual": bool(has_actual),
                     "is_valid_progress": bool(is_valid),
+                    "calculation_state": "NOT_ASSESSED",
+                    "limitations": [analytical.LEGACY_LIMIT],
                 })
 
             avg_prog = safe_mean(prog_list)
@@ -5016,13 +5065,28 @@ def build_bi_tables(data: LogiTrackData):
             "workplan_coverage_pct": (round(coverage * 100, 3) if coverage is not None else None),
         })
 
+    kpi_indicator = [analytical.indicator_kpi(data, p, ind,
+        selected if p.id == project_id and ind.id == indicator_id else None)
+        for p in data.projects for ind in p.indicators]
+    for rows in (kpi_project, kpi_district):
+        for row in rows:
+            analytical.guard_aggregate(row)
+            row['budget_total'] = None  # Legacy locations have no approved currency conversion.
+    for row in kpi_project:
+        locations = [loc for loc in indicator_locations if loc['project_id'] == row['project_id']]
+        row['locations_missing_count'] = sum(loc['actual_local'] is None for loc in locations)
+        row['locations_unassessed_count'] = len(locations)
+    for row in kpi_district:
+        locations = [loc for loc in indicator_locations if all(loc[k] == row[k] for k in ('project_id', 'country', 'province', 'district'))]
+        row['rows_missing_count'] = sum(loc['actual_local'] is None for loc in locations)
+        row['rows_unassessed_count'] = len(locations)
     return (
         projects, indicators, indicator_locations, activities, tasks,
         activity_indicator_links,
         kpi_project, kpi_indicator, kpi_district, kpi_workplan
     )
 
-def build_bi_payload(data: LogiTrackData) -> Dict[str, List[dict]]:
+def build_bi_payload(data: LogiTrackData, selected=None, *, project_id='', indicator_id='') -> Dict[str, List[dict]]:
     (
         projects,
         indicators,
@@ -5034,7 +5098,7 @@ def build_bi_payload(data: LogiTrackData) -> Dict[str, List[dict]]:
         kpi_indicator,
         kpi_district,
         kpi_workplan,
-    ) = build_bi_tables(data)
+    ) = build_bi_tables(data, selected, project_id=project_id, indicator_id=indicator_id)
 
     return {
         "projects": projects,
@@ -5083,9 +5147,11 @@ def build_dashboard_summary(data: LogiTrackData) -> Dict[str, Any]:
             "audit_events": len(data.audit_events),
         },
         "portfolio": {
+            "calculation_state": "NOT_ASSESSED",
+            "limitations": [analytical.AGGREGATION_LIMIT],
             "progress_mean_pct": safe_mean(project_mean_values),
             "progress_weighted_pct": safe_mean(project_weighted_values),
-            "budget_total": round(sum(float(row.get("budget_total") or 0.0) for row in project_kpis), 3),
+            "budget_total": None,
             "tasks_total": sum(int(row.get("tasks_total") or 0) for row in workplan_kpis),
             "tasks_overdue": sum(int(row.get("tasks_overdue") or 0) for row in workplan_kpis),
             "tasks_next_7_days": sum(int(row.get("tasks_next_7_days") or 0) for row in workplan_kpis),
@@ -5192,8 +5258,8 @@ def build_project_notifications(data: LogiTrackData) -> List[Dict[str, Any]]:
                 "project",
                 project_id,
                 f"{project_name}: progress cannot be calculated",
-                "The project does not yet have enough valid KPI values to compute overall progress.",
-                "Upload actual and target values for indicator locations.",
+                "NOT_ASSESSED: project progress requires an approved comparable-group aggregation method.",
+                "Inspect each indicator using its approved method and explicit reporting context.",
                 {"project_id": project_id},
             ))
         elif progress < 50:
@@ -6234,10 +6300,14 @@ def export_bi_csv(data: LogiTrackData, out_dir: str) -> None:
 
     def write_csv(name: str, rows: List[dict], fieldnames: List[str]):
         with open(out / name, "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=fieldnames)
+            extra = [key for key in ('calculation_state', 'limitations', 'aggregation_state', 'aggregation_limitation')
+                     if any(key in row for row in rows) and key not in fieldnames]
+            columns = fieldnames + extra
+            w = csv.DictWriter(f, fieldnames=columns)
             w.writeheader()
             for r in rows:
-                w.writerow(r)
+                w.writerow({key: json.dumps(r[key], ensure_ascii=False) if isinstance(r.get(key), (list, dict)) else r.get(key)
+                            for key in columns})
 
     write_csv("projects.csv", projects, ["project_id", "project_name", "objective"])
 
@@ -6540,6 +6610,8 @@ if FastAPI is not None:
             response.headers["Deprecation"] = "true"
             response.headers["X-RCAtlas-Methodology-State"] = "LEGACY_UNVALIDATED"
             response.headers["Warning"] = '299 RCAtlas "Legacy analytics; not validated under Wave 2 methodology"'
+            # This header describes the mixed legacy response, not its selected
+            # calculation envelope. A query parameter cannot certify a consumer.
         return response
 
     def _save_with_idempotency_replay(
@@ -6738,11 +6810,26 @@ if FastAPI is not None:
     def _build_tenant_payload_for_api(
         x_api_key: Optional[str],
         x_auth_token: Optional[str],
+        analysis=None,
     ) -> Tuple[LogiTrackData, Dict[str, List[dict]], AuthenticatedTenantContext]:
         data = _load_for_api()
         actor = _authorize_request(data, x_api_key, x_auth_token, required_role=None)
+        query = analysis or {'selected': None, 'project_id': '', 'indicator_id': ''}
+        if query['selected'] is not None:
+            actor = _authorize_request(data, x_api_key, x_auth_token,
+                required_permissions=['VIEW_INDICATORS', 'VIEW_REPORTS'], require_all_permissions=True)
         scoped = scope_snapshot_for_tenant(data, actor)
-        return scoped, build_bi_payload(scoped), actor
+        if query['project_id']:
+            project = find_scoped_project(scoped, actor.organization_id, query['project_id'])
+            if project is None:
+                raise HTTPException(404, 'Indicator methodology resource not found.')
+            if query['indicator_id'] and not any(i.id == query['indicator_id'] for i in project.indicators):
+                raise HTTPException(404, 'Indicator methodology resource not found.')
+        try:
+            payload = build_bi_payload(scoped, **query)
+        except ServiceError as exc:
+            raise HTTPException(exc.status_code, exc.detail) from exc
+        return scoped, payload, actor
 
     def _build_dataset_payload(data: LogiTrackData, dataset: TidyDataset) -> Dict[str, Any]:
         recommendation = build_dashboard_recommendation_for_rows(dataset.rows, dataset.name)
@@ -8058,9 +8145,11 @@ if FastAPI is not None:
         return payload["kpi_project"]
 
     @app.get("/v1/kpi/indicator")
-    def v1_kpi_indicator(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
-        return payload["kpi_indicator"]
+    def v1_kpi_indicator(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"), analysis: Dict[str, Any] = Depends(analytical_query)):
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, analysis)
+        return [row for row in payload["kpi_indicator"]
+                if (not analysis['project_id'] or row['project_id'] == analysis['project_id'])
+                and (not analysis['indicator_id'] or row['indicator_id'] == analysis['indicator_id'])]
 
     @app.get("/v1/kpi/district")
     def v1_kpi_district(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
@@ -8077,8 +8166,9 @@ if FastAPI is not None:
         project_id: str,
         x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
+        analysis: Dict[str, Any] = Depends(analytical_query),
     ):
-        data, payload, actor = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        data, payload, actor = _build_tenant_payload_for_api(x_api_key, x_auth_token, analysis)
         project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")

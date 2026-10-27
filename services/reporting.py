@@ -68,11 +68,13 @@ class ReportingService:
             raise ServiceError(404, f"Tidy dataset '{dataset_id}' not found.")
         return dataset
 
-    def _tenant_data(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> tuple[Any, Any]:
+    def _tenant_data(self, x_api_key: Optional[str], x_auth_token: Optional[str], *, selected=False) -> tuple[Any, Any]:
         data = self.deps.load_data()
-        actor = self.deps.authorize_request(
-            data, x_api_key, x_auth_token, required_permission="VIEW_REPORTS"
-        )
+        if selected:
+            actor = self.deps.authorize_request(data, x_api_key, x_auth_token,
+                required_permissions=['VIEW_INDICATORS', 'VIEW_REPORTS'], require_all_permissions=True)
+        else:
+            actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="VIEW_REPORTS")
         return scope_snapshot_for_tenant(data, actor), actor
 
     def list_reporting_records(
@@ -187,15 +189,17 @@ class ReportingService:
             "mapping": asdict(mapping),
         }
 
-    def get_tidy_dataset_quality(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
-        data, _ = self._tenant_data(x_api_key, x_auth_token)
+    def get_tidy_dataset_quality(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str], analysis=None) -> Dict[str, Any]:
+        query = analysis or {'selected': None, 'project_id': '', 'indicator_id': ''}
+        data, _ = self._tenant_data(x_api_key, x_auth_token, selected=query['selected'] is not None)
         dataset = self._require_dataset(data, dataset_id)
-        return self.deps.build_tidy_dataset_quality_report(data, dataset)
+        return self.deps.build_tidy_dataset_quality_report(data, dataset, **query)
 
-    def get_tidy_dataset_narrative(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
-        data, _ = self._tenant_data(x_api_key, x_auth_token)
+    def get_tidy_dataset_narrative(self, dataset_id: str, x_api_key: Optional[str], x_auth_token: Optional[str], analysis=None) -> Dict[str, Any]:
+        query = analysis or {'selected': None, 'project_id': '', 'indicator_id': ''}
+        data, _ = self._tenant_data(x_api_key, x_auth_token, selected=query['selected'] is not None)
         dataset = self._require_dataset(data, dataset_id)
-        return self.deps.build_dataset_narrative_summary(data, dataset)
+        return self.deps.build_dataset_narrative_summary(data, dataset, **query)
 
     def get_tidy_dataset_dashboard_blueprint(
         self,

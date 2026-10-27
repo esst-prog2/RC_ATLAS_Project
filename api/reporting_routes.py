@@ -2,6 +2,8 @@ from typing import Any, Dict, Optional
 
 from api.common import header_default, raise_http_error
 from services.errors import ServiceError
+from fastapi import Depends
+from api.analytical_context import analytical_query
 
 
 def register_reporting_routes(
@@ -86,16 +88,16 @@ def register_reporting_routes(
             raise_http_error(exc, http_exception_cls)
 
     @app.get("/v1/tidy_datasets/{dataset_id}/quality")
-    def v1_tidy_dataset_quality(dataset_id: str, x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"), x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token")):
+    def v1_tidy_dataset_quality(dataset_id: str, x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"), x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token"), analysis: Dict[str, Any] = Depends(analytical_query)):
         try:
-            return service.get_tidy_dataset_quality(dataset_id, x_api_key, x_auth_token)
+            return service.get_tidy_dataset_quality(dataset_id, x_api_key, x_auth_token, analysis)
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 
     @app.get("/v1/tidy_datasets/{dataset_id}/narrative")
-    def v1_tidy_dataset_narrative(dataset_id: str, x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"), x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token")):
+    def v1_tidy_dataset_narrative(dataset_id: str, x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"), x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token"), analysis: Dict[str, Any] = Depends(analytical_query)):
         try:
-            return service.get_tidy_dataset_narrative(dataset_id, x_api_key, x_auth_token)
+            return service.get_tidy_dataset_narrative(dataset_id, x_api_key, x_auth_token, analysis)
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 
