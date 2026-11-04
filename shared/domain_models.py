@@ -196,7 +196,7 @@ class UserAccount:
     email: str = ""
     role: str = "viewer"
     status: str = "active"
-    permissions: List[str] = field(default_factory=list)
+    permissions: Optional[List[str]] = field(default_factory=list)
     password_salt: str = ""
     password_hash: str = ""
     api_token_hash: str = ""
@@ -205,6 +205,9 @@ class UserAccount:
     updated_at: str = ""
     last_login_at: str = ""
     team_id: str = ""
+    # Existing constructors/records stay v0. Account writes use v1, where
+    # None inherits and every list (including []) is an explicit grant set.
+    permission_policy_version: int = 0
 
 
 @dataclass

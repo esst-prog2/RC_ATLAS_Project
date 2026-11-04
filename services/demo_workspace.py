@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional
 from .demo_seed import DemoSeedBundle, build_demo_seed_bundle
 from .errors import ServiceError
 from .tenant_security import find_scoped_project, scope_snapshot_for_tenant, workspace_is_uninitialized
+from .analytical_authorization import allows_category, project_snapshot_for_permissions
 
 
 UTC_DATETIME_MIN = datetime.min.replace(tzinfo=timezone.utc)
@@ -1294,7 +1295,7 @@ class DemoWorkspaceService:
         )
 
         overdue_tasks = [row for row in task_rows if self._task_is_overdue(row)]
-        return {
+        snapshot = {
             "generated_at": self.deps.now_iso_utc(),
             "analytical_contract": ANALYTICAL_CONTRACT,
             "project": project_payload,
@@ -1341,6 +1342,7 @@ class DemoWorkspaceService:
                 'progress_value': None, 'calculation_state': 'NOT_ASSESSED',
                 'limitations': ['LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING']} for item in records],
         }
+        return project_snapshot_for_permissions(snapshot, self._user_permissions(actor))
 
     def project_risks(
         self,
@@ -2069,7 +2071,7 @@ class DemoWorkspaceService:
         x_auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
-        self.deps.authorize_request(
+        actor = self.deps.authorize_request(
             data,
             x_api_key,
             x_auth_token,
@@ -2083,14 +2085,16 @@ class DemoWorkspaceService:
             snapshot = self.project_executive_snapshot(project_id, x_api_key=x_api_key, x_auth_token=x_auth_token)
             narrative = snapshot["narrative"]
             title = f"{snapshot['project']['project_name']} {self._audience_title(audience)}"
+            indicator_description = ("restricted indicator detail" if "indicators" in snapshot.get("restricted_sections", [])
+                                     else f"{len(snapshot['indicators'])} tracked indicator rows")
             highlights = [
                 "Indicator-derived delivery health is NOT_ASSESSED; no approved aggregation profile.",
                 f"{snapshot['executive'].get('tasks_overdue', 0)} tasks are overdue.",
-                f"{len(snapshot['notifications'])} current alerts require follow-up.",
+                f"{snapshot['executive'].get('active_notifications', len(snapshot['notifications']))} current alerts require follow-up.",
             ]
             sections = [
                 {"title": "Executive summary", "body": narrative.get("summary", ""), "bullets": narrative.get("insights", [])[:4]},
-                {"title": "Delivery and coverage", "body": f"The project is active in {len(snapshot['project'].get('districts', []))} districts with {len(snapshot['indicators'])} tracked indicator rows and {snapshot['executive'].get('open_tasks', 0)} open operational tasks.", "bullets": [item.get("title", "") for item in snapshot["dashboard"]["widgets"][:3]]},
+                {"title": "Delivery and coverage", "body": f"The project is active in {len(snapshot['project'].get('districts', []))} districts with {indicator_description} and {snapshot['executive'].get('open_tasks', 0)} open operational tasks.", "bullets": [item.get("title", "") for item in snapshot["dashboard"]["widgets"][:3]]},
                 {"title": "Risks and mitigation", "body": "Current risks are summarized below for management action.", "bullets": [item.get("title", "") for item in snapshot["notifications"][:4]]},
             ]
         else:
@@ -2113,7 +2117,7 @@ class DemoWorkspaceService:
             "management": ["Delivery trend", "Escalations", "Management actions due this week"],
             "meal": ["Indicator quality", "Reporting freshness", "Evidence gaps by district"],
         }
-        return {
+        report = {
             "generated_at": self.deps.now_iso_utc(),
             "audience": audience,
             "title": title,
@@ -2122,6 +2126,17 @@ class DemoWorkspaceService:
             "talking_points": audience_guidance[audience],
             "export_options": ["PDF briefing", "PowerPoint board pack", "Email summary"],
         }
+        if not allows_category(self._user_permissions(actor), 'notifications'):
+            # Both scopes end with notification-derived risk details. Retain
+            # authorized aggregate highlights, but distinguish withheld details
+            # from an authorized empty result. Full-access reports stay verbatim.
+            report['sections'][-1] = {
+                **report['sections'][-1],
+                'body': 'Notification details are restricted by your permissions.',
+                'bullets': [],
+            }
+            report['restricted_sections'] = ['notifications']
+        return report
 
     def _select_template(self, data: Any, template_id: Optional[str]) -> Any:
         if template_id:

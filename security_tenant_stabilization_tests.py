@@ -219,7 +219,10 @@ class SecurityTenantStabilizationTests(unittest.TestCase):
 
     def test_collection_detail_and_write_isolation_are_side_effect_free(self):
         before = self.serialized()
-        self.assertEqual(self.client.get('/v1/projects/proj_other/dashboard', headers=self.headers()).status_code, 404)
+        # Capability denial precedes resource lookup; a capable actor still
+        # receives the tenant-scoped 404 without any foreign-resource details.
+        self.assertEqual(self.client.get('/v1/projects/proj_other/dashboard', headers=self.headers()).status_code, 403)
+        self.assertEqual(self.client.get('/v1/projects/proj_other/dashboard', headers=self.headers('org.admin')).status_code, 404)
         denied = self.client.post(
             '/v1/projects/proj_other/indicators',
             headers=self.headers('raimundo.cumba'),

@@ -6,6 +6,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from shared.permission_policy import encode_permission_policy
 
 
 DDL_STATEMENTS = [
@@ -729,7 +730,7 @@ def sync_snapshot_to_relational_store(
                     str(user.get("email", "")),
                     str(user.get("role", "")),
                     str(user.get("status", "active")),
-                    _json_text(user.get("permissions") or []),
+                    encode_permission_policy(user),
                     str(user.get("password_salt", "")),
                     str(user.get("password_hash", "")),
                     str(user.get("api_token_hash", "")),

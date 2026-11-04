@@ -5,6 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from .common import begin_write, connect_repository_db, safe_rollback
+from shared.permission_policy import decode_permission_policy, encode_permission_policy
 
 
 LOGGER = logging.getLogger("logitrack.repositories.users")
@@ -13,11 +14,14 @@ LOGGER = logging.getLogger("logitrack.repositories.users")
 def _row_to_user_dict(row: Any) -> Dict[str, Any]:
     permissions_raw = row["permissions_json"] if "permissions_json" in row.keys() else "[]"
     try:
-        permissions = json.loads(str(permissions_raw or "[]"))
+        stored_permissions = json.loads(str(permissions_raw or "[]"))
     except json.JSONDecodeError as exc:
         raise ValueError("Stored user permissions are invalid JSON.") from exc
-    if not isinstance(permissions, list):
-        raise ValueError("Stored user permissions must be a JSON array.")
+    if not isinstance(stored_permissions, list) and not (
+        isinstance(stored_permissions, dict) and "permission_policy_version" in stored_permissions
+    ):
+        raise ValueError("Stored user permissions must be a JSON array or a versioned permission policy.")
+    permissions = decode_permission_policy(permissions_raw)
     return {
         "id": str(row["user_id"]),
         "organization_id": str(row["organization_id"] or ""),
@@ -27,7 +31,7 @@ def _row_to_user_dict(row: Any) -> Dict[str, Any]:
         "email": str(row["email"] or ""),
         "role": str(row["role"] or "viewer"),
         "status": str(row["status"] or "active"),
-        "permissions": permissions,
+        **permissions,
         "password_salt": str(row["password_salt"] or ""),
         "password_hash": str(row["password_hash"] or ""),
         "api_token_hash": str(row["api_token_hash"] or ""),
@@ -120,7 +124,7 @@ def upsert_user(user: Dict[str, Any], db_path: Optional[str] = None) -> str:
                 str(user.get("email", "")),
                 str(user.get("role", "viewer")),
                 str(user.get("status", "active")),
-                json.dumps(user.get("permissions", []) or [], ensure_ascii=False),
+                encode_permission_policy(user),
                 str(user.get("password_salt", "")),
                 str(user.get("password_hash", "")),
                 str(user.get("api_token_hash", "")),
@@ -162,7 +166,7 @@ def replace_all_users(users: List[Dict[str, Any]], db_path: Optional[str] = None
                     str(user.get("email", "")),
                     str(user.get("role", "viewer")),
                     str(user.get("status", "active")),
-                    json.dumps(user.get("permissions", []) or [], ensure_ascii=False),
+                    encode_permission_policy(user),
                     str(user.get("password_salt", "")),
                     str(user.get("password_hash", "")),
                     str(user.get("api_token_hash", "")),

@@ -45,6 +45,8 @@ from api import (
 from api.methodology_routes import register_methodology_routes
 from api.analytical_context import analytical_query
 from services import analytical_consumers as analytical
+from shared.permission_policy import policy_version, validate_grant_shape
+from services.analytical_authorization import CAPABILITIES, PROJECT_DASHBOARD_PERMISSIONS
 from services.methodology import validate_history as validate_methodology_history, validate_transition as validate_methodology_transition
 from logitrack_platform import (
     RepeatingRuntimeWorker,
@@ -1084,6 +1086,9 @@ def from_serializable(d: dict) -> LogiTrackData:
 
     users: List[UserAccount] = []
     for item in d.get("users", []):
+        permission_version = policy_version(item.get("permission_policy_version", 0))
+        if permission_version == 1 and "permissions" not in item:
+            raise ValueError("Versioned permission records require an explicit permissions field.")
         users.append(construct_compat_model(UserAccount,
             id=str(item["id"]),
             username=str(item.get("username", "")),
@@ -1093,7 +1098,9 @@ def from_serializable(d: dict) -> LogiTrackData:
             email=str(item.get("email", "")),
             role=str(item.get("role", "viewer")),
             status=str(item.get("status", "active") or "active"),
-            permissions=normalize_permission_ids(item.get("permissions", [])),
+            permissions=(validate_permission_grants(item["permissions"]) if permission_version == 1
+                         else normalize_permission_ids(item.get("permissions", []))),
+            permission_policy_version=permission_version,
             password_salt=str(item.get("password_salt", "")),
             password_hash=str(item.get("password_hash", "")),
             api_token_hash=str(item.get("api_token_hash", "")),
@@ -2117,9 +2124,24 @@ def normalize_permission_ids(values: Optional[List[str]]) -> List[str]:
 def role_permissions(role: Optional[str]) -> List[str]:
     return list(ROLE_PERMISSION_TEMPLATES.get(normalize_role(role), []))
 
+def validate_permission_grants(values: Any) -> Optional[List[str]]:
+    validate_grant_shape(values)
+    if values is None:
+        return None
+    if any(normalize_permission_id(value) not in PERMISSION_CATALOG for value in values):
+        raise ValueError("Permissions contain an unknown permission ID.")
+    return normalize_permission_ids(values)
+
 def effective_permissions(user: Optional[UserAccount]) -> List[str]:
     if user is None:
         return []
+    try:
+        version = policy_version(getattr(user, "permission_policy_version", 0))
+        if version == 1:
+            explicit = validate_permission_grants(user.permissions)
+            return role_permissions(user.role) if explicit is None else explicit
+    except (ValueError, TypeError, AttributeError):
+        return []  # Unknown/corrupt versioned policy must never restore defaults.
     explicit = normalize_permission_ids(getattr(user, "permissions", []) or [])
     return explicit or role_permissions(user.role)
 
@@ -2188,6 +2210,9 @@ def sanitize_user(user: UserAccount) -> Dict[str, Any]:
         "role_label": role_label(user.role),
         "status": user.status,
         "permissions": effective_permissions(user),
+        "permission_policy_version": getattr(user, "permission_policy_version", 0),
+        "permission_mode": ("legacy" if getattr(user, "permission_policy_version", 0) == 0
+                            else "inherit" if user.permissions is None else "explicit"),
         "role_template_permissions": role_permissions(user.role),
         "is_active": user.is_active,
         "created_at": user.created_at,
@@ -2785,6 +2810,15 @@ def sanitize_dashboard_layout(layout: Any, visuals: List[Dict[str, Any]]) -> Lis
     return sanitized or default_layout
 
 def build_user_account_from_payload(payload: Dict[str, Any], existing: Optional[UserAccount] = None) -> UserAccount:
+    if "permission_policy_version" in payload:
+        raise ValueError("Permission policy version is managed by the server; submit permissions instead.")
+    if "permissions" in payload or existing is None:
+        permissions = validate_permission_grants(payload.get("permissions"))
+        permission_version = 1
+    else:
+        # A name/role/profile edit does not reinterpret an ambiguous legacy list.
+        permission_version = policy_version(getattr(existing, "permission_policy_version", 0))
+        permissions = (list(existing.permissions) if isinstance(existing.permissions, list) else existing.permissions)
     username = derive_username(payload, existing=existing)
     password = payload.get("password")
     if existing is None and (password is None or str(password) == ""):
@@ -2810,7 +2844,8 @@ def build_user_account_from_payload(payload: Dict[str, Any], existing: Optional[
         email=optional_text_field(payload, "email", existing.email if existing else ""),
         role=normalize_role(optional_text_field(payload, "role", existing.role if existing else "executive_viewer")),
         status=optional_text_field(payload, "status", existing.status if existing else ("active" if is_active else "inactive")) or ("active" if is_active else "inactive"),
-        permissions=normalize_permission_ids(payload.get("permissions", existing.permissions if existing else [])),
+        permissions=permissions,
+        permission_policy_version=permission_version,
         password_salt=salt,
         password_hash=password_hash,
         api_token_hash=existing.api_token_hash if existing else "",
@@ -6811,13 +6846,15 @@ if FastAPI is not None:
         x_api_key: Optional[str],
         x_auth_token: Optional[str],
         analysis=None,
+        *, required_permissions: Tuple[str, ...],
     ) -> Tuple[LogiTrackData, Dict[str, List[dict]], AuthenticatedTenantContext]:
         data = _load_for_api()
-        actor = _authorize_request(data, x_api_key, x_auth_token, required_role=None)
         query = analysis or {'selected': None, 'project_id': '', 'indicator_id': ''}
+        capabilities = list(required_permissions)
         if query['selected'] is not None:
-            actor = _authorize_request(data, x_api_key, x_auth_token,
-                required_permissions=['VIEW_INDICATORS', 'VIEW_REPORTS'], require_all_permissions=True)
+            capabilities.extend(CAPABILITIES['indicators'])
+        actor = _authorize_request(data, x_api_key, x_auth_token,
+            required_permissions=capabilities, require_all_permissions=True)
         scoped = scope_snapshot_for_tenant(data, actor)
         if query['project_id']:
             project = find_scoped_project(scoped, actor.organization_id, query['project_id'])
@@ -7043,9 +7080,10 @@ if FastAPI is not None:
         if not str(bootstrap_payload.get("username") or "").strip():
             email_value = str(bootstrap_payload.get("email") or "").strip().lower()
             bootstrap_payload["username"] = email_value.split("@", 1)[0] if "@" in email_value else "organization.admin"
-        user = build_user_account_from_payload({
-            **bootstrap_payload,
-        })
+        try:
+            user = build_user_account_from_payload(bootstrap_payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         if find_user_by_username(data, user.username) is not None:
             raise HTTPException(status_code=409, detail=f"Username '{user.username}' already exists.")
         if user.email and find_user_by_email(data, user.email) is not None:
@@ -8111,54 +8149,54 @@ if FastAPI is not None:
 
     @app.get("/v1/projects")
     def v1_projects(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_EXECUTIVE_SNAPSHOT',))
         return payload["projects"]
 
     @app.get("/v1/indicators")
     def v1_indicators(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_INDICATORS',))
         return payload["indicators"]
 
     @app.get("/v1/indicator_locations")
     def v1_indicator_locations(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_INDICATORS',))
         return payload["indicator_locations"]
 
     @app.get("/v1/activities")
     def v1_activities(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_WORKPLAN',))
         return payload["activities"]
 
     @app.get("/v1/tasks")
     def v1_tasks(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_WORKPLAN',))
         return payload["tasks"]
 
     @app.get("/v1/activity_indicator_links")
     def v1_links(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_WORKPLAN',))
         return payload["activity_indicator_links"]
 
     @app.get("/v1/kpi/project")
     def v1_kpi_project(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_REPORTS',))
         return payload["kpi_project"]
 
     @app.get("/v1/kpi/indicator")
     def v1_kpi_indicator(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"), analysis: Dict[str, Any] = Depends(analytical_query)):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, analysis)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, analysis, required_permissions=CAPABILITIES['indicators'])
         return [row for row in payload["kpi_indicator"]
                 if (not analysis['project_id'] or row['project_id'] == analysis['project_id'])
                 and (not analysis['indicator_id'] or row['indicator_id'] == analysis['indicator_id'])]
 
     @app.get("/v1/kpi/district")
     def v1_kpi_district(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_REPORTS',))
         return payload["kpi_district"]
 
     @app.get("/v1/kpi/workplan")
     def v1_kpi_workplan(x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"), x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token")):
-        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token)
+        _, payload, _ = _build_tenant_payload_for_api(x_api_key, x_auth_token, required_permissions=('VIEW_WORKPLAN',))
         return payload["kpi_workplan"]
 
     @app.get("/v1/projects/{project_id}/dashboard")
@@ -8168,7 +8206,8 @@ if FastAPI is not None:
         x_auth_token: Optional[str] = Header(default=None, alias="X-Auth-Token"),
         analysis: Dict[str, Any] = Depends(analytical_query),
     ):
-        data, payload, actor = _build_tenant_payload_for_api(x_api_key, x_auth_token, analysis)
+        data, payload, actor = _build_tenant_payload_for_api(x_api_key, x_auth_token, analysis,
+            required_permissions=PROJECT_DASHBOARD_PERMISSIONS)
         project = find_scoped_project(data, actor.organization_id, project_id)
         if project is None:
             raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found.")

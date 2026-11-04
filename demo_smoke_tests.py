@@ -112,11 +112,16 @@ def build_demo_service():
 
 
 def build_in_memory_demo_service(data):
+    # Builder tests use an explicit synthetic administrator. A missing actor is
+    # not an authorization bypass for the permission-aware snapshot projection.
+    actor = MODULE.find_user_by_username(data, 'org.admin')
+    if actor is None:
+        raise AssertionError('The in-memory demo fixture requires its synthetic administrator.')
     return MODULE.DemoWorkspaceService(
         MODULE.DemoWorkspaceServiceDependencies(
             load_data=lambda: data,
             save_data=lambda _: "memory://demo",
-            authorize_request=lambda *args, **kwargs: None,
+            authorize_request=lambda *args, **kwargs: actor,
             append_audit_event=lambda *args, **kwargs: None,
             from_serializable=MODULE.from_serializable,
             find_user_by_username=MODULE.find_user_by_username,
@@ -787,7 +792,7 @@ class DemoSmokeTests(unittest.TestCase):
                     None,
                     field_token,
                 )
-                pending_snapshot = demo_service.project_executive_snapshot(project_id, None, manager_token)
+                pending_snapshot = demo_service.project_executive_snapshot(project_id, x_auth_token=manager_token)
                 self.assertEqual(submitted["task"]["status"], "pending_validation")
                 self.assertGreaterEqual(submitted["workflow"]["task_board"]["pending_validation"], 1)
                 self.assertTrue(
@@ -811,7 +816,7 @@ class DemoSmokeTests(unittest.TestCase):
                     None,
                     manager_token,
                 )
-                final_snapshot = demo_service.project_executive_snapshot(project_id, None, manager_token)
+                final_snapshot = demo_service.project_executive_snapshot(project_id, x_auth_token=manager_token)
                 final_workplan = demo_service.project_workplan_snapshot(project_id, None, manager_token)
 
                 self.assertEqual(approved["task"]["status"], "completed")
