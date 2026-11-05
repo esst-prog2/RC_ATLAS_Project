@@ -97,7 +97,8 @@ class SnapshotAuthorizationTests(unittest.TestCase):
         self.assertTrue(body['reporting_records'])
         self.assertTrue(body['dashboard']['widgets'])
         self.assertIn('AUDIT_DETAIL_SENTINEL', json.dumps(body))
-        golden = Path(os.environ['SEC01_SNAPSHOT_GOLDEN'])
+        golden = Path(os.environ.get('SEC01_SNAPSHOT_GOLDEN',
+            Path(__file__).resolve().parent / 'test_fixtures' / 'sec01' / 'executive_snapshot.json'))
         if os.environ.get('SEC01_CAPTURE_SNAPSHOT') == 'true':
             if golden.exists():
                 raise AssertionError('Never overwrite captured baseline.')

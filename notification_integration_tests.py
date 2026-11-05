@@ -1,5 +1,6 @@
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from services.notifications import NotificationService
 
@@ -30,20 +31,25 @@ class NotificationIntegrationTests(unittest.TestCase):
         )
         service = NotificationService(dependencies)
 
-        result, provider = service._dispatch_email(
-            notifications=[{"id": "notice-1"}],
-            payload={
-                "sendgrid_api_key": "synthetic-test-key",
-                "sendgrid_from": "sender@example.test",
-                "subject": "Synthetic notice",
-            },
-            recipients=["recipient@example.test"],
-            provider="sendgrid",
-        )
+        with patch.dict("os.environ", {
+            "LOGITRACK_SENDGRID_API_KEY": "synthetic-test-key",
+            "LOGITRACK_SENDGRID_FROM": "sender@example.test",
+        }):
+            result, provider = service._dispatch_email(
+                notifications=[{"id": "notice-1"}],
+                payload={
+                    "sendgrid_api_key": "untrusted-request-key",
+                    "sendgrid_from": "untrusted@example.test",
+                    "subject": "Synthetic notice",
+                },
+                recipients=["recipient@example.test"],
+                provider="sendgrid",
+            )
 
         self.assertEqual(provider, "sendgrid")
         self.assertEqual(result, {"accepted": 1})
         self.assertEqual(calls[0]["sender_email"], "sender@example.test")
+        self.assertEqual(calls[0]["api_key"], "synthetic-test-key")
 
 
 if __name__ == "__main__":

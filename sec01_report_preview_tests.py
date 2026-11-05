@@ -36,7 +36,8 @@ class ReportPreviewAuthorizationTests(unittest.TestCase):
         for report in reports.values():
             self.assertTrue(report['sections'][-1]['bullets'])
             self.assertNotIn('restricted_sections', report)
-        golden = Path(os.environ['SEC01_REPORT_GOLDEN'])
+        golden = Path(os.environ.get('SEC01_REPORT_GOLDEN',
+            Path(__file__).resolve().parent / 'test_fixtures' / 'sec01' / 'report_previews.json'))
         if os.environ.get('SEC01_CAPTURE_REPORT') == 'true':
             if golden.exists():
                 raise AssertionError('Never overwrite the pre-correction report baseline.')

@@ -65,13 +65,17 @@ def main():
             raise RuntimeError('Unisolated canonical path.')
     (evidence / 'isolation.json').write_text(json.dumps(isolation, indent=2), encoding='utf-8')
     if args.suite.startswith(('snapshot', 'report-preview')):
-        golden = source / 'sec01-evidence' / 'rework-before' / 'full-snapshot.json'
+        golden = (source / 'sec01-evidence' / 'rework-before' / 'full-snapshot.json'
+                  if args.suite == 'snapshot-before' else
+                  source / 'test_fixtures' / 'sec01' / 'executive_snapshot.json')
         os.environ['SEC01_SNAPSHOT_GOLDEN'] = str(golden)
         os.environ['SEC01_CAPTURE_SNAPSHOT'] = 'true' if args.suite == 'snapshot-before' else 'false'
         if args.suite == 'snapshot-before' and golden.parent != evidence:
             raise RuntimeError('Capture must use the dedicated, new rework-before directory.')
     if args.suite.startswith('report-preview'):
-        golden = source / 'sec01-evidence' / 'report-preview-before' / 'full-reports.json'
+        golden = (source / 'sec01-evidence' / 'report-preview-before' / 'full-reports.json'
+                  if args.suite == 'report-preview-before' else
+                  source / 'test_fixtures' / 'sec01' / 'report_previews.json')
         os.environ['SEC01_REPORT_GOLDEN'] = str(golden)
         os.environ['SEC01_CAPTURE_REPORT'] = 'true' if args.suite == 'report-preview-before' else 'false'
         if args.suite == 'report-preview-before' and golden.parent != evidence:
