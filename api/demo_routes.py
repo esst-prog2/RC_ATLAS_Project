@@ -14,9 +14,10 @@ def register_demo_routes(
     def v1_demo_seed(
         x_api_key: Optional[str] = header_default(header_factory, "X-API-Key"),
         x_auth_token: Optional[str] = header_default(header_factory, "X-Auth-Token"),
+        x_setup_token: Optional[str] = header_default(header_factory, "X-Setup-Token"),
     ):
         try:
-            return service.seed_workspace(x_api_key, x_auth_token)
+            return service.seed_workspace(x_api_key, x_auth_token, x_setup_token)
         except ServiceError as exc:
             raise_http_error(exc, http_exception_cls)
 

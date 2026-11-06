@@ -105,16 +105,23 @@ def build_demo_service():
             find_tidy_dataset=MODULE.find_tidy_dataset,
             find_dashboard_template=MODULE.find_dashboard_template,
             parse_date_like_value=MODULE.parse_date_like_value,
+            demo_setup_enabled=lambda: True,
+            authorize_setup=lambda _: None,
         )
     )
 
 
 def build_in_memory_demo_service(data):
+    # Builder tests use an explicit synthetic administrator. A missing actor is
+    # not an authorization bypass for the permission-aware snapshot projection.
+    actor = MODULE.find_user_by_username(data, 'org.admin')
+    if actor is None:
+        raise AssertionError('The in-memory demo fixture requires its synthetic administrator.')
     return MODULE.DemoWorkspaceService(
         MODULE.DemoWorkspaceServiceDependencies(
             load_data=lambda: data,
             save_data=lambda _: "memory://demo",
-            authorize_request=lambda *args, **kwargs: None,
+            authorize_request=lambda *args, **kwargs: actor,
             append_audit_event=lambda *args, **kwargs: None,
             from_serializable=MODULE.from_serializable,
             find_user_by_username=MODULE.find_user_by_username,
@@ -135,6 +142,8 @@ def build_in_memory_demo_service(data):
             find_tidy_dataset=MODULE.find_tidy_dataset,
             find_dashboard_template=MODULE.find_dashboard_template,
             parse_date_like_value=MODULE.parse_date_like_value,
+            demo_setup_enabled=lambda: True,
+            authorize_setup=lambda _: None,
         )
     )
 
@@ -144,7 +153,7 @@ def issue_token_for_user(data, username):
     if user is None:
         raise AssertionError(f"User '{username}' is missing from the demo workspace.")
     token = MODULE.new_api_token()
-    user.api_token_hash = MODULE.hash_with_sha256(token)
+    MODULE.register_session_for_token(data, user, token)
     user.last_login_at = MODULE.now_iso_utc()
     user.updated_at = MODULE.now_iso_utc()
     return user, token
@@ -369,18 +378,20 @@ class DemoSmokeTests(unittest.TestCase):
             ):
                 seeded = demo_service.seed_workspace(None, None)
                 loaded = MODULE.load_data_from_path()
-                overview = demo_service.workspace_overview(None, seeded["login"]["token"])
-                snapshot = demo_service.project_executive_snapshot(overview["default_project_id"], x_auth_token=seeded["login"]["token"])
-                report = demo_service.report_preview("donor", overview["default_project_id"], x_auth_token=seeded["login"]["token"])
+                _, token = issue_token_for_user(loaded, "org.admin")
+                MODULE.save_data_to_path(loaded)
+                overview = demo_service.workspace_overview(None, token)
+                snapshot = demo_service.project_executive_snapshot(overview["default_project_id"], x_auth_token=token)
+                report = demo_service.report_preview("donor", overview["default_project_id"], x_auth_token=token)
                 simulation = demo_service.simulate_notifications(
                     {"scenario": "overdue_alerts", "project_id": overview["default_project_id"]},
                     None,
-                    seeded["login"]["token"],
+                    token,
                 )
 
-            self.assertEqual(seeded["login"]["email"], "amina.duarte@bluedelta.org")
-            self.assertEqual(seeded["login"]["username"], "org.admin")
-            self.assertTrue(seeded["login"]["token"])
+            self.assertNotIn("login", seeded)
+            self.assertNotIn("credentials", seeded)
+            self.assertNotIn("saved_to", seeded)
             self.assertGreaterEqual(len(loaded.projects), 3)
             self.assertTrue(overview["demo_ready"])
             self.assertGreaterEqual(len(overview["project_cards"]), 3)
@@ -781,7 +792,7 @@ class DemoSmokeTests(unittest.TestCase):
                     None,
                     field_token,
                 )
-                pending_snapshot = demo_service.project_executive_snapshot(project_id, None, manager_token)
+                pending_snapshot = demo_service.project_executive_snapshot(project_id, x_auth_token=manager_token)
                 self.assertEqual(submitted["task"]["status"], "pending_validation")
                 self.assertGreaterEqual(submitted["workflow"]["task_board"]["pending_validation"], 1)
                 self.assertTrue(
@@ -805,7 +816,7 @@ class DemoSmokeTests(unittest.TestCase):
                     None,
                     manager_token,
                 )
-                final_snapshot = demo_service.project_executive_snapshot(project_id, None, manager_token)
+                final_snapshot = demo_service.project_executive_snapshot(project_id, x_auth_token=manager_token)
                 final_workplan = demo_service.project_workplan_snapshot(project_id, None, manager_token)
 
                 self.assertEqual(approved["task"]["status"], "completed")

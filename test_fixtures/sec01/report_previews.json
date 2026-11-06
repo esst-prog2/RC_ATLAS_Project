@@ -1,0 +1,308 @@
+{
+  "portfolio:donor": {
+    "generated_at": "2026-10-28T12:00:00Z",
+    "audience": "donor",
+    "title": "Portfolio Donor Review Brief",
+    "highlights": [
+      "The portfolio covers 3 active projects.",
+      "Portfolio progress is NOT_ASSESSED; no approved aggregation profile.",
+      "10 overdue tasks are currently visible."
+    ],
+    "sections": [
+      {
+        "title": "Executive summary",
+        "body": "The active portfolio combines 3 project(s), 8 overdue operational action(s), and 3 project(s) requiring closer management attention.",
+        "bullets": [
+          "Operational posture now reacts to task completion, validation backlog, and escalation pressure.",
+          "10 overdue tasks are currently visible across the portfolio workspace.",
+          "11 live notification signal(s) remain available for follow-up.",
+          "There are 4 high-priority portfolio notifications."
+        ]
+      },
+      {
+        "title": "Portfolio delivery",
+        "body": "The demo workspace combines delivery, operational, and donor accountability signals.",
+        "bullets": [
+          "Coastal Resilience and Livelihoods Programme",
+          "Community Health Access Initiative",
+          "Girls Learning and Protection Accelerator"
+        ]
+      },
+      {
+        "title": "Risk and accountability",
+        "body": "Priority notifications and data quality issues are surfaced for rapid follow-up.",
+        "bullets": [
+          "Coastal Resilience and Livelihoods Programme: overdue tasks detected",
+          "Community Health Access Initiative: overdue tasks detected",
+          "Girls Learning and Protection Accelerator: overdue tasks detected",
+          "Portfolio KPI Reporting Feed: low actual-vs-target rows found"
+        ]
+      }
+    ],
+    "talking_points": [
+      "Value for money",
+      "Implementation risks",
+      "Coverage and beneficiary reach"
+    ],
+    "export_options": [
+      "PDF briefing",
+      "PowerPoint board pack",
+      "Email summary"
+    ]
+  },
+  "portfolio:management": {
+    "generated_at": "2026-10-28T12:00:00Z",
+    "audience": "management",
+    "title": "Portfolio Management Brief",
+    "highlights": [
+      "The portfolio covers 3 active projects.",
+      "Portfolio progress is NOT_ASSESSED; no approved aggregation profile.",
+      "10 overdue tasks are currently visible."
+    ],
+    "sections": [
+      {
+        "title": "Executive summary",
+        "body": "The active portfolio combines 3 project(s), 8 overdue operational action(s), and 3 project(s) requiring closer management attention.",
+        "bullets": [
+          "Operational posture now reacts to task completion, validation backlog, and escalation pressure.",
+          "10 overdue tasks are currently visible across the portfolio workspace.",
+          "11 live notification signal(s) remain available for follow-up.",
+          "There are 4 high-priority portfolio notifications."
+        ]
+      },
+      {
+        "title": "Portfolio delivery",
+        "body": "The demo workspace combines delivery, operational, and donor accountability signals.",
+        "bullets": [
+          "Coastal Resilience and Livelihoods Programme",
+          "Community Health Access Initiative",
+          "Girls Learning and Protection Accelerator"
+        ]
+      },
+      {
+        "title": "Risk and accountability",
+        "body": "Priority notifications and data quality issues are surfaced for rapid follow-up.",
+        "bullets": [
+          "Coastal Resilience and Livelihoods Programme: overdue tasks detected",
+          "Community Health Access Initiative: overdue tasks detected",
+          "Girls Learning and Protection Accelerator: overdue tasks detected",
+          "Portfolio KPI Reporting Feed: low actual-vs-target rows found"
+        ]
+      }
+    ],
+    "talking_points": [
+      "Delivery trend",
+      "Escalations",
+      "Management actions due this week"
+    ],
+    "export_options": [
+      "PDF briefing",
+      "PowerPoint board pack",
+      "Email summary"
+    ]
+  },
+  "portfolio:meal": {
+    "generated_at": "2026-10-28T12:00:00Z",
+    "audience": "meal",
+    "title": "Portfolio MEAL Learning Brief",
+    "highlights": [
+      "The portfolio covers 3 active projects.",
+      "Portfolio progress is NOT_ASSESSED; no approved aggregation profile.",
+      "10 overdue tasks are currently visible."
+    ],
+    "sections": [
+      {
+        "title": "Executive summary",
+        "body": "The active portfolio combines 3 project(s), 8 overdue operational action(s), and 3 project(s) requiring closer management attention.",
+        "bullets": [
+          "Operational posture now reacts to task completion, validation backlog, and escalation pressure.",
+          "10 overdue tasks are currently visible across the portfolio workspace.",
+          "11 live notification signal(s) remain available for follow-up.",
+          "There are 4 high-priority portfolio notifications."
+        ]
+      },
+      {
+        "title": "Portfolio delivery",
+        "body": "The demo workspace combines delivery, operational, and donor accountability signals.",
+        "bullets": [
+          "Coastal Resilience and Livelihoods Programme",
+          "Community Health Access Initiative",
+          "Girls Learning and Protection Accelerator"
+        ]
+      },
+      {
+        "title": "Risk and accountability",
+        "body": "Priority notifications and data quality issues are surfaced for rapid follow-up.",
+        "bullets": [
+          "Coastal Resilience and Livelihoods Programme: overdue tasks detected",
+          "Community Health Access Initiative: overdue tasks detected",
+          "Girls Learning and Protection Accelerator: overdue tasks detected",
+          "Portfolio KPI Reporting Feed: low actual-vs-target rows found"
+        ]
+      }
+    ],
+    "talking_points": [
+      "Indicator quality",
+      "Reporting freshness",
+      "Evidence gaps by district"
+    ],
+    "export_options": [
+      "PDF briefing",
+      "PowerPoint board pack",
+      "Email summary"
+    ]
+  },
+  "project:donor": {
+    "generated_at": "2026-10-28T12:00:00Z",
+    "audience": "donor",
+    "title": "Community Health Access Initiative Donor Review Brief",
+    "highlights": [
+      "Indicator-derived delivery health is NOT_ASSESSED; no approved aggregation profile.",
+      "2 tasks are overdue.",
+      "4 current alerts require follow-up."
+    ],
+    "sections": [
+      {
+        "title": "Executive summary",
+        "body": "Community Health Access Initiative: indicator-derived delivery health is NOT_ASSESSED. There are 2 overdue task(s) and 0 validation checkpoint(s).",
+        "bullets": [
+          "Indicator aggregation requires an approved comparable-group estimand.",
+          "Reporting confidence currently stands at 96.7% after validation and backlog penalties.",
+          "5 open task(s) remain active in the implementation workspace.",
+          "There are 3 active notification(s) for this project."
+        ]
+      },
+      {
+        "title": "Delivery and coverage",
+        "body": "The project is active in 3 districts with 3 tracked indicator rows and 5 open operational tasks.",
+        "bullets": [
+          "Portfolio KPIs",
+          "Weighted Progress Trend",
+          "Status Mix"
+        ]
+      },
+      {
+        "title": "Risks and mitigation",
+        "body": "Current risks are summarized below for management action.",
+        "bullets": [
+          "Community Health Access Initiative: overdue tasks detected",
+          "Community Health Access Initiative: overdue coordination pressure",
+          "Community Health Access Initiative: progress cannot be calculated",
+          "Confirm vaccine stock buffer: deadline approaching"
+        ]
+      }
+    ],
+    "talking_points": [
+      "Value for money",
+      "Implementation risks",
+      "Coverage and beneficiary reach"
+    ],
+    "export_options": [
+      "PDF briefing",
+      "PowerPoint board pack",
+      "Email summary"
+    ]
+  },
+  "project:management": {
+    "generated_at": "2026-10-28T12:00:00Z",
+    "audience": "management",
+    "title": "Community Health Access Initiative Management Brief",
+    "highlights": [
+      "Indicator-derived delivery health is NOT_ASSESSED; no approved aggregation profile.",
+      "2 tasks are overdue.",
+      "4 current alerts require follow-up."
+    ],
+    "sections": [
+      {
+        "title": "Executive summary",
+        "body": "Community Health Access Initiative: indicator-derived delivery health is NOT_ASSESSED. There are 2 overdue task(s) and 0 validation checkpoint(s).",
+        "bullets": [
+          "Indicator aggregation requires an approved comparable-group estimand.",
+          "Reporting confidence currently stands at 96.7% after validation and backlog penalties.",
+          "5 open task(s) remain active in the implementation workspace.",
+          "There are 3 active notification(s) for this project."
+        ]
+      },
+      {
+        "title": "Delivery and coverage",
+        "body": "The project is active in 3 districts with 3 tracked indicator rows and 5 open operational tasks.",
+        "bullets": [
+          "Portfolio KPIs",
+          "Weighted Progress Trend",
+          "Status Mix"
+        ]
+      },
+      {
+        "title": "Risks and mitigation",
+        "body": "Current risks are summarized below for management action.",
+        "bullets": [
+          "Community Health Access Initiative: overdue tasks detected",
+          "Community Health Access Initiative: overdue coordination pressure",
+          "Community Health Access Initiative: progress cannot be calculated",
+          "Confirm vaccine stock buffer: deadline approaching"
+        ]
+      }
+    ],
+    "talking_points": [
+      "Delivery trend",
+      "Escalations",
+      "Management actions due this week"
+    ],
+    "export_options": [
+      "PDF briefing",
+      "PowerPoint board pack",
+      "Email summary"
+    ]
+  },
+  "project:meal": {
+    "generated_at": "2026-10-28T12:00:00Z",
+    "audience": "meal",
+    "title": "Community Health Access Initiative MEAL Learning Brief",
+    "highlights": [
+      "Indicator-derived delivery health is NOT_ASSESSED; no approved aggregation profile.",
+      "2 tasks are overdue.",
+      "4 current alerts require follow-up."
+    ],
+    "sections": [
+      {
+        "title": "Executive summary",
+        "body": "Community Health Access Initiative: indicator-derived delivery health is NOT_ASSESSED. There are 2 overdue task(s) and 0 validation checkpoint(s).",
+        "bullets": [
+          "Indicator aggregation requires an approved comparable-group estimand.",
+          "Reporting confidence currently stands at 96.7% after validation and backlog penalties.",
+          "5 open task(s) remain active in the implementation workspace.",
+          "There are 3 active notification(s) for this project."
+        ]
+      },
+      {
+        "title": "Delivery and coverage",
+        "body": "The project is active in 3 districts with 3 tracked indicator rows and 5 open operational tasks.",
+        "bullets": [
+          "Portfolio KPIs",
+          "Weighted Progress Trend",
+          "Status Mix"
+        ]
+      },
+      {
+        "title": "Risks and mitigation",
+        "body": "Current risks are summarized below for management action.",
+        "bullets": [
+          "Community Health Access Initiative: overdue tasks detected",
+          "Community Health Access Initiative: overdue coordination pressure",
+          "Community Health Access Initiative: progress cannot be calculated",
+          "Confirm vaccine stock buffer: deadline approaching"
+        ]
+      }
+    ],
+    "talking_points": [
+      "Indicator quality",
+      "Reporting freshness",
+      "Evidence gaps by district"
+    ],
+    "export_options": [
+      "PDF briefing",
+      "PowerPoint board pack",
+      "Email summary"
+    ]
+  }
+}

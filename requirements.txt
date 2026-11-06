@@ -4,3 +4,6 @@ uvicorn>=0.53.0,<0.54
 
 # Test dependency used by FastAPI's TestClient
 httpx>=0.28.1,<0.29
+
+# PostgreSQL primary persistence (legacy JSON/SQLite remain available for tests).
+psycopg[binary]>=3.3,<3.4

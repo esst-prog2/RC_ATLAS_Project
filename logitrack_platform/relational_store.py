@@ -6,6 +6,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from shared.permission_policy import encode_permission_policy
 
 
 DDL_STATEMENTS = [
@@ -28,6 +29,7 @@ DDL_STATEMENTS = [
     """
     CREATE TABLE IF NOT EXISTS projects (
         project_id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         objective TEXT,
         indicator_count INTEGER NOT NULL DEFAULT 0,
@@ -102,6 +104,7 @@ DDL_STATEMENTS = [
     """
     CREATE TABLE IF NOT EXISTS operational_activities (
         activity_id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL DEFAULT '',
         project_id TEXT NOT NULL,
         name TEXT NOT NULL,
         owner TEXT,
@@ -117,6 +120,7 @@ DDL_STATEMENTS = [
     """
     CREATE TABLE IF NOT EXISTS tasks (
         task_id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL DEFAULT '',
         project_id TEXT NOT NULL,
         activity_id TEXT NOT NULL,
         name TEXT NOT NULL,
@@ -330,6 +334,15 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     }
     if "organization_id" not in existing_indicator_columns:
         conn.execute("ALTER TABLE indicators ADD COLUMN organization_id TEXT NOT NULL DEFAULT ''")
+    for table_name in ("projects", "operational_activities", "tasks"):
+        existing_columns = {
+            str(row["name"])
+            for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+        }
+        if "organization_id" not in existing_columns:
+            conn.execute(
+                f"ALTER TABLE {table_name} ADD COLUMN organization_id TEXT NOT NULL DEFAULT ''"
+            )
 
 
 def _delete_existing_content(conn: sqlite3.Connection) -> None:
@@ -381,9 +394,10 @@ def sync_snapshot_to_relational_store(
                 continue
             indicators = [item for item in (project.get("indicators") or []) if isinstance(item, dict)]
             conn.execute(
-                "INSERT INTO projects (project_id, name, objective, indicator_count, synced_at) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO projects (project_id, organization_id, name, objective, indicator_count, synced_at) VALUES (?, ?, ?, ?, ?, ?)",
                 (
                     str(project.get("id", "")),
+                    str(project.get("organization_id", "")),
                     str(project.get("name", "")),
                     str(project.get("objective", "")),
                     len(indicators),
@@ -515,11 +529,12 @@ def sync_snapshot_to_relational_store(
                 conn.execute(
                     """
                     INSERT INTO operational_activities
-                    (activity_id, project_id, name, owner, start_date, due_date, status, linked_indicator_count, task_count, linked_indicator_ids_json, synced_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (activity_id, organization_id, project_id, name, owner, start_date, due_date, status, linked_indicator_count, task_count, linked_indicator_ids_json, synced_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         str(activity.get("id", "")),
+                        str(activity.get("organization_id", "")),
                         str(project_id),
                         str(activity.get("name", "")),
                         str(activity.get("owner", "")),
@@ -537,11 +552,12 @@ def sync_snapshot_to_relational_store(
                     conn.execute(
                         """
                         INSERT INTO tasks
-                        (task_id, project_id, activity_id, name, owner, due_date, status, notes, synced_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        (task_id, organization_id, project_id, activity_id, name, owner, due_date, status, notes, synced_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             str(task.get("id", "")),
+                            str(task.get("organization_id", "")),
                             str(project_id),
                             str(activity.get("id", "")),
                             str(task.get("name", "")),
@@ -714,7 +730,7 @@ def sync_snapshot_to_relational_store(
                     str(user.get("email", "")),
                     str(user.get("role", "")),
                     str(user.get("status", "active")),
-                    _json_text(user.get("permissions") or []),
+                    encode_permission_policy(user),
                     str(user.get("password_salt", "")),
                     str(user.get("password_hash", "")),
                     str(user.get("api_token_hash", "")),

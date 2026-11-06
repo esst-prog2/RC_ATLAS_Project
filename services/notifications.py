@@ -13,6 +13,18 @@ from .tenant_security import (
 )
 
 
+SUPPORTED_V1_CHANNELS = frozenset({"in_app", "email"})
+DEFERRED_CHANNELS = frozenset({"webhook", "whatsapp", "sms"})
+REQUEST_SECRET_FIELDS = frozenset({
+    "smtp_password",
+    "smtp_username",
+    "sendgrid_api_key",
+    "twilio_account_sid",
+    "twilio_auth_token",
+    "meta_whatsapp_token",
+})
+
+
 @dataclass(frozen=True)
 class NotificationServiceDependencies:
     load_data: Callable[[], Any]
@@ -58,6 +70,23 @@ class NotificationService:
             None,
         )
 
+    @staticmethod
+    def _email_enabled() -> bool:
+        return str(os.getenv("LOGITRACK_EMAIL_ENABLED", "false") or "false").strip().lower() in {"1", "true", "yes", "on"}
+
+    def _require_dispatchable_channel(self, channel: str) -> None:
+        normalized = str(channel or "").strip().lower()
+        if normalized not in SUPPORTED_V1_CHANNELS:
+            raise ServiceError(400, "Unsupported notification channel for v1. Use 'in_app' or 'email'.")
+        if normalized == "email" and not self._email_enabled():
+            raise ServiceError(503, "Email delivery is disabled until the approved provider sandbox gate passes.")
+
+    @staticmethod
+    def _reject_request_secrets(payload: Dict[str, Any]) -> None:
+        supplied = sorted(key for key in REQUEST_SECRET_FIELDS if payload.get(key) not in (None, ""))
+        if supplied:
+            raise ServiceError(400, "Provider credentials must be supplied through deployment configuration, not request bodies.")
+
     def channel_status(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> Dict[str, Any]:
         self._tenant_data(x_api_key, x_auth_token, "VIEW_NOTIFICATIONS")
         return self.deps.notification_channels_status()
@@ -74,10 +103,16 @@ class NotificationService:
     def list_rules(self, x_api_key: Optional[str], x_auth_token: Optional[str]) -> List[Dict[str, Any]]:
         data = self.deps.load_data()
         actor = self.deps.authorize_request(data, x_api_key, x_auth_token, required_permission="MANAGE_NOTIFICATIONS")
-        return [
-            asdict(rule) for rule in data.notification_rules
-            if notification_rule_organization_id(data, rule) == actor.organization_id
-        ]
+        items = []
+        for rule in data.notification_rules:
+            if notification_rule_organization_id(data, rule) != actor.organization_id:
+                continue
+            item = asdict(rule)
+            channel = str(rule.channel or "").strip().lower()
+            item["dispatch_enabled"] = channel == "in_app" or (channel == "email" and self._email_enabled())
+            item["migration_required"] = channel not in SUPPORTED_V1_CHANNELS
+            items.append(item)
+        return items
 
     def save_rule(
         self,
@@ -230,20 +265,16 @@ class NotificationService:
         return result
 
     def build_dispatch_payload_for_rule(self, rule: Any, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        dispatch_payload = dict(payload or {})
-        if rule.channel and "channel" not in dispatch_payload:
-            dispatch_payload["channel"] = rule.channel
-        if rule.provider and "provider" not in dispatch_payload:
-            dispatch_payload["provider"] = rule.provider
-        if rule.recipients:
-            if rule.channel == "email" and "email_to" not in dispatch_payload:
-                dispatch_payload["email_to"] = rule.recipients
-            if rule.channel == "whatsapp" and "whatsapp_to" not in dispatch_payload:
-                dispatch_payload["whatsapp_to"] = rule.recipients
-        if rule.webhook_url and "webhook_url" not in dispatch_payload and rule.channel == "webhook":
-            dispatch_payload["webhook_url"] = rule.webhook_url
-        if rule.webhook_url and "whatsapp_webhook_url" not in dispatch_payload and rule.channel == "whatsapp":
-            dispatch_payload["whatsapp_webhook_url"] = rule.webhook_url
+        supplied = dict(payload or {})
+        forbidden = {
+            "channel", "provider", "email_to", "whatsapp_to", "webhook_url", "whatsapp_webhook_url",
+            *REQUEST_SECRET_FIELDS,
+        }
+        if forbidden.intersection(supplied):
+            raise ServiceError(400, "Stored notification routing cannot be overridden when a rule is executed.")
+        dispatch_payload = {"channel": rule.channel, "provider": rule.provider}
+        if rule.channel == "email":
+            dispatch_payload["email_to"] = list(rule.recipients or [])
         return dispatch_payload
 
     def execute_rule(
@@ -256,6 +287,7 @@ class NotificationService:
         update_when_empty: bool = False,
         evaluation_data: Optional[Any] = None,
     ) -> Dict[str, Any]:
+        self._require_dispatchable_channel(str(rule.channel or ""))
         notifications = self.deps.evaluate_notification_rule(evaluation_data or data, rule)
         if not notifications:
             if update_when_empty:
@@ -357,40 +389,35 @@ class NotificationService:
         }
 
     def dispatch_by_channel(self, notifications: List[Dict[str, Any]], payload: Dict[str, Any]) -> Dict[str, Any]:
-        channel = (self.deps.optional_text_field(payload, "channel", "webhook") or "webhook").strip().lower()
+        self._reject_request_secrets(payload)
+        channel = (self.deps.optional_text_field(payload, "channel", "in_app") or "in_app").strip().lower()
+        self._require_dispatchable_channel(channel)
         provider = (self.deps.optional_text_field(payload, "provider") or "").strip().lower()
-        webhook_url = self.deps.optional_text_field(payload, "webhook_url") or (os.getenv("LOGITRACK_NOTIFY_WEBHOOK_URL", "") or "").strip()
-        whatsapp_webhook_url = self.deps.optional_text_field(payload, "whatsapp_webhook_url") or (os.getenv("LOGITRACK_WHATSAPP_WEBHOOK_URL", "") or "").strip()
         email_to = self.deps.parse_recipients(payload.get("email_to")) or self.deps.parse_recipients(os.getenv("LOGITRACK_NOTIFY_EMAIL_TO", ""))
-        whatsapp_to = self.deps.parse_recipients(payload.get("whatsapp_to")) or self.deps.parse_recipients(os.getenv("LOGITRACK_NOTIFY_WHATSAPP_TO", ""))
+
+        if channel == "in_app":
+            return {
+                "ok": True,
+                "dispatched": True,
+                "items_sent": len(notifications),
+                "channel": "in_app",
+                "provider": "internal",
+                "result": {"available_in_authenticated_feed": True},
+            }
 
         try:
-            if channel == "webhook":
-                if not webhook_url:
-                    return {
-                        "ok": True,
-                        "dispatched": False,
-                        "reason": "No webhook URL configured. Set LOGITRACK_NOTIFY_WEBHOOK_URL or send webhook_url in the request body.",
-                        "items": notifications,
-                    }
-                dispatch_result = self.deps.dispatch_notifications_to_webhook(notifications, webhook_url)
-                provider = provider or "generic_webhook"
-            elif channel == "email":
+            if channel == "email":
                 dispatch_result, provider = self._dispatch_email(notifications, payload, email_to, provider)
-            elif channel == "whatsapp":
-                dispatch_result, provider = self._dispatch_whatsapp(notifications, payload, whatsapp_to, whatsapp_webhook_url, provider)
-            else:
-                raise ServiceError(400, "Unsupported channel. Use 'webhook', 'email', or 'whatsapp'.")
         except ServiceError:
             raise
         except urlerror.URLError as exc:
-            raise ServiceError(502, f"Notification webhook failed: {exc}") from exc
+            raise ServiceError(502, "Notification provider request failed.") from exc
         except smtplib.SMTPException as exc:
-            raise ServiceError(502, f"Email dispatch failed: {exc}") from exc
+            raise ServiceError(502, "Email delivery failed.") from exc
         except ValueError as exc:
             raise ServiceError(400, str(exc)) from exc
         except Exception as exc:
-            raise ServiceError(500, f"Failed to dispatch notifications: {exc}") from exc
+            raise ServiceError(500, "Notification delivery failed.") from exc
 
         return {
             "ok": True,
@@ -408,13 +435,13 @@ class NotificationService:
         recipients: List[str],
         provider: str,
     ) -> tuple[Dict[str, Any], str]:
-        smtp_host = (self.deps.optional_text_field(payload, "smtp_host") or os.getenv("LOGITRACK_SMTP_HOST", "")).strip()
-        smtp_port_raw = payload.get("smtp_port", os.getenv("LOGITRACK_SMTP_PORT", "587"))
-        smtp_from = (self.deps.optional_text_field(payload, "smtp_from") or os.getenv("LOGITRACK_SMTP_FROM", "")).strip()
-        smtp_username = (self.deps.optional_text_field(payload, "smtp_username") or os.getenv("LOGITRACK_SMTP_USERNAME", "")).strip()
-        smtp_password = self.deps.optional_text_field(payload, "smtp_password") or os.getenv("LOGITRACK_SMTP_PASSWORD", "")
-        sendgrid_api_key = (self.deps.optional_text_field(payload, "sendgrid_api_key") or os.getenv("LOGITRACK_SENDGRID_API_KEY", "")).strip()
-        sendgrid_from = (self.deps.optional_text_field(payload, "sendgrid_from") or os.getenv("LOGITRACK_SENDGRID_FROM", "")).strip()
+        smtp_host = (os.getenv("LOGITRACK_SMTP_HOST", "") or "").strip()
+        smtp_port_raw = os.getenv("LOGITRACK_SMTP_PORT", "587")
+        smtp_from = (os.getenv("LOGITRACK_SMTP_FROM", "") or "").strip()
+        smtp_username = (os.getenv("LOGITRACK_SMTP_USERNAME", "") or "").strip()
+        smtp_password = os.getenv("LOGITRACK_SMTP_PASSWORD", "")
+        sendgrid_api_key = (os.getenv("LOGITRACK_SENDGRID_API_KEY", "") or "").strip()
+        sendgrid_from = (os.getenv("LOGITRACK_SENDGRID_FROM", "") or "").strip()
         smtp_subject = self.deps.optional_text_field(payload, "subject") or None
         use_tls_raw = payload.get("use_tls", os.getenv("LOGITRACK_SMTP_USE_TLS", "true"))
         use_tls = str(use_tls_raw).strip().lower() not in {"0", "false", "no"}

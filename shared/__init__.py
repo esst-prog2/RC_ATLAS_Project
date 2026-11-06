@@ -1,6 +1,8 @@
 from .domain_models import (
+    ApiSession,
     AuditEvent,
     DashboardTemplate,
+    IdempotencyRecord,
     IndicatorResultLink,
     NotificationRule,
     OrganizationAccount,
@@ -13,8 +15,10 @@ from .domain_models import (
 )
 
 __all__ = [
+    "ApiSession",
     "AuditEvent",
     "DashboardTemplate",
+    "IdempotencyRecord",
     "IndicatorResultLink",
     "NotificationRule",
     "OrganizationAccount",

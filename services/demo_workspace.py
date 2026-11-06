@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from services.analytical_consumers import CONTRACT as ANALYTICAL_CONTRACT, AGGREGATION_LIMIT
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional
@@ -7,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional
 from .demo_seed import DemoSeedBundle, build_demo_seed_bundle
 from .errors import ServiceError
 from .tenant_security import find_scoped_project, scope_snapshot_for_tenant, workspace_is_uninitialized
+from .analytical_authorization import allows_category, project_snapshot_for_permissions
 
 
 UTC_DATETIME_MIN = datetime.min.replace(tzinfo=timezone.utc)
@@ -150,6 +152,8 @@ class DemoWorkspaceServiceDependencies:
     find_tidy_dataset: Callable[[Any, str], Any]
     find_dashboard_template: Callable[[Any, str], Any]
     parse_date_like_value: Callable[[Any], Any]
+    demo_setup_enabled: Callable[[], bool]
+    authorize_setup: Callable[[Optional[str]], None]
 
 
 class DemoWorkspaceService:
@@ -869,12 +873,14 @@ class DemoWorkspaceService:
             posture = "stable"
 
         return {
-            "delivery_health_score": round(delivery_health, 2),
+            "delivery_health_score": None,
+            "calculation_state": "NOT_ASSESSED",
+            "limitations": [AGGREGATION_LIMIT],
             "reporting_confidence_score": round(reporting_confidence, 2),
             "operational_load_score": round(operational_load, 2),
             "escalation_pressure_score": round(escalation_pressure, 2),
-            "status_mean_canon": self._canonical_status_from_score(delivery_health),
-            "status_weighted_canon": self._canonical_status_from_score(delivery_health),
+            "status_mean_canon": "NOT_ASSESSED",
+            "status_weighted_canon": "NOT_ASSESSED",
             "coordination_posture": posture,
             "approval_backlog": int(workflow.get("pending_validation") or 0),
             "open_tasks": int(workflow.get("open") or 0),
@@ -974,12 +980,12 @@ class DemoWorkspaceService:
         pending = int(workflow.get("pending_validation") or 0)
         high_alerts = sum(1 for item in notifications if self._severity_rank(item.get("severity", "info")) >= 3)
         summary = (
-            f"{project.get('project_name', 'This project')} is operating at {round(float(delivery_score or 0.0), 1)}% delivery health "
-            f"with {overdue} overdue task(s), {pending} validation checkpoint(s), and {high_alerts} high-severity alert(s) currently shaping management attention."
+            f"{project.get('project_name', 'This project')}: indicator-derived delivery health is NOT_ASSESSED. "
+            f"There are {overdue} overdue task(s) and {pending} validation checkpoint(s)."
         )
         insights = list(payload.get("insights") or [])
         insights[:0] = [
-            f"Delivery health is now partially driven by operational execution, not only KPI reporting.",
+            "Indicator aggregation requires an approved comparable-group estimand.",
             f"Reporting confidence currently stands at {round(float(reporting_score or 0.0), 1)}% after validation and backlog penalties.",
             f"{workflow.get('open', 0)} open task(s) remain active in the implementation workspace.",
         ]
@@ -1016,7 +1022,18 @@ class DemoWorkspaceService:
         self,
         x_api_key: Optional[str],
         x_auth_token: Optional[str],
+        x_setup_token: Optional[str] = None,
     ) -> Dict[str, Any]:
+        if not self.deps.demo_setup_enabled():
+            raise ServiceError(403, "Demo setup is disabled for this deployment.")
+        try:
+            self.deps.authorize_setup(x_setup_token)
+        except ServiceError:
+            raise
+        except Exception as exc:
+            status_code = int(getattr(exc, "status_code", 403) or 403)
+            detail = str(getattr(exc, "detail", "Demo setup authorization failed."))
+            raise ServiceError(status_code, detail) from exc
         current_data = self.deps.load_data()
         actor = None
         if not workspace_is_uninitialized(current_data):
@@ -1028,8 +1045,6 @@ class DemoWorkspaceService:
         if default_user is None:
             raise ServiceError(500, "Demo seed bundle did not create the default admin user.")
 
-        demo_token = self.deps.new_api_token()
-        default_user.api_token_hash = self.deps.hash_with_sha256(demo_token)
         default_user.updated_at = self.deps.now_iso_utc()
 
         self.deps.append_audit_event(
@@ -1041,25 +1056,17 @@ class DemoWorkspaceService:
             endpoint="/v1/demo/seed",
             details=bundle.to_summary(),
         )
-        saved_path = self.deps.save_data(data)
+        self.deps.save_data(data)
         summary = self.deps.build_dashboard_summary(data)
         return {
             "ok": True,
-            "saved_to": saved_path,
             "counts": summary["counts"],
             "default_project_id": bundle.default_project_id,
             "default_dataset_id": bundle.default_dataset_id,
-            "login": {
-                "email": bundle.default_email,
-                "username": bundle.default_username,
-                "password": next(item.password for item in bundle.credentials if item.username == bundle.default_username),
-                "token": demo_token,
-            },
             "user": {
                 **self.deps.sanitize_user(default_user),
                 "organization_name": bundle.payload.get("organizations", [{}])[0].get("organization_name", ""),
             },
-            "credentials": [asdict(item) for item in bundle.credentials],
         }
 
     def workspace_overview(
@@ -1146,6 +1153,9 @@ class DemoWorkspaceService:
                 "description": dataset.description,
                 "row_count": len(dataset.rows),
                 "quality_score": quality.get("overall_score"),
+                "state": quality["state"],
+                "profile": quality["profile"],
+                "limitations": quality["limitations"],
                 "issues_count": len(quality.get("issues") or []),
                 "freshness_days": quality.get("data_freshness_days"),
                 "updated_at": dataset.updated_at,
@@ -1163,13 +1173,15 @@ class DemoWorkspaceService:
             "counts": summary["counts"],
             "portfolio": {
                 **summary["portfolio"],
-                "delivery_health_avg_pct": round(sum(portfolio_delivery_scores) / len(portfolio_delivery_scores), 2) if portfolio_delivery_scores else 0.0,
+                "delivery_health_avg_pct": None,
+                "calculation_state": "NOT_ASSESSED",
+                "limitations": [AGGREGATION_LIMIT],
                 "reporting_confidence_avg_pct": round(sum(portfolio_reporting_scores) / len(portfolio_reporting_scores), 2) if portfolio_reporting_scores else 0.0,
                 "operational_load_avg_pct": round(sum(portfolio_load_scores) / len(portfolio_load_scores), 2) if portfolio_load_scores else 0.0,
             },
             "executive_cards": [
                 {"label": "Active projects", "value": summary["counts"]["projects"], "tone": "good"},
-                {"label": "Delivery health", "value": round(sum(portfolio_delivery_scores) / len(portfolio_delivery_scores), 1) if portfolio_delivery_scores else 0.0, "tone": "info", "suffix": "%"},
+                {"label": "Delivery health", "value": None, "state": "NOT_ASSESSED", "tone": "info", "suffix": "%"},
                 {"label": "Reporting confidence", "value": round(sum(portfolio_reporting_scores) / len(portfolio_reporting_scores), 1) if portfolio_reporting_scores else 0.0, "tone": "accent", "suffix": "%"},
                 {"label": "Overdue tasks", "value": summary["portfolio"].get("tasks_overdue"), "tone": "bad"},
                 {"label": "Operational load", "value": sum(int(card.get("open_tasks") or 0) for card in project_cards), "tone": "warn"},
@@ -1181,7 +1193,9 @@ class DemoWorkspaceService:
             "notifications": notifications,
             "risks": risks,
             "data_quality": {
-                "average_score": round(total_quality / len(datasets), 2) if datasets else 0.0,
+                "average_score": None,
+                "state": "NOT_ASSESSED",
+                "fitness": "FITNESS_NOT_CONFIGURED",
                 "datasets": datasets,
                 "issue_count": total_issues,
                 "stale_datasets": stale_datasets,
@@ -1281,8 +1295,9 @@ class DemoWorkspaceService:
         )
 
         overdue_tasks = [row for row in task_rows if self._task_is_overdue(row)]
-        return {
+        snapshot = {
             "generated_at": self.deps.now_iso_utc(),
+            "analytical_contract": ANALYTICAL_CONTRACT,
             "project": project_payload,
             "executive": {
                 "progress_weighted_pct": operational_state.get("delivery_health_score", project_kpi.get("progress_weighted_pct")),
@@ -1323,8 +1338,11 @@ class DemoWorkspaceService:
             "activity_feed": self._activity_feed(data, project_id, workflow),
             "workflow": workflow,
             "role_views": ROLE_EXPERIENCE,
-            "reporting_records": [asdict(item) for item in records],
+            "reporting_records": [{**asdict(item), 'reported_progress_value': item.progress_value,
+                'progress_value': None, 'calculation_state': 'NOT_ASSESSED',
+                'limitations': ['LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING']} for item in records],
         }
+        return project_snapshot_for_permissions(snapshot, self._user_permissions(actor))
 
     def project_risks(
         self,
@@ -1424,13 +1442,19 @@ class DemoWorkspaceService:
                 "description": dataset.description,
                 "row_count": len(dataset.rows),
                 "overall_score": quality.get("overall_score"),
+                "state": quality["state"],
+                "profile": quality["profile"],
+                "limitations": quality["limitations"],
                 "data_freshness_days": quality.get("data_freshness_days"),
                 "issues": quality.get("issues", []),
             })
-        average_score = round(sum(float(item["overall_score"] or 0.0) for item in items) / len(items), 2) if items else 0.0
+        average_score = None
         return {
             "generated_at": self.deps.now_iso_utc(),
             "average_score": average_score,
+            "state": "NOT_ASSESSED",
+            "fitness": "FITNESS_NOT_CONFIGURED",
+            "analytical_contract": ANALYTICAL_CONTRACT,
             "datasets": items,
             "issue_count": sum(len(item["issues"]) for item in items),
         }
@@ -2047,7 +2071,7 @@ class DemoWorkspaceService:
         x_auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         data = self.deps.load_data()
-        self.deps.authorize_request(
+        actor = self.deps.authorize_request(
             data,
             x_api_key,
             x_auth_token,
@@ -2061,14 +2085,16 @@ class DemoWorkspaceService:
             snapshot = self.project_executive_snapshot(project_id, x_api_key=x_api_key, x_auth_token=x_auth_token)
             narrative = snapshot["narrative"]
             title = f"{snapshot['project']['project_name']} {self._audience_title(audience)}"
+            indicator_description = ("restricted indicator detail" if "indicators" in snapshot.get("restricted_sections", [])
+                                     else f"{len(snapshot['indicators'])} tracked indicator rows")
             highlights = [
-                f"Delivery health is {snapshot['executive'].get('delivery_health_score', snapshot['executive'].get('progress_weighted_pct'))}%.",
+                "Indicator-derived delivery health is NOT_ASSESSED; no approved aggregation profile.",
                 f"{snapshot['executive'].get('tasks_overdue', 0)} tasks are overdue.",
-                f"{len(snapshot['notifications'])} current alerts require follow-up.",
+                f"{snapshot['executive'].get('active_notifications', len(snapshot['notifications']))} current alerts require follow-up.",
             ]
             sections = [
                 {"title": "Executive summary", "body": narrative.get("summary", ""), "bullets": narrative.get("insights", [])[:4]},
-                {"title": "Delivery and coverage", "body": f"The project is active in {len(snapshot['project'].get('districts', []))} districts with {len(snapshot['indicators'])} tracked indicator rows and {snapshot['executive'].get('open_tasks', 0)} open operational tasks.", "bullets": [item.get("title", "") for item in snapshot["dashboard"]["widgets"][:3]]},
+                {"title": "Delivery and coverage", "body": f"The project is active in {len(snapshot['project'].get('districts', []))} districts with {indicator_description} and {snapshot['executive'].get('open_tasks', 0)} open operational tasks.", "bullets": [item.get("title", "") for item in snapshot["dashboard"]["widgets"][:3]]},
                 {"title": "Risks and mitigation", "body": "Current risks are summarized below for management action.", "bullets": [item.get("title", "") for item in snapshot["notifications"][:4]]},
             ]
         else:
@@ -2077,7 +2103,7 @@ class DemoWorkspaceService:
             title = f"Portfolio {self._audience_title(audience)}"
             highlights = [
                 f"The portfolio covers {workspace['counts']['projects']} active projects.",
-                f"Delivery health is {workspace['portfolio'].get('delivery_health_avg_pct', workspace['portfolio'].get('progress_weighted_pct'))}%.",
+                "Portfolio progress is NOT_ASSESSED; no approved aggregation profile.",
                 f"{workspace['portfolio'].get('tasks_overdue', 0)} overdue tasks are currently visible.",
             ]
             sections = [
@@ -2091,7 +2117,7 @@ class DemoWorkspaceService:
             "management": ["Delivery trend", "Escalations", "Management actions due this week"],
             "meal": ["Indicator quality", "Reporting freshness", "Evidence gaps by district"],
         }
-        return {
+        report = {
             "generated_at": self.deps.now_iso_utc(),
             "audience": audience,
             "title": title,
@@ -2100,6 +2126,17 @@ class DemoWorkspaceService:
             "talking_points": audience_guidance[audience],
             "export_options": ["PDF briefing", "PowerPoint board pack", "Email summary"],
         }
+        if not allows_category(self._user_permissions(actor), 'notifications'):
+            # Both scopes end with notification-derived risk details. Retain
+            # authorized aggregate highlights, but distinguish withheld details
+            # from an authorized empty result. Full-access reports stay verbatim.
+            report['sections'][-1] = {
+                **report['sections'][-1],
+                'body': 'Notification details are restricted by your permissions.',
+                'bullets': [],
+            }
+            report['restricted_sections'] = ['notifications']
+        return report
 
     def _select_template(self, data: Any, template_id: Optional[str]) -> Any:
         if template_id:
@@ -2262,7 +2299,8 @@ class DemoWorkspaceService:
                 "bars": [
                     {
                         "label": item.get("district") or item.get("indicator_name") or f"Row {index + 1}",
-                        "value": item.get("progress_weighted_pct") or item.get("budget_total") or 0,
+                        "value": item.get("progress_weighted_pct"),
+                        "state": item.get("calculation_state", "NOT_ASSESSED"),
                         "secondary_value": item.get("budget_total") if chart_type == "variance_bar" else item.get("progress_mean_pct"),
                     }
                     for index, item in enumerate((district_rows or indicator_rows)[:6])

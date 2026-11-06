@@ -1,0 +1,2465 @@
+{
+  "generated_at": "2026-10-28T12:00:00Z",
+  "analytical_contract": "analytical-consumers/1.0.0",
+  "project": {
+    "project_id": "proj_health",
+    "project_name": "Community Health Access Initiative",
+    "objective": "Improve primary health service delivery and reduce stock-outs in underserved districts.",
+    "organization_id": "org_blue_delta",
+    "donor": "USAID",
+    "manager": "Helena Cuamba",
+    "partner": "Vida Rural Alliance",
+    "sector": "Primary Health",
+    "country": "Mozambique",
+    "provinces": [
+      "Cabo Delgado",
+      "Nampula"
+    ],
+    "districts": [
+      "Angoche",
+      "Monapo",
+      "Mueda"
+    ],
+    "risk_level": "high",
+    "budget_variance_pct": 7.4
+  },
+  "executive": {
+    "progress_weighted_pct": null,
+    "progress_mean_pct": null,
+    "status_mean_canon": "NOT_ASSESSED",
+    "budget_total": null,
+    "latest_reporting_period": "2026-10-01T00:00:00Z",
+    "tasks_overdue": 2,
+    "tasks_total": 6,
+    "tasks_done": 1,
+    "workplan_coverage_pct": 100.0,
+    "active_notifications": 5,
+    "pending_validation_count": 0,
+    "escalated_tasks": 0,
+    "open_tasks": 5,
+    "task_progress_avg_pct": 37.0,
+    "delivery_health_score": null,
+    "reporting_confidence_score": 96.67,
+    "operational_load_score": 66.0,
+    "escalation_pressure_score": 62.0,
+    "coordination_posture": "managed_pressure",
+    "approval_backlog": 0,
+    "latest_sync_at": "2026-10-28T12:00:00Z"
+  },
+  "dashboard": {
+    "selected_template": {
+      "id": "demo_tpl_portfolio_board",
+      "name": "Portfolio Executive Board",
+      "description": "Portfolio-wide executive review with delivery, risks, budget, and notifications.",
+      "dashboard_type": "portfolio_executive",
+      "organization_id": "org_blue_delta",
+      "scope": "custom",
+      "filters": [
+        "project_name",
+        "donor",
+        "province",
+        "reporting_month"
+      ],
+      "visuals": [
+        {
+          "id": "demo_exec_kpis",
+          "chart_type": "kpi_cards",
+          "title": "Portfolio KPIs",
+          "reason": "Board-level headline measures."
+        },
+        {
+          "id": "demo_exec_trend",
+          "chart_type": "line_trend",
+          "title": "Weighted Progress Trend",
+          "reason": "Shows whether the portfolio is improving across reporting periods."
+        },
+        {
+          "id": "demo_exec_status",
+          "chart_type": "status_donut",
+          "title": "Status Mix",
+          "reason": "Summarizes delivery health by status."
+        },
+        {
+          "id": "demo_exec_budget",
+          "chart_type": "budget_vs_actual",
+          "title": "Budget vs Delivery",
+          "reason": "Compares portfolio burn against results."
+        },
+        {
+          "id": "demo_exec_alerts",
+          "chart_type": "notification_summary",
+          "title": "Management Alerts",
+          "reason": "Pulls current priority issues for action."
+        },
+        {
+          "id": "demo_exec_map",
+          "chart_type": "map_placeholder",
+          "title": "Coverage Footprint",
+          "reason": "Highlights the current district coverage footprint."
+        },
+        {
+          "id": "demo_exec_narrative",
+          "chart_type": "narrative_panel",
+          "title": "Executive Narrative",
+          "reason": "Provides a management-ready written interpretation."
+        }
+      ],
+      "layout": [
+        {
+          "widget_id": "demo_exec_kpis",
+          "visual_index": 0,
+          "chart_type": "kpi_cards",
+          "title": "Portfolio KPIs",
+          "column_span": 3,
+          "row_span": 1,
+          "section": "summary"
+        },
+        {
+          "widget_id": "demo_exec_trend",
+          "visual_index": 1,
+          "chart_type": "line_trend",
+          "title": "Weighted Progress Trend",
+          "column_span": 2,
+          "row_span": 2,
+          "section": "main"
+        },
+        {
+          "widget_id": "demo_exec_status",
+          "visual_index": 2,
+          "chart_type": "status_donut",
+          "title": "Status Mix",
+          "column_span": 1,
+          "row_span": 1,
+          "section": "summary"
+        },
+        {
+          "widget_id": "demo_exec_budget",
+          "visual_index": 3,
+          "chart_type": "budget_vs_actual",
+          "title": "Budget vs Delivery",
+          "column_span": 1,
+          "row_span": 2,
+          "section": "main"
+        },
+        {
+          "widget_id": "demo_exec_alerts",
+          "visual_index": 4,
+          "chart_type": "notification_summary",
+          "title": "Management Alerts",
+          "column_span": 2,
+          "row_span": 2,
+          "section": "main"
+        },
+        {
+          "widget_id": "demo_exec_map",
+          "visual_index": 5,
+          "chart_type": "map_placeholder",
+          "title": "Coverage Footprint",
+          "column_span": 1,
+          "row_span": 2,
+          "section": "main"
+        },
+        {
+          "widget_id": "demo_exec_narrative",
+          "visual_index": 6,
+          "chart_type": "narrative_panel",
+          "title": "Executive Narrative",
+          "column_span": 3,
+          "row_span": 1,
+          "section": "main"
+        }
+      ],
+      "narrative_sections": [
+        "summary",
+        "risks",
+        "actions",
+        "donor_talking_points"
+      ],
+      "theme": "executive",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z"
+    },
+    "available_templates": [
+      {
+        "id": "demo_tpl_portfolio_board",
+        "name": "Portfolio Executive Board",
+        "description": "Portfolio-wide executive review with delivery, risks, budget, and notifications.",
+        "dashboard_type": "portfolio_executive",
+        "organization_id": "org_blue_delta",
+        "scope": "custom",
+        "filters": [
+          "project_name",
+          "donor",
+          "province",
+          "reporting_month"
+        ],
+        "visuals": [
+          {
+            "id": "demo_exec_kpis",
+            "chart_type": "kpi_cards",
+            "title": "Portfolio KPIs",
+            "reason": "Board-level headline measures."
+          },
+          {
+            "id": "demo_exec_trend",
+            "chart_type": "line_trend",
+            "title": "Weighted Progress Trend",
+            "reason": "Shows whether the portfolio is improving across reporting periods."
+          },
+          {
+            "id": "demo_exec_status",
+            "chart_type": "status_donut",
+            "title": "Status Mix",
+            "reason": "Summarizes delivery health by status."
+          },
+          {
+            "id": "demo_exec_budget",
+            "chart_type": "budget_vs_actual",
+            "title": "Budget vs Delivery",
+            "reason": "Compares portfolio burn against results."
+          },
+          {
+            "id": "demo_exec_alerts",
+            "chart_type": "notification_summary",
+            "title": "Management Alerts",
+            "reason": "Pulls current priority issues for action."
+          },
+          {
+            "id": "demo_exec_map",
+            "chart_type": "map_placeholder",
+            "title": "Coverage Footprint",
+            "reason": "Highlights the current district coverage footprint."
+          },
+          {
+            "id": "demo_exec_narrative",
+            "chart_type": "narrative_panel",
+            "title": "Executive Narrative",
+            "reason": "Provides a management-ready written interpretation."
+          }
+        ],
+        "layout": [
+          {
+            "widget_id": "demo_exec_kpis",
+            "visual_index": 0,
+            "chart_type": "kpi_cards",
+            "title": "Portfolio KPIs",
+            "column_span": 3,
+            "row_span": 1,
+            "section": "summary"
+          },
+          {
+            "widget_id": "demo_exec_trend",
+            "visual_index": 1,
+            "chart_type": "line_trend",
+            "title": "Weighted Progress Trend",
+            "column_span": 2,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_exec_status",
+            "visual_index": 2,
+            "chart_type": "status_donut",
+            "title": "Status Mix",
+            "column_span": 1,
+            "row_span": 1,
+            "section": "summary"
+          },
+          {
+            "widget_id": "demo_exec_budget",
+            "visual_index": 3,
+            "chart_type": "budget_vs_actual",
+            "title": "Budget vs Delivery",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_exec_alerts",
+            "visual_index": 4,
+            "chart_type": "notification_summary",
+            "title": "Management Alerts",
+            "column_span": 2,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_exec_map",
+            "visual_index": 5,
+            "chart_type": "map_placeholder",
+            "title": "Coverage Footprint",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_exec_narrative",
+            "visual_index": 6,
+            "chart_type": "narrative_panel",
+            "title": "Executive Narrative",
+            "column_span": 3,
+            "row_span": 1,
+            "section": "main"
+          }
+        ],
+        "narrative_sections": [
+          "summary",
+          "risks",
+          "actions",
+          "donor_talking_points"
+        ],
+        "theme": "executive",
+        "created_at": "2026-10-26T12:00:00Z",
+        "updated_at": "2026-10-28T12:00:00Z"
+      },
+      {
+        "id": "demo_tpl_project_snapshot",
+        "name": "Project Executive Snapshot",
+        "description": "Project-level view for delivery, workplan execution, and donor readiness.",
+        "dashboard_type": "project_snapshot",
+        "organization_id": "org_blue_delta",
+        "scope": "custom",
+        "filters": [
+          "project_name",
+          "district",
+          "indicator_name",
+          "reporting_month"
+        ],
+        "visuals": [
+          {
+            "id": "demo_proj_status",
+            "chart_type": "project_status_summary",
+            "title": "Delivery Posture",
+            "reason": "Summarizes project health and implementation context."
+          },
+          {
+            "id": "demo_proj_gauge",
+            "chart_type": "bullet_or_gauge",
+            "title": "Progress vs Target",
+            "reason": "Highlights delivery confidence against target."
+          },
+          {
+            "id": "demo_proj_districts",
+            "chart_type": "bar_comparison",
+            "title": "District Performance",
+            "reason": "Compares district-level progress."
+          },
+          {
+            "id": "demo_proj_budget",
+            "chart_type": "variance_bar",
+            "title": "Budget Variance",
+            "reason": "Shows financial deviation from plan."
+          },
+          {
+            "id": "demo_proj_workplan",
+            "chart_type": "activity_progress",
+            "title": "Workplan Delivery",
+            "reason": "Tracks activity and task completion."
+          },
+          {
+            "id": "demo_proj_alerts",
+            "chart_type": "notification_summary",
+            "title": "Project Alerts",
+            "reason": "Keeps the project manager focused on current risks."
+          },
+          {
+            "id": "demo_proj_map",
+            "chart_type": "map_placeholder",
+            "title": "District Coverage",
+            "reason": "Displays delivery footprint by district."
+          },
+          {
+            "id": "demo_proj_narrative",
+            "chart_type": "narrative_panel",
+            "title": "Narrative Summary",
+            "reason": "Summarizes the story behind the numbers."
+          }
+        ],
+        "layout": [
+          {
+            "widget_id": "demo_proj_status",
+            "visual_index": 0,
+            "chart_type": "project_status_summary",
+            "title": "Delivery Posture",
+            "column_span": 2,
+            "row_span": 1,
+            "section": "summary"
+          },
+          {
+            "widget_id": "demo_proj_gauge",
+            "visual_index": 1,
+            "chart_type": "bullet_or_gauge",
+            "title": "Progress vs Target",
+            "column_span": 1,
+            "row_span": 1,
+            "section": "summary"
+          },
+          {
+            "widget_id": "demo_proj_districts",
+            "visual_index": 2,
+            "chart_type": "bar_comparison",
+            "title": "District Performance",
+            "column_span": 2,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_proj_budget",
+            "visual_index": 3,
+            "chart_type": "variance_bar",
+            "title": "Budget Variance",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_proj_workplan",
+            "visual_index": 4,
+            "chart_type": "activity_progress",
+            "title": "Workplan Delivery",
+            "column_span": 2,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_proj_alerts",
+            "visual_index": 5,
+            "chart_type": "notification_summary",
+            "title": "Project Alerts",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_proj_map",
+            "visual_index": 6,
+            "chart_type": "map_placeholder",
+            "title": "District Coverage",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_proj_narrative",
+            "visual_index": 7,
+            "chart_type": "narrative_panel",
+            "title": "Narrative Summary",
+            "column_span": 2,
+            "row_span": 1,
+            "section": "main"
+          }
+        ],
+        "narrative_sections": [
+          "summary",
+          "exceptions",
+          "actions"
+        ],
+        "theme": "operations",
+        "created_at": "2026-10-26T12:00:00Z",
+        "updated_at": "2026-10-28T12:00:00Z"
+      },
+      {
+        "id": "demo_tpl_donor_pack",
+        "name": "Donor Reporting Snapshot",
+        "description": "Funding, delivery, and accountability lens for donor conversations.",
+        "dashboard_type": "donor_reporting",
+        "organization_id": "org_blue_delta",
+        "scope": "custom",
+        "filters": [
+          "donor",
+          "project_name",
+          "reporting_month"
+        ],
+        "visuals": [
+          {
+            "id": "demo_donor_kpis",
+            "chart_type": "kpi_cards",
+            "title": "Donor Review KPIs",
+            "reason": "Focuses on burn rate, progress, and compliance."
+          },
+          {
+            "id": "demo_donor_trend",
+            "chart_type": "area_trend",
+            "title": "Budget Burn Trend",
+            "reason": "Shows expenditure and delivery trajectory."
+          },
+          {
+            "id": "demo_donor_variance",
+            "chart_type": "budget_vs_actual",
+            "title": "Budget Commitments vs Spend",
+            "reason": "Provides budget governance perspective."
+          },
+          {
+            "id": "demo_donor_risks",
+            "chart_type": "notification_summary",
+            "title": "Reporting Risks",
+            "reason": "Highlights issues that may affect donor confidence."
+          },
+          {
+            "id": "demo_donor_narrative",
+            "chart_type": "narrative_panel",
+            "title": "Donor Narrative",
+            "reason": "Packages delivery into donor-ready language."
+          }
+        ],
+        "layout": [
+          {
+            "widget_id": "demo_donor_kpis",
+            "visual_index": 0,
+            "chart_type": "kpi_cards",
+            "title": "Donor Review KPIs",
+            "column_span": 3,
+            "row_span": 1,
+            "section": "summary"
+          },
+          {
+            "widget_id": "demo_donor_trend",
+            "visual_index": 1,
+            "chart_type": "area_trend",
+            "title": "Budget Burn Trend",
+            "column_span": 2,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_donor_variance",
+            "visual_index": 2,
+            "chart_type": "budget_vs_actual",
+            "title": "Budget Commitments vs Spend",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_donor_risks",
+            "visual_index": 3,
+            "chart_type": "notification_summary",
+            "title": "Reporting Risks",
+            "column_span": 1,
+            "row_span": 2,
+            "section": "main"
+          },
+          {
+            "widget_id": "demo_donor_narrative",
+            "visual_index": 4,
+            "chart_type": "narrative_panel",
+            "title": "Donor Narrative",
+            "column_span": 2,
+            "row_span": 1,
+            "section": "main"
+          }
+        ],
+        "narrative_sections": [
+          "executive_summary",
+          "budget",
+          "risk_and_mitigation",
+          "next_commitments"
+        ],
+        "theme": "geo_focus",
+        "created_at": "2026-10-26T12:00:00Z",
+        "updated_at": "2026-10-28T12:00:00Z"
+      }
+    ],
+    "widgets": [
+      {
+        "widget_id": "demo_exec_kpis",
+        "title": "Portfolio KPIs",
+        "chart_type": "kpi_cards",
+        "column_span": 3,
+        "row_span": 1,
+        "section": "summary",
+        "content": {
+          "cards": [
+            {
+              "label": "Weighted progress",
+              "value": null,
+              "suffix": "%"
+            },
+            {
+              "label": "Budget tracked",
+              "value": null,
+              "prefix": "$"
+            },
+            {
+              "label": "Overdue tasks",
+              "value": 2
+            },
+            {
+              "label": "Active alerts",
+              "value": 5
+            }
+          ]
+        }
+      },
+      {
+        "widget_id": "demo_exec_trend",
+        "title": "Weighted Progress Trend",
+        "chart_type": "line_trend",
+        "column_span": 2,
+        "row_span": 2,
+        "section": "main",
+        "content": {
+          "series": [
+            {
+              "label": "2026-07-01T00:00:00Z",
+              "value": null
+            },
+            {
+              "label": "2026-08-01T00:00:00Z",
+              "value": null
+            },
+            {
+              "label": "2026-09-01T00:00:00Z",
+              "value": null
+            },
+            {
+              "label": "2026-10-01T00:00:00Z",
+              "value": null
+            }
+          ]
+        }
+      },
+      {
+        "widget_id": "demo_exec_status",
+        "title": "Status Mix",
+        "chart_type": "status_donut",
+        "column_span": 1,
+        "row_span": 1,
+        "section": "summary",
+        "content": {
+          "segments": [
+            {
+              "label": "NOT_ASSESSED",
+              "value": 3
+            }
+          ]
+        }
+      },
+      {
+        "widget_id": "demo_exec_budget",
+        "title": "Budget vs Delivery",
+        "chart_type": "budget_vs_actual",
+        "column_span": 1,
+        "row_span": 2,
+        "section": "main",
+        "content": {
+          "cards": [
+            {
+              "label": "Budget total",
+              "value": null,
+              "prefix": "$"
+            },
+            {
+              "label": "Variance to plan",
+              "value": 7.4,
+              "suffix": "%"
+            },
+            {
+              "label": "Tasks next 7 days",
+              "value": 3
+            }
+          ]
+        }
+      },
+      {
+        "widget_id": "demo_exec_alerts",
+        "title": "Management Alerts",
+        "chart_type": "notification_summary",
+        "column_span": 2,
+        "row_span": 2,
+        "section": "main",
+        "content": {
+          "items": [
+            {
+              "id": "notif_20261029085129884286",
+              "severity": "high",
+              "category": "delivery_risk",
+              "source_type": "project",
+              "source_id": "proj_health",
+              "title": "Community Health Access Initiative: overdue tasks detected",
+              "message": "2 task(s) are overdue in the workplan.",
+              "suggested_action": "Review overdue tasks, assign owners, and update the delivery plan.",
+              "context": {
+                "project_id": "proj_health",
+                "tasks_overdue": 2
+              },
+              "generated_at": "2026-10-28T12:00:00Z"
+            },
+            {
+              "severity": "high",
+              "source_type": "demo_simulation",
+              "source_id": "community_health_access_initiative__overdue_coordination_pressure",
+              "title": "Community Health Access Initiative: overdue coordination pressure",
+              "message": "2 operational task(s) are overdue and currently lowering delivery flexibility.",
+              "suggested_action": "Reassign recovery owners, confirm near-term deadlines, and unblock delayed actions.",
+              "context": {
+                "project_id": "proj_health",
+                "area": "workplan",
+                "overdue_tasks": 2
+              }
+            },
+            {
+              "id": "notif_20261029085129884314",
+              "severity": "medium",
+              "category": "missing_data",
+              "source_type": "project",
+              "source_id": "proj_health",
+              "title": "Community Health Access Initiative: progress cannot be calculated",
+              "message": "NOT_ASSESSED: project progress requires an approved comparable-group aggregation method.",
+              "suggested_action": "Inspect each indicator using its approved method and explicit reporting context.",
+              "context": {
+                "project_id": "proj_health"
+              },
+              "generated_at": "2026-10-28T12:00:00Z"
+            },
+            {
+              "id": "notif_20261029085129884797",
+              "severity": "low",
+              "category": "upcoming_deadline",
+              "source_type": "task",
+              "source_id": "task_health_5",
+              "title": "Confirm vaccine stock buffer: deadline approaching",
+              "message": "The task is due on 2026-10-30 and is still marked as open.",
+              "suggested_action": "Check progress with the task owner and confirm the next action.",
+              "context": {
+                "project_id": "proj_health",
+                "activity_id": "act_health_outreach",
+                "task_id": "task_health_5",
+                "due_date": "2026-10-30"
+              },
+              "generated_at": "2026-10-28T12:00:00Z"
+            },
+            {
+              "id": "notif_20261029085129884713",
+              "severity": "low",
+              "category": "upcoming_deadline",
+              "source_type": "task",
+              "source_id": "task_health_3",
+              "title": "Verify Angoche redistribution: deadline approaching",
+              "message": "The task is due on 2026-10-29 and is still marked as open.",
+              "suggested_action": "Check progress with the task owner and confirm the next action.",
+              "context": {
+                "project_id": "proj_health",
+                "activity_id": "act_health_supply",
+                "task_id": "task_health_3",
+                "due_date": "2026-10-29"
+              },
+              "generated_at": "2026-10-28T12:00:00Z"
+            }
+          ]
+        }
+      },
+      {
+        "widget_id": "demo_exec_map",
+        "title": "Coverage Footprint",
+        "chart_type": "map_placeholder",
+        "column_span": 1,
+        "row_span": 2,
+        "section": "main",
+        "content": {
+          "districts": [
+            {
+              "province": "Nampula",
+              "district": "Angoche",
+              "value": null,
+              "status": "NOT_ASSESSED"
+            },
+            {
+              "province": "Nampula",
+              "district": "Monapo",
+              "value": null,
+              "status": "NOT_ASSESSED"
+            },
+            {
+              "province": "Cabo Delgado",
+              "district": "Mueda",
+              "value": null,
+              "status": "NOT_ASSESSED"
+            }
+          ]
+        }
+      },
+      {
+        "widget_id": "demo_exec_narrative",
+        "title": "Executive Narrative",
+        "chart_type": "narrative_panel",
+        "column_span": 3,
+        "row_span": 1,
+        "section": "main",
+        "content": {
+          "summary": "Community Health Access Initiative: indicator-derived delivery health is NOT_ASSESSED. There are 2 overdue task(s) and 0 validation checkpoint(s).",
+          "insights": [
+            "Indicator aggregation requires an approved comparable-group estimand.",
+            "Reporting confidence currently stands at 96.7% after validation and backlog penalties.",
+            "5 open task(s) remain active in the implementation workspace.",
+            "There are 4 active notification(s) for this project."
+          ]
+        }
+      }
+    ]
+  },
+  "trend": [
+    {
+      "reporting_period": "2026-07-01T00:00:00Z",
+      "records_count": 9,
+      "actual_total": null,
+      "target_total": null,
+      "budget_total": null,
+      "dimensions_count": 3,
+      "statistical_trend": "NOT_ASSESSED",
+      "source_binding_state": "UNCONFIGURED",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "records_count": 9,
+      "actual_total": null,
+      "target_total": null,
+      "budget_total": null,
+      "dimensions_count": 3,
+      "statistical_trend": "NOT_ASSESSED",
+      "source_binding_state": "UNCONFIGURED",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "records_count": 9,
+      "actual_total": null,
+      "target_total": null,
+      "budget_total": null,
+      "dimensions_count": 3,
+      "statistical_trend": "NOT_ASSESSED",
+      "source_binding_state": "UNCONFIGURED",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "records_count": 9,
+      "actual_total": null,
+      "target_total": null,
+      "budget_total": null,
+      "dimensions_count": 3,
+      "statistical_trend": "NOT_ASSESSED",
+      "source_binding_state": "UNCONFIGURED",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "project_id": "proj_health",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "budget_total": null,
+      "rows_valid_count": 0,
+      "rows_missing_count": 0,
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "APPROVED_COMPARABLE_GROUP_AND_ESTIMAND_REQUIRED"
+      ],
+      "rows_unassessed_count": 3
+    },
+    {
+      "project_id": "proj_health",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "budget_total": null,
+      "rows_valid_count": 0,
+      "rows_missing_count": 0,
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "APPROVED_COMPARABLE_GROUP_AND_ESTIMAND_REQUIRED"
+      ],
+      "rows_unassessed_count": 3
+    },
+    {
+      "project_id": "proj_health",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "budget_total": null,
+      "rows_valid_count": 0,
+      "rows_missing_count": 0,
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "APPROVED_COMPARABLE_GROUP_AND_ESTIMAND_REQUIRED"
+      ],
+      "rows_unassessed_count": 3
+    }
+  ],
+  "indicators": [
+    {
+      "project_id": "proj_health",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "level": "outcome",
+      "direction": "up",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "district_valid_count": 0,
+      "district_missing_count": 0,
+      "district_unassessed_count": 3,
+      "budget_total": null,
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "UNCONFIGURED",
+      "calculated_value": null,
+      "calculation": {
+        "definition": null,
+        "historical": false,
+        "result": {
+          "state": "UNCONFIGURED",
+          "display_value": null,
+          "exact_value": null,
+          "methodology_version": null,
+          "formula": null,
+          "context": null,
+          "scope": {
+            "organization_id": "org_blue_delta",
+            "project_id": "proj_health",
+            "indicator_id": "ind_health_coverage"
+          },
+          "warnings": [
+            "EXPLICIT_CALCULATION_CONTEXT_REQUIRED"
+          ],
+          "limitations": [
+            "No method, population, target, weight or status threshold is inferred from legacy values."
+          ]
+        }
+      },
+      "aggregation_state": "NOT_ASSESSED",
+      "aggregation_limitation": "APPROVED_COMPARABLE_GROUP_AND_ESTIMAND_REQUIRED"
+    },
+    {
+      "project_id": "proj_health",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "level": "output",
+      "direction": "up",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "district_valid_count": 0,
+      "district_missing_count": 0,
+      "district_unassessed_count": 3,
+      "budget_total": null,
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "UNCONFIGURED",
+      "calculated_value": null,
+      "calculation": {
+        "definition": null,
+        "historical": false,
+        "result": {
+          "state": "UNCONFIGURED",
+          "display_value": null,
+          "exact_value": null,
+          "methodology_version": null,
+          "formula": null,
+          "context": null,
+          "scope": {
+            "organization_id": "org_blue_delta",
+            "project_id": "proj_health",
+            "indicator_id": "ind_health_chw"
+          },
+          "warnings": [
+            "EXPLICIT_CALCULATION_CONTEXT_REQUIRED"
+          ],
+          "limitations": [
+            "No method, population, target, weight or status threshold is inferred from legacy values."
+          ]
+        }
+      },
+      "aggregation_state": "NOT_ASSESSED",
+      "aggregation_limitation": "APPROVED_COMPARABLE_GROUP_AND_ESTIMAND_REQUIRED"
+    },
+    {
+      "project_id": "proj_health",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "level": "outcome",
+      "direction": "down",
+      "progress_mean_pct": null,
+      "progress_weighted_pct": null,
+      "status_mean_canon": "NOT_ASSESSED",
+      "status_weighted_canon": "NOT_ASSESSED",
+      "district_valid_count": 0,
+      "district_missing_count": 0,
+      "district_unassessed_count": 3,
+      "budget_total": null,
+      "analytical_contract": "analytical-consumers/1.0.0",
+      "calculation_state": "UNCONFIGURED",
+      "calculated_value": null,
+      "calculation": {
+        "definition": null,
+        "historical": false,
+        "result": {
+          "state": "UNCONFIGURED",
+          "display_value": null,
+          "exact_value": null,
+          "methodology_version": null,
+          "formula": null,
+          "context": null,
+          "scope": {
+            "organization_id": "org_blue_delta",
+            "project_id": "proj_health",
+            "indicator_id": "ind_health_stockout"
+          },
+          "warnings": [
+            "EXPLICIT_CALCULATION_CONTEXT_REQUIRED"
+          ],
+          "limitations": [
+            "No method, population, target, weight or status threshold is inferred from legacy values."
+          ]
+        }
+      },
+      "aggregation_state": "NOT_ASSESSED",
+      "aggregation_limitation": "APPROVED_COMPARABLE_GROUP_AND_ESTIMAND_REQUIRED"
+    }
+  ],
+  "activities": [
+    {
+      "activity_id": "act_health_supervision",
+      "project_id": "proj_health",
+      "activity_name": "Quarterly supervision wave completed",
+      "owner": "Regional MEAL Lead",
+      "start_date": "2026-09-06",
+      "due_date": "2026-10-19",
+      "status": "ongoing",
+      "linked_indicator_ids": "ind_health_chw"
+    },
+    {
+      "activity_id": "act_health_supply",
+      "project_id": "proj_health",
+      "activity_name": "Stock-out root cause action plan",
+      "owner": "Supply Chain Advisor",
+      "start_date": "2026-09-19",
+      "due_date": "2026-11-01",
+      "status": "ongoing",
+      "linked_indicator_ids": "ind_health_stockout"
+    },
+    {
+      "activity_id": "act_health_outreach",
+      "project_id": "proj_health",
+      "activity_name": "Catch-up outreach sessions",
+      "owner": "District Health Promoter",
+      "start_date": "2026-09-30",
+      "due_date": "2026-11-15",
+      "status": "ongoing",
+      "linked_indicator_ids": "ind_health_coverage"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task_health_1",
+      "project_id": "proj_health",
+      "activity_id": "act_health_supervision",
+      "activity_name": "Quarterly supervision wave completed",
+      "task_name": "Resolve missing Mueda supervision forms",
+      "owner": "raimundo.cumba",
+      "assignee_user_id": "",
+      "assignee_username": "raimundo.cumba",
+      "assignee_name": "raimundo.cumba",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "",
+      "approver_user_id": "",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": false,
+      "routing_resolution_error": "Task validator identity is unresolved.",
+      "due_date": "2026-10-14",
+      "status": "overdue",
+      "status_label": "Overdue",
+      "notes": "",
+      "priority": "critical",
+      "progress_pct": 35.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_chw",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_1_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Resolve missing Mueda supervision forms was seeded for Raimundo Cumba with overdue status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "task_health_2",
+      "project_id": "proj_health",
+      "activity_id": "act_health_supervision",
+      "activity_name": "Quarterly supervision wave completed",
+      "task_name": "Upload supervision dashboard pack",
+      "owner": "raimundo.cumba",
+      "assignee_user_id": "",
+      "assignee_username": "raimundo.cumba",
+      "assignee_name": "raimundo.cumba",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "",
+      "approver_user_id": "",
+      "evidence_required": false,
+      "review_stage": "complete",
+      "routing_resolved": false,
+      "routing_resolution_error": "Task validator identity is unresolved.",
+      "due_date": "2026-10-26",
+      "status": "completed",
+      "status_label": "Completed",
+      "notes": "Fictional demo workflow item.",
+      "priority": "medium",
+      "progress_pct": 100.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_chw",
+      "evidence_count": 1,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "2026-10-28T12:00:00Z",
+      "validated_at": "2026-10-28T12:00:00Z",
+      "approved_at": "2026-10-28T12:00:00Z",
+      "evidence_placeholders": [
+        "Fictional supervision dashboard evidence pack"
+      ],
+      "activity_log": [
+        {
+          "id": "log_task_health_2_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Upload supervision dashboard pack was seeded for Raimundo Cumba with completed status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "task_health_3",
+      "project_id": "proj_health",
+      "activity_id": "act_health_supply",
+      "activity_name": "Stock-out root cause action plan",
+      "task_name": "Verify Angoche redistribution",
+      "owner": "Aline Duarte",
+      "assignee_user_id": "user_demo_4",
+      "assignee_username": "aline.duarte",
+      "assignee_name": "Aline Duarte",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "user_demo_3",
+      "approver_user_id": "user_demo_2",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": true,
+      "routing_resolution_error": "",
+      "due_date": "2026-10-29",
+      "status": "in_progress",
+      "status_label": "In Progress",
+      "notes": "",
+      "priority": "medium",
+      "progress_pct": 52.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_stockout",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_3_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Verify Angoche redistribution was seeded for Aline Duarte with in progress status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "task_health_4",
+      "project_id": "proj_health",
+      "activity_id": "act_health_supply",
+      "activity_name": "Stock-out root cause action plan",
+      "task_name": "Review transport framework",
+      "owner": "teresa.mbanze",
+      "assignee_user_id": "",
+      "assignee_username": "teresa.mbanze",
+      "assignee_name": "teresa.mbanze",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "",
+      "approver_user_id": "",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": false,
+      "routing_resolution_error": "Task approver identity is unresolved.",
+      "due_date": "2026-11-03",
+      "status": "not_started",
+      "status_label": "Not Started",
+      "notes": "",
+      "priority": "medium",
+      "progress_pct": 0.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_stockout",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_4_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Review transport framework was seeded for Teresa Mbanze with not started status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "task_health_5",
+      "project_id": "proj_health",
+      "activity_id": "act_health_outreach",
+      "activity_name": "Catch-up outreach sessions",
+      "task_name": "Confirm vaccine stock buffer",
+      "owner": "Aline Duarte",
+      "assignee_user_id": "user_demo_4",
+      "assignee_username": "aline.duarte",
+      "assignee_name": "Aline Duarte",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "user_demo_3",
+      "approver_user_id": "user_demo_2",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": true,
+      "routing_resolution_error": "",
+      "due_date": "2026-10-30",
+      "status": "not_started",
+      "status_label": "Not Started",
+      "notes": "",
+      "priority": "medium",
+      "progress_pct": 0.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_coverage",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_5_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Confirm vaccine stock buffer was seeded for Aline Duarte with not started status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "task_health_6",
+      "project_id": "proj_health",
+      "activity_id": "act_health_outreach",
+      "activity_name": "Catch-up outreach sessions",
+      "task_name": "Approve outreach mobilization budget",
+      "owner": "teresa.mbanze",
+      "assignee_user_id": "",
+      "assignee_username": "teresa.mbanze",
+      "assignee_name": "teresa.mbanze",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "",
+      "approver_user_id": "",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": false,
+      "routing_resolution_error": "Task approver identity is unresolved.",
+      "due_date": "2026-10-27",
+      "status": "overdue",
+      "status_label": "Overdue",
+      "notes": "",
+      "priority": "critical",
+      "progress_pct": 35.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_coverage",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_6_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Approve outreach mobilization budget was seeded for Teresa Mbanze with overdue status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    }
+  ],
+  "overdue_tasks": [
+    {
+      "task_id": "task_health_1",
+      "project_id": "proj_health",
+      "activity_id": "act_health_supervision",
+      "activity_name": "Quarterly supervision wave completed",
+      "task_name": "Resolve missing Mueda supervision forms",
+      "owner": "raimundo.cumba",
+      "assignee_user_id": "",
+      "assignee_username": "raimundo.cumba",
+      "assignee_name": "raimundo.cumba",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "",
+      "approver_user_id": "",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": false,
+      "routing_resolution_error": "Task validator identity is unresolved.",
+      "due_date": "2026-10-14",
+      "status": "overdue",
+      "status_label": "Overdue",
+      "notes": "",
+      "priority": "critical",
+      "progress_pct": 35.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_chw",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_1_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Resolve missing Mueda supervision forms was seeded for Raimundo Cumba with overdue status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "task_health_6",
+      "project_id": "proj_health",
+      "activity_id": "act_health_outreach",
+      "activity_name": "Catch-up outreach sessions",
+      "task_name": "Approve outreach mobilization budget",
+      "owner": "teresa.mbanze",
+      "assignee_user_id": "",
+      "assignee_username": "teresa.mbanze",
+      "assignee_name": "teresa.mbanze",
+      "review_mode": "validation_and_approval",
+      "validator_user_id": "",
+      "approver_user_id": "",
+      "evidence_required": false,
+      "review_stage": "execution",
+      "routing_resolved": false,
+      "routing_resolution_error": "Task approver identity is unresolved.",
+      "due_date": "2026-10-27",
+      "status": "overdue",
+      "status_label": "Overdue",
+      "notes": "",
+      "priority": "critical",
+      "progress_pct": 35.0,
+      "category": "implementation",
+      "linked_indicator_id": "ind_health_coverage",
+      "evidence_count": 0,
+      "comment_count": 1,
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "submitted_at": "",
+      "validated_at": "",
+      "approved_at": "",
+      "evidence_placeholders": [],
+      "activity_log": [
+        {
+          "id": "log_task_health_6_seed",
+          "occurred_at": "2026-10-28T12:00:00Z",
+          "actor_username": "org.admin",
+          "actor_role": "organization_admin",
+          "event_type": "seeded",
+          "message": "Approve outreach mobilization budget was seeded for Teresa Mbanze with overdue status.",
+          "details": {
+            "source": "demo_seed"
+          }
+        }
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif_20261029085129884286",
+      "severity": "high",
+      "category": "delivery_risk",
+      "source_type": "project",
+      "source_id": "proj_health",
+      "title": "Community Health Access Initiative: overdue tasks detected",
+      "message": "2 task(s) are overdue in the workplan.",
+      "suggested_action": "Review overdue tasks, assign owners, and update the delivery plan.",
+      "context": {
+        "project_id": "proj_health",
+        "tasks_overdue": 2
+      },
+      "generated_at": "2026-10-28T12:00:00Z"
+    },
+    {
+      "severity": "high",
+      "source_type": "demo_simulation",
+      "source_id": "community_health_access_initiative__overdue_coordination_pressure",
+      "title": "Community Health Access Initiative: overdue coordination pressure",
+      "message": "2 operational task(s) are overdue and currently lowering delivery flexibility.",
+      "suggested_action": "Reassign recovery owners, confirm near-term deadlines, and unblock delayed actions.",
+      "context": {
+        "project_id": "proj_health",
+        "area": "workplan",
+        "overdue_tasks": 2
+      }
+    },
+    {
+      "id": "notif_20261029085129884314",
+      "severity": "medium",
+      "category": "missing_data",
+      "source_type": "project",
+      "source_id": "proj_health",
+      "title": "Community Health Access Initiative: progress cannot be calculated",
+      "message": "NOT_ASSESSED: project progress requires an approved comparable-group aggregation method.",
+      "suggested_action": "Inspect each indicator using its approved method and explicit reporting context.",
+      "context": {
+        "project_id": "proj_health"
+      },
+      "generated_at": "2026-10-28T12:00:00Z"
+    },
+    {
+      "id": "notif_20261029085129884797",
+      "severity": "low",
+      "category": "upcoming_deadline",
+      "source_type": "task",
+      "source_id": "task_health_5",
+      "title": "Confirm vaccine stock buffer: deadline approaching",
+      "message": "The task is due on 2026-10-30 and is still marked as open.",
+      "suggested_action": "Check progress with the task owner and confirm the next action.",
+      "context": {
+        "project_id": "proj_health",
+        "activity_id": "act_health_outreach",
+        "task_id": "task_health_5",
+        "due_date": "2026-10-30"
+      },
+      "generated_at": "2026-10-28T12:00:00Z"
+    },
+    {
+      "id": "notif_20261029085129884713",
+      "severity": "low",
+      "category": "upcoming_deadline",
+      "source_type": "task",
+      "source_id": "task_health_3",
+      "title": "Verify Angoche redistribution: deadline approaching",
+      "message": "The task is due on 2026-10-29 and is still marked as open.",
+      "suggested_action": "Check progress with the task owner and confirm the next action.",
+      "context": {
+        "project_id": "proj_health",
+        "activity_id": "act_health_supply",
+        "task_id": "task_health_3",
+        "due_date": "2026-10-29"
+      },
+      "generated_at": "2026-10-28T12:00:00Z"
+    }
+  ],
+  "narrative": {
+    "project_id": "proj_health",
+    "project_name": "Community Health Access Initiative",
+    "summary": "Community Health Access Initiative: indicator-derived delivery health is NOT_ASSESSED. There are 2 overdue task(s) and 0 validation checkpoint(s).",
+    "insights": [
+      "Indicator aggregation requires an approved comparable-group estimand.",
+      "Reporting confidence currently stands at 96.7% after validation and backlog penalties.",
+      "5 open task(s) remain active in the implementation workspace.",
+      "There are 4 active notification(s) for this project."
+    ],
+    "trend": [
+      {
+        "reporting_period": "2026-07-01T00:00:00Z",
+        "records_count": 9,
+        "actual_total": null,
+        "target_total": null,
+        "budget_total": null,
+        "dimensions_count": 3,
+        "statistical_trend": "NOT_ASSESSED",
+        "source_binding_state": "UNCONFIGURED",
+        "progress_mean_pct": null,
+        "progress_weighted_pct": null,
+        "status_mean_canon": "NOT_ASSESSED",
+        "status_weighted_canon": "NOT_ASSESSED",
+        "analytical_contract": "analytical-consumers/1.0.0",
+        "calculation_state": "NOT_ASSESSED",
+        "limitations": [
+          "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+        ]
+      },
+      {
+        "reporting_period": "2026-08-01T00:00:00Z",
+        "records_count": 9,
+        "actual_total": null,
+        "target_total": null,
+        "budget_total": null,
+        "dimensions_count": 3,
+        "statistical_trend": "NOT_ASSESSED",
+        "source_binding_state": "UNCONFIGURED",
+        "progress_mean_pct": null,
+        "progress_weighted_pct": null,
+        "status_mean_canon": "NOT_ASSESSED",
+        "status_weighted_canon": "NOT_ASSESSED",
+        "analytical_contract": "analytical-consumers/1.0.0",
+        "calculation_state": "NOT_ASSESSED",
+        "limitations": [
+          "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+        ]
+      },
+      {
+        "reporting_period": "2026-09-01T00:00:00Z",
+        "records_count": 9,
+        "actual_total": null,
+        "target_total": null,
+        "budget_total": null,
+        "dimensions_count": 3,
+        "statistical_trend": "NOT_ASSESSED",
+        "source_binding_state": "UNCONFIGURED",
+        "progress_mean_pct": null,
+        "progress_weighted_pct": null,
+        "status_mean_canon": "NOT_ASSESSED",
+        "status_weighted_canon": "NOT_ASSESSED",
+        "analytical_contract": "analytical-consumers/1.0.0",
+        "calculation_state": "NOT_ASSESSED",
+        "limitations": [
+          "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+        ]
+      },
+      {
+        "reporting_period": "2026-10-01T00:00:00Z",
+        "records_count": 9,
+        "actual_total": null,
+        "target_total": null,
+        "budget_total": null,
+        "dimensions_count": 3,
+        "statistical_trend": "NOT_ASSESSED",
+        "source_binding_state": "UNCONFIGURED",
+        "progress_mean_pct": null,
+        "progress_weighted_pct": null,
+        "status_mean_canon": "NOT_ASSESSED",
+        "status_weighted_canon": "NOT_ASSESSED",
+        "analytical_contract": "analytical-consumers/1.0.0",
+        "calculation_state": "NOT_ASSESSED",
+        "limitations": [
+          "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+        ]
+      }
+    ],
+    "notifications": [
+      {
+        "id": "notif_20261029085129643050",
+        "severity": "high",
+        "category": "delivery_risk",
+        "source_type": "project",
+        "source_id": "proj_health",
+        "title": "Community Health Access Initiative: overdue tasks detected",
+        "message": "2 task(s) are overdue in the workplan.",
+        "suggested_action": "Review overdue tasks, assign owners, and update the delivery plan.",
+        "context": {
+          "project_id": "proj_health",
+          "tasks_overdue": 2
+        },
+        "generated_at": "2026-10-28T12:00:00Z"
+      },
+      {
+        "id": "notif_20261029085129643078",
+        "severity": "medium",
+        "category": "missing_data",
+        "source_type": "project",
+        "source_id": "proj_health",
+        "title": "Community Health Access Initiative: progress cannot be calculated",
+        "message": "NOT_ASSESSED: project progress requires an approved comparable-group aggregation method.",
+        "suggested_action": "Inspect each indicator using its approved method and explicit reporting context.",
+        "context": {
+          "project_id": "proj_health"
+        },
+        "generated_at": "2026-10-28T12:00:00Z"
+      },
+      {
+        "id": "notif_20261029085129643482",
+        "severity": "low",
+        "category": "upcoming_deadline",
+        "source_type": "task",
+        "source_id": "task_health_5",
+        "title": "Confirm vaccine stock buffer: deadline approaching",
+        "message": "The task is due on 2026-10-30 and is still marked as open.",
+        "suggested_action": "Check progress with the task owner and confirm the next action.",
+        "context": {
+          "project_id": "proj_health",
+          "activity_id": "act_health_outreach",
+          "task_id": "task_health_5",
+          "due_date": "2026-10-30"
+        },
+        "generated_at": "2026-10-28T12:00:00Z"
+      },
+      {
+        "id": "notif_20261029085129643407",
+        "severity": "low",
+        "category": "upcoming_deadline",
+        "source_type": "task",
+        "source_id": "task_health_3",
+        "title": "Verify Angoche redistribution: deadline approaching",
+        "message": "The task is due on 2026-10-29 and is still marked as open.",
+        "suggested_action": "Check progress with the task owner and confirm the next action.",
+        "context": {
+          "project_id": "proj_health",
+          "activity_id": "act_health_supply",
+          "task_id": "task_health_3",
+          "due_date": "2026-10-29"
+        },
+        "generated_at": "2026-10-28T12:00:00Z"
+      }
+    ],
+    "recommended_actions": [
+      "Assign recovery owners for overdue actions.",
+      "Clear pending validation checkpoints before the next reporting cycle.",
+      "Escalate blocked or repeated slippage items in the next coordination call."
+    ]
+  },
+  "activity_feed": [
+    {
+      "id": "proj_health-overdue-pressure",
+      "occurred_at": "2026-10-28T12:00:00Z",
+      "actor": "workflow",
+      "actor_role": "system",
+      "title": "Overdue implementation pressure detected",
+      "message": "2 task(s) are overdue and currently shaping delivery pressure.",
+      "action": "workflow.overdue",
+      "tone": "bad"
+    },
+    {
+      "id": "sec01_audit",
+      "occurred_at": "2026-10-28T12:00:00Z",
+      "actor": "AUDIT_DETAIL_SENTINEL",
+      "actor_role": "",
+      "title": "Sec01 Synthetic",
+      "message": "AUDIT_MESSAGE_SENTINEL",
+      "action": "sec01.synthetic",
+      "tone": "warn"
+    }
+  ],
+  "workflow": {
+    "total": 6,
+    "completed": 1,
+    "open": 5,
+    "in_progress": 1,
+    "pending_validation": 0,
+    "escalated": 0,
+    "overdue": 2,
+    "upcoming": 3,
+    "active_assignees": 3,
+    "categories": {
+      "implementation": 6
+    },
+    "linked_indicators": 3,
+    "evidence_count": 1,
+    "comments_count": 6,
+    "progress_avg_pct": 37.0,
+    "completion_pct": 16.67,
+    "status_counts": {
+      "not_started": 2,
+      "in_progress": 1,
+      "pending_validation": 0,
+      "overdue": 2,
+      "escalated": 0,
+      "completed": 1
+    }
+  },
+  "role_views": {
+    "organization_admin": {
+      "title": "Organization Admin",
+      "focus": "Organization-wide access control, workspace administration, and operational governance."
+    },
+    "programme_manager": {
+      "title": "Programme Manager",
+      "focus": "Operational overview, backlog reduction, escalation control, and deadline recovery."
+    },
+    "meal_officer": {
+      "title": "MEAL Officer",
+      "focus": "Validation backlog, reporting confidence, evidence quality, and indicator-linked follow-up."
+    },
+    "field_coordinator": {
+      "title": "Field Coordinator",
+      "focus": "Assigned tasks, upcoming deadlines, field comments, and implementation progress updates."
+    },
+    "executive_viewer": {
+      "title": "Executive Viewer",
+      "focus": "Delivery posture, donor readiness, risk exposure, and management actions needing oversight."
+    }
+  },
+  "reporting_records": [
+    {
+      "id": "rep_proj_health_ind_health_coverage_1_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 76.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 165000.0,
+      "currency": "USD",
+      "status": "amarelo",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 56.25,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_2_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 72.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 158000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 43.75,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_3_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 67.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 172000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 28.125,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_1_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 70.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 72000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 200.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_2_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 64.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 68000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 260.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_3_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 61.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 74000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 290.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_stockout_1_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 11.0,
+      "target_value": 5.0,
+      "progress_value": null,
+      "budget_value": 95000.0,
+      "currency": "USD",
+      "status": "amarelo",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 73.913,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_stockout_2_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 16.0,
+      "target_value": 5.0,
+      "progress_value": null,
+      "budget_value": 91000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 52.174,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_stockout_3_4",
+      "reporting_period": "2026-10-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 19.0,
+      "target_value": 5.0,
+      "progress_value": null,
+      "budget_value": 99000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 39.13,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_1_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 72.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 123750.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 43.75,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_2_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 69.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 118500.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 34.375,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_3_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 61.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 129000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 9.375,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_1_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 63.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 54000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 270.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_2_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 58.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 51000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 320.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_3_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 54.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 55500.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 360.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_stockout_1_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 13.0,
+      "target_value": 5.0,
+      "progress_value": null,
+      "budget_value": 71250.0,
+      "currency": "USD",
+      "status": "amarelo",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 65.217,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_stockout_2_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 18.0,
+      "target_value": 5.0,
+      "progress_value": null,
+      "budget_value": 68250.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 43.478,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_stockout_3_3",
+      "reporting_period": "2026-09-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_stockout",
+      "indicator_name": "Essential medicine stock-out rate",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 21.0,
+      "target_value": 5.0,
+      "progress_value": null,
+      "budget_value": 74250.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 30.435,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_1_2",
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 68.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 82500.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 31.25,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_2_2",
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 65.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 79000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 21.875,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_coverage_3_2",
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_coverage",
+      "indicator_name": "Children fully immunized before age one",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 58.0,
+      "target_value": 90.0,
+      "progress_value": null,
+      "budget_value": 86000.0,
+      "currency": "USD",
+      "status": "vermelho",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 0.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_1_2",
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Angoche",
+      "actual_value": 56.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 36000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 340.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_2_2",
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Nampula",
+      "district": "Monapo",
+      "actual_value": 51.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 34000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 390.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    },
+    {
+      "id": "rep_proj_health_ind_health_chw_3_2",
+      "reporting_period": "2026-08-01T00:00:00Z",
+      "project_id": "proj_health",
+      "project_name": "Community Health Access Initiative",
+      "organization_id": "org_blue_delta",
+      "indicator_id": "ind_health_chw",
+      "indicator_name": "Community health workers supervised on schedule",
+      "country": "Mozambique",
+      "province": "Cabo Delgado",
+      "district": "Mueda",
+      "actual_value": 46.0,
+      "target_value": 80.0,
+      "progress_value": null,
+      "budget_value": 37000.0,
+      "currency": "USD",
+      "status": "verde",
+      "owner": "Health Programme Unit",
+      "notes": "",
+      "source_dataset_id": "ds_demo_portfolio",
+      "created_at": "2026-10-26T12:00:00Z",
+      "updated_at": "2026-10-28T12:00:00Z",
+      "reported_progress_value": 440.0,
+      "calculation_state": "NOT_ASSESSED",
+      "limitations": [
+        "LEGACY_OBSERVATIONS_REQUIRE_APPROVED_SOURCE_BINDING"
+      ]
+    }
+  ]
+}

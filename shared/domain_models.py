@@ -109,7 +109,7 @@ class NotificationRule:
     is_active: bool = True
     organization_id: str = ""
     schedule: str = "manual"
-    channel: str = "webhook"
+    channel: str = "in_app"
     provider: str = ""
     min_severity: str = "medium"
     condition_type: str = ""
@@ -196,7 +196,7 @@ class UserAccount:
     email: str = ""
     role: str = "viewer"
     status: str = "active"
-    permissions: List[str] = field(default_factory=list)
+    permissions: Optional[List[str]] = field(default_factory=list)
     password_salt: str = ""
     password_hash: str = ""
     api_token_hash: str = ""
@@ -205,6 +205,39 @@ class UserAccount:
     updated_at: str = ""
     last_login_at: str = ""
     team_id: str = ""
+    # Existing constructors/records stay v0. Account writes use v1, where
+    # None inherits and every list (including []) is an explicit grant set.
+    permission_policy_version: int = 0
+
+
+@dataclass
+class ApiSession:
+    id: str
+    token_hash: str
+    user_id: str
+    organization_id: str
+    created_at: str
+    last_seen_at: str
+    idle_expires_at: str
+    absolute_expires_at: str
+    csrf_token_hash: str = ""
+    revoked_at: str = ""
+    revocation_reason: str = ""
+    version: int = 1
+
+
+@dataclass
+class IdempotencyRecord:
+    id: str
+    organization_id: str
+    actor_user_id: str
+    operation: str
+    key_hash: str
+    request_hash: str
+    response_payload: Dict[str, Any] = field(default_factory=dict)
+    resource_id: str = ""
+    created_at: str = ""
+    expires_at: str = ""
 
 
 @dataclass
