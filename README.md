@@ -10,7 +10,7 @@ This revision measures how many predefined workflow mutations the demo survives 
 
 ## 1. The demo
 
-I start RC Atlas locally and open it in the browser. I log in as Teresa Mbanze, the Programme Manager for the Coastal Resilience and Livelihoods Programme, and create a task called **“Finalize Buzi monitoring report”**, assign it to Aline Duarte, and set its deadline. I log in as Aline, the Field Coordinator; the task appears in her work queue, where I update its progress and submit it for validation. I then log in as Raimundo Cumba, the MEAL Officer, open the submitted task, review it, and validate it. The task remains pending final approval. When I return as Teresa, I approve the validated work and the task becomes Completed.
+Using screenshots for a five-minute presentation, I follow one task in the Coastal Resilience and Livelihoods Programme through three RC Atlas project roles. As Programme Manager Teresa Mbanze, I open **Workplan** and its **Create Operational Task** form, create **"Finalize Buzi monitoring report"**, assign it to Aline Duarte, set its deadline, and choose **Validation + Approval** with Raimundo Cumba as **Validator** and Teresa as **Approver**. As Field Coordinator Aline Duarte, I open **My Tasks** and then **Workplan**, select the assigned task, choose **Start Work**, update its progress, and select **Submit for Validation**. As MEAL Officer Raimundo Cumba, I open **Validation Workflow**, review the task, and select **Validate**; the task shows **Pending Approval**. As Teresa, I return to **Workplan**, open the task, and select **Approve**. The final screenshot shows **"Finalize Buzi monitoring report"** as **Completed** with **100%** progress in **Task Delivery**.
 
 ## 2. The shape
 
