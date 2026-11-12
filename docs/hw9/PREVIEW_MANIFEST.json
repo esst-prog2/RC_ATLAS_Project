@@ -1,0 +1,122 @@
+{
+  "date": "2026-11-12",
+  "purpose": "Local HW9 design comparison only; not a GitHub Pages publishing manifest",
+  "origin": "http://127.0.0.1:8769/",
+  "product_screenshots_used": false,
+  "files": [
+    {
+      "path": "editorial.html",
+      "bytes": 7967,
+      "sha256": "247752b8e8a63d5f01c6a2813b4286cd2dbcf32af0d0d5072d3c223d52ac3d13",
+      "http_status": 200
+    },
+    {
+      "path": "index.html",
+      "bytes": 4968,
+      "sha256": "99a1fc69ac097ec6341f7ee34c06749796d5030615fd2be4d6405581de9e44b1",
+      "http_status": 200
+    },
+    {
+      "path": "journey.html",
+      "bytes": 7928,
+      "sha256": "c6808e221341674910c0f17b89253e582dd43eb5940dbe726b9e19cf6a999270",
+      "http_status": 200
+    },
+    {
+      "path": "live.html",
+      "bytes": 453,
+      "sha256": "1d3839a4556491a52f59b28d80b040f27945298665943e7a7608dd474363bf39",
+      "http_status": 200
+    },
+    {
+      "path": "overview.html",
+      "bytes": 7618,
+      "sha256": "92407df4552446b1065e0ec630802cb99830cc356de28bb148336d549e74ba4c",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/comparison-desktop.png",
+      "bytes": 159428,
+      "sha256": "f02d3315e33f64101a0254394fff00ccc86774e0b4953407bca80f9e2ddc0628",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/editorial-desktop-full.png",
+      "bytes": 430985,
+      "sha256": "6adf933817224ed592015e6e310799554251f2c4a9dd998c1c35521488378724",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/editorial-desktop.png",
+      "bytes": 95260,
+      "sha256": "f5dcb72a14e35a4121247185563a321500fdd7cddc3b68984328d994334f2641",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/editorial-mobile-full.png",
+      "bytes": 191645,
+      "sha256": "285506165d7da46fc6113a66159e6dee9e4a71523db7f054a1dab230cc6e752c",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/editorial-mobile.png",
+      "bytes": 44023,
+      "sha256": "82b4400849f761ee3db06f3ccd348728363e6bc18c2966f24076b4f160e86d1c",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/journey-desktop-full.png",
+      "bytes": 386630,
+      "sha256": "a80cce889023b88842d788a0edc8e3f3487bbf23317f5006078df05feb07a989",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/journey-desktop.png",
+      "bytes": 87434,
+      "sha256": "c524d60b4860218f5cc08eff479010b894e68f1ec1659d8050bab7bc4816e3ad",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/journey-mobile-full.png",
+      "bytes": 200720,
+      "sha256": "68364a3ca47c713e280c721f3348dd4fd5dc48d497ff8b1ef5372d270f09be7a",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/journey-mobile.png",
+      "bytes": 48356,
+      "sha256": "08e8ef73a1e4d5a76f3751df4aff7ed3739b9592064764a4fddf2837aa9ee50c",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/overview-desktop-full.png",
+      "bytes": 435634,
+      "sha256": "2c51915f848d8953b6842c82bd0fe660fc37961cbed623a3532edcb7fbc1f795",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/overview-desktop.png",
+      "bytes": 104515,
+      "sha256": "e63d581e1e1d4ae35a4031432fea20f1b4a58bf5899aa5ee6206a8fdf9b39da6",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/overview-mobile-full.png",
+      "bytes": 199004,
+      "sha256": "d0cb6975428ec80e935f349101dcf19cd9c3833e9b2f000740d481b733db89a6",
+      "http_status": 200
+    },
+    {
+      "path": "screenshots/overview-mobile.png",
+      "bytes": 45358,
+      "sha256": "8c691813e65869f3b679092f69f0b885d0cee9d876b022d82914588520249f43",
+      "http_status": 200
+    },
+    {
+      "path": "styles.css",
+      "bytes": 13533,
+      "sha256": "5e21c8aca0d7e779c1c96f9499c4a532d4884276cf7d1c7735ece91f2a3c3ae0",
+      "http_status": 200
+    }
+  ]
+}

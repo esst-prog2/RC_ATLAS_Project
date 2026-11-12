@@ -52,4 +52,4 @@ No backend or security changes; no edits to existing untracked artifacts; no new
 
 After owner confirmation: generate the three real browser variants, wait for selection, critique the selection from the classmate/professor/new-visitor perspectives, and request approval of substantive improvements. Then implement and verify desktop/mobile behavior, links, accessibility, provenance, and the public deployment. Record each meaningful step and its genuine decision in PROCESS.md and commit it.
 
-Open: brief confirmation, visual variant choice, safe screenshots, exact publishing source, substantive critique revisions, and publication approval.
+Open: visual variant choice, any later verified product screenshots, exact publishing source, substantive critique revisions, and publication approval. The confirmed brief has now been used to generate all three previews; see GENERATE_REPORT.md.
