@@ -1,6 +1,6 @@
-﻿# HW9 content evidence and proposed direction
+# HW9 content evidence and proposed direction
 
-Status: source review complete; product-owner approval of content direction pending. This is a planning artifact, not public page content or an approved Impeccable shape brief.
+Status: product owner approved the broader institutional positioning and original headline on 2026-11-12. Capability wording is grounded in the expanded source review below; visual selection and publication remain unapproved. This is a planning artifact, not public page content or an approved Impeccable shape brief.
 
 ## Tool availability
 
@@ -23,30 +23,63 @@ Evidence below is static inspection of committed source and tests at baseline 5d
 | Actions depend on assigned responsibilities. | README.md sections 3-4; test_non_assignee_is_rejected_without_mutation | Describe user behavior, not an absolute security guarantee. |
 | Developers can explore the source and follow local setup instructions. | Public repository URL supplied by the owner; docs/DEVELOPMENT.md | Do not suggest visitors can sign up for a hosted app. A fresh setup requires initialization and contains no included runtime data. |
 
-## Content direction awaiting approval
+## Approved content direction
 
-Recommendation: emphasize the concrete handoff from assigned work to approved results. The original tagline, From institutional data to coordinated action, remains an owner suggestion rather than approved final copy.
+Owner decision, 2026-11-12: retain **RC Atlas ? From institutional data to coordinated action.** Present the assignment-to-approval workflow as the practical demonstration, not the whole product. Highlight verified project management, monitoring, indicators, analytics, and reporting capabilities in support of institutional accountability and decision-making.
 
-Proposed primary audience: programme managers, field coordinators, and monitoring/evaluation teams coordinating institutional project work. Organization categories and adoption claims remain unconfirmed; name no real institution as a customer.
+Primary audience: programme managers, field coordinators, and monitoring/evaluation teams coordinating institutional project work. Do not imply a real institution is a customer or that production adoption has been verified.
 
-Proposed headline: **RC Atlas - From assigned work to approved results.**
+### Proposed publication copy
 
-Draft supporting copy: **Keep responsibilities, progress, and review checkpoints together. RC Atlas helps project teams assign tasks, track delivery, and follow work through validation and approval.**
+**RC Atlas ? From institutional data to coordinated action.**
 
-Draft problem statement: **A task is not finished just because someone has submitted it. Teams also need to know who owns the work, what is due, and which review comes next. RC Atlas makes those handoffs visible in a shared project workflow.**
+Bring project work, monitoring information, and indicator evidence into one workspace. RC Atlas helps institutional teams follow responsibilities, examine results, and prepare information for review and decisions.
 
-Draft capability labels:
+**A clearer picture of the work and the evidence.**
 
-- Assign responsibility: give each task an owner and a deadline.
-- Track progress: follow assigned work as it moves forward.
-- Review submissions: validate work before its final approval in the featured workflow.
-- See the outcome: follow the task through to its completed state.
+Institutional decisions need more than a completed-task count. Teams need to see who is responsible, how delivery is progressing, what indicators measure, and what the available data can support. RC Atlas brings these perspectives together while keeping work completion distinct from measured results.
 
-Draft workflow: **Assign -> Work -> Submit -> Validate -> Approve.** Explain that the featured example uses both validation and approval. Use generic role names rather than reproducing fictional people that could be mistaken for real endorsements.
+**Five connected capabilities**
 
-Draft exploration section: **Explore RC Atlas. This course project runs locally. Visit the GitHub repository to read the workflow and find setup instructions.** Proposed primary action: **Explore on GitHub**. A secondary action can link directly to the documented local setup.
+- **Project management.** Organize project work, assign responsibility, set deadlines, and follow tasks through review.
+- **Monitoring.** Follow operational progress and reporting records so teams can see what has been submitted and what still needs attention.
+- **Indicators.** Examine indicator baselines, targets, and results. For configured indicators, inspect the selected calculation method and reporting period.
+- **Analytics.** Understand how supported indicator results are calculated, with explanations, source context, and data-quality checks for the selected indicator. Missing configuration and unsupported calculations are identified explicitly.
+- **Reporting.** Review recorded information and prepare report previews for discussion. Report previews are part of the current project; fully governed export snapshots remain future work.
 
-Not approved for ready-to-use marketing claims: donor reports, AI narratives, budgeting, predictive analytics, mapping, external notification providers, data-collection integrations, mobile apps, subscription management, and production cloud hosting. README.md explicitly excludes these from the assessed workflow, even where supporting code exists.
+**Accountability, demonstrated through one task.**
+
+A manager assigns the work and its deadline. A coordinator updates progress and submits the result. A reviewer validates the submission. The manager approves completion. This example uses both validation and approval checkpoints; other configured task flows exist.
+
+**Assign ? Work ? Submit ? Validate ? Approve.**
+
+A completed task shows that the work passed its delivery checks. Indicator results provide a separate view of what the data shows. Keeping these distinct helps teams discuss both delivery and evidence without treating task completion as proof of impact.
+
+**Explore the project.**
+
+RC Atlas is a locally run course project. Explore its public repository to understand the workflow, inspect the source, and follow the local setup instructions. The promotional website does not host the application.
+
+Primary action: **Explore on GitHub**. Secondary action: **Local setup guide**. Workflow anchor: **See the workflow**.
+
+**Current scope.**
+
+Indicator analysis requires configured methods and suitable data. Some wider analytical and reporting functions remain under development. This page describes supported capabilities and does not offer a production-hosted service.
+
+### Expanded claim evidence and boundaries
+
+Static inspection at baseline 5d487f8ff2fff3a864bc5405a90d2555ee3b5218; no fresh test-pass or live acceptance claim.
+
+| Area | Supporting implementation and contract | Publication boundary |
+|---|---|---|
+| Project management | Assignment workflow tests; project member tests; api/logical_framework_routes.py includes result and indicator-link operations | Describe the verified operational journey; do not call the logical-framework builder complete. |
+| Monitoring | services/reporting.py:list_reporting_records; workflow status/progress in README and tests; consumer matrix C19 and C41 | Reporting records and operational task progress are different from calculated indicator achievement. |
+| Indicators | api/methodology_routes.py:get_methodology/get_calculation; Studio How is this calculated? panel; docs/WAVE_2_PACKAGE_1_CONTRACT.md | Approved method definitions and explicit source, period, and version are required. No automatic configuration or full authoring UI claim. |
+| Analytics | services/analytical_consumers.py:calculate_indicator/indicator_kpi/quality_report; docs/WAVE_2_PACKAGE_2_CONTRACT.md; Studio renderMethodologyResult | Supported selected indicator calculations and explanations only. Quality is rule-specific and scoped; no overall fitness score, prediction, statistical trend, or cross-project aggregate claim. |
+| Reporting | services/reporting.py:list_reporting_records and narrative/quality accessors; services/demo_workspace.py:report_preview; sec01_report_preview_tests.py; consumer matrix C28-C31 | Report previews and recorded information exist. Do not promise production donor reports, governed immutable exports, or certified PDF/PPTX output. |
+
+The README's assessed course workflow is narrower than the integrated platform source. Exclusion from that homework demonstration does not prove a broader feature is absent; use the implementation contracts to determine its supported scope. Conversely, a route or visible menu alone does not prove readiness.
+
+Keep out of ready-to-use claims: predictive analysis, statistical trends, portfolio progress aggregation, cross-currency totals, universal data-quality scoring, risk scoring, AI narratives, complete budgeting, mapping, external notification/data-collection integrations, subscription management, production cloud hosting, and fully governed report/export snapshots.
 
 ## Existing visual identity evidence
 
@@ -54,8 +87,8 @@ logitrack_studio.html defines navy #123b5d, teal #11828a, dark text #0f172a, lig
 
 ## Remaining owner gates and next steps
 
-1. Confirm the content focus and headline, then complete the office-hours content decisions.
-2. Capture confirmed product truth in PRODUCT.md through Impeccable init; no product record has been invented.
+1. Content focus and headline confirmed by the owner; exact final copy and the completed office-hours design record remain reviewable.
+2. Capture confirmed product truth in PRODUCT.md through Impeccable init, using the explicit owner answer and source evidence.
 3. Produce and confirm the shape brief without page code.
 4. Generate visual variants in the browser and wait for the owner's selection.
 5. Critique the selected variant as a classmate, professor, and unfamiliar visitor; apply substantive revisions only after approval.

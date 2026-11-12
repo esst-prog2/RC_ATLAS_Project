@@ -19,3 +19,9 @@ The original qa-system-audit planning addition is preserved in its own branch co
 | 2026-11-12 | Ground promo claims and prepare content proposal | Read README.md, docs/DEVELOPMENT.md, relevant workflow tests, and existing CSS tokens. Created docs/hw9/CONTENT_REVIEW.md with claim evidence, draft copy, excluded claims, and pending decisions. Tests were inspected but not executed. No app runtime was started. | Required repository-supported claims, established RC Atlas identity, and no unsupported production claims. Workflow-focused headline and audience were proposed by the assistant; owner approval is pending. |
 
 Office-hours is in progress. Impeccable init/shape, generate, critique, final implementation, and publication remain pending. No design or publication approval has been inferred.
+
+## Confirmed platform positioning
+
+| Date | Step | Tool and actual result | Product-owner decision |
+|---|---|---|---|
+| 2026-11-12 | Confirm broader content direction | Structured question received an explicit owner correction: retain the institutional headline and highlight verified platform capabilities. Expanded static inspection to methodology/consumer contracts, reporting service, report-preview tests, and indicator UI. Updated CONTENT_REVIEW.md and created PRODUCT.md using the confirmed answer. No runtime or tests executed. | Approved the assignment-to-approval workflow as the main practical demonstration, not the entire platform; retained the original headline; requested verified project management, monitoring, indicators, analytics, and reporting. Visual selection and publication remain separate decisions. |
