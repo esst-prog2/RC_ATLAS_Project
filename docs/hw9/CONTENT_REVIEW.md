@@ -25,13 +25,13 @@ Evidence below is static inspection of committed source and tests at baseline 5d
 
 ## Approved content direction
 
-Owner decision, 2026-11-12: retain **RC Atlas ? From institutional data to coordinated action.** Present the assignment-to-approval workflow as the practical demonstration, not the whole product. Highlight verified project management, monitoring, indicators, analytics, and reporting capabilities in support of institutional accountability and decision-making.
+Owner decision, 2026-11-12: retain **RC Atlas — From institutional data to coordinated action.** Present the assignment-to-approval workflow as the practical demonstration, not the whole product. Highlight verified project management, monitoring, indicators, analytics, and reporting capabilities in support of institutional accountability and decision-making.
 
 Primary audience: programme managers, field coordinators, and monitoring/evaluation teams coordinating institutional project work. Do not imply a real institution is a customer or that production adoption has been verified.
 
 ### Proposed publication copy
 
-**RC Atlas ? From institutional data to coordinated action.**
+**RC Atlas — From institutional data to coordinated action.**
 
 Bring project work, monitoring information, and indicator evidence into one workspace. RC Atlas helps institutional teams follow responsibilities, examine results, and prepare information for review and decisions.
 
@@ -51,7 +51,7 @@ Institutional decisions need more than a completed-task count. Teams need to see
 
 A manager assigns the work and its deadline. A coordinator updates progress and submits the result. A reviewer validates the submission. The manager approves completion. This example uses both validation and approval checkpoints; other configured task flows exist.
 
-**Assign ? Work ? Submit ? Validate ? Approve.**
+**Assign → Work → Submit → Validate → Approve.**
 
 A completed task shows that the work passed its delivery checks. Indicator results provide a separate view of what the data shows. Keeping these distinct helps teams discuss both delivery and evidence without treating task completion as proof of impact.
 

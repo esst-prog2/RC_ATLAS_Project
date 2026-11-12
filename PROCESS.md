@@ -25,3 +25,10 @@ Office-hours is in progress. Impeccable init/shape, generate, critique, final im
 | Date | Step | Tool and actual result | Product-owner decision |
 |---|---|---|---|
 | 2026-11-12 | Confirm broader content direction | Structured question received an explicit owner correction: retain the institutional headline and highlight verified platform capabilities. Expanded static inspection to methodology/consumer contracts, reporting service, report-preview tests, and indicator UI. Updated CONTENT_REVIEW.md and created PRODUCT.md using the confirmed answer. No runtime or tests executed. | Approved the assignment-to-approval workflow as the main practical demonstration, not the entire platform; retained the original headline; requested verified project management, monitoring, indicators, analytics, and reporting. Visual selection and publication remain separate decisions. |
+
+## Shape preparation
+
+| Date | Step | Tool and actual result | Product-owner decision |
+|---|---|---|---|
+| 2026-11-12 | Confirm implementation and preview approach | Structured questions returned explicit approval of plain HTML/CSS with minimal JavaScript and code-first browser variants. Updated PRODUCT.md; left pre-existing Impeccable config unchanged. | Approved both choices for this promotional page only. |
+| 2026-11-12 | Produce the no-code shape brief | Followed Impeccable shape/new-work guidance; concept-seed returned three surface indices while preserving the incumbent identity. Wrote docs/hw9/SHAPE_BRIEF.md with message, sequence, constraints, and proposed compositions. No page code, generated images, or browser variants yet. Corrected a shell encoding defect in the headline documents and appended a planning-log correction without rewriting earlier log entries. | Existing identity, broad headline, capability scope, lightweight stack, and code-first approach approved; shape brief confirmation and final visual selection pending. |

@@ -6,6 +6,10 @@
 
 web
 
+## HW9 Implementation
+
+Owner approved plain HTML/CSS with minimal JavaScript and code-first browser variants on 2026-11-12. This is a page-specific choice, not a change to global Impeccable defaults or application architecture.
+
 ## Users
 
 Institutional project teams, including programme managers, field coordinators, and monitoring/evaluation teams. The HW9 page also serves classmates, the professor, and visitors unfamiliar with RC Atlas. No customer adoption is claimed.
@@ -16,7 +20,7 @@ RC Atlas brings project work, monitoring information, indicators, analytics, and
 
 ## Positioning
 
-Approved headline: **RC Atlas ? From institutional data to coordinated action.**
+Approved headline: **RC Atlas — From institutional data to coordinated action.**
 
 Use the assignment-to-approval workflow as a concrete demonstration of responsibility and review. Operational completion and measured indicator results are distinct. Do not imply a completed task proves institutional impact.
 
@@ -55,4 +59,4 @@ The owner requires an accessible, responsive, professional, lightweight page for
 
 ## Open HW9 Decisions
 
-Implementation stack and variant production approach await the owner's answer. The owner will select a visual variant, approve substantive critique revisions, and approve publication separately. Reserve space for a later video without an empty player; do not generate video in HW9.
+The owner will select a visual variant, approve substantive critique revisions, and approve publication separately. Reserve space for a later video without an empty player; do not generate video in HW9.
