@@ -1,0 +1,28 @@
+﻿{
+  "page": "/overview.html",
+  "viewport": [
+    720,
+    500
+  ],
+  "documentWidth": 720,
+  "h1Count": 1,
+  "headline": "RC Atlas — From institutional data to coordinated action.",
+  "brokenAnchors": [],
+  "overflow": [],
+  "lowContrast": [],
+  "remoteResources": [],
+  "links": [
+    "#overview-start",
+    "index.html",
+    "#overview-capabilities",
+    "#overview-workflow",
+    "#overview-explore",
+    "https://github.com/esst-prog2/RC_ATLAS_Project",
+    "#overview-cap-0",
+    "#overview-cap-1",
+    "#overview-cap-2",
+    "#overview-cap-3",
+    "#overview-cap-4",
+    "https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md"
+  ]
+}

@@ -1,0 +1,87 @@
+﻿{
+  "viewport": [
+    390,
+    844
+  ],
+  "documentWidth": 390,
+  "pageHeight": 5527,
+  "nav": [
+    {
+      "text": "Capabilities",
+      "x": 20,
+      "y": 112.984375,
+      "width": 73.1875,
+      "height": 22.390625
+    },
+    {
+      "text": "The workflow",
+      "x": 164.96875,
+      "y": 112.984375,
+      "width": 86.03125,
+      "height": 22.390625
+    },
+    {
+      "text": "Explore",
+      "x": 322.78125,
+      "y": 112.984375,
+      "width": 47.21875,
+      "height": 22.390625
+    },
+    {
+      "text": "Explore on GitHub",
+      "x": 20,
+      "y": 550.875,
+      "width": 197.15625,
+      "height": 50
+    },
+    {
+      "text": "See the workflow",
+      "x": 241.15625,
+      "y": 563.078125,
+      "width": 125.375,
+      "height": 25.59375
+    }
+  ],
+  "insets": [
+    {
+      "class": "review-strip",
+      "left": 20,
+      "paddingTop": "8px",
+      "paddingBottom": "8px"
+    },
+    {
+      "class": "hero",
+      "left": 20,
+      "paddingTop": "48px",
+      "paddingBottom": "30px"
+    },
+    {
+      "class": "section capabilities",
+      "left": 20,
+      "paddingTop": "58px",
+      "paddingBottom": "58px"
+    },
+    {
+      "class": "section workflow",
+      "left": 20,
+      "paddingTop": "58px",
+      "paddingBottom": "58px"
+    },
+    {
+      "class": "section understand",
+      "left": 20,
+      "paddingTop": "58px",
+      "paddingBottom": "58px"
+    },
+    {
+      "class": "section explore",
+      "left": 20,
+      "paddingTop": "58px",
+      "paddingBottom": "58px"
+    }
+  ],
+  "localProjectDisclosureY": 4715.359375,
+  "mainCount": 1,
+  "headingCount": 1,
+  "focus": ""
+}

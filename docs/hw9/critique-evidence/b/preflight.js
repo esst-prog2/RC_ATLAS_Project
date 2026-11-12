@@ -1,0 +1,1 @@
+(() => {const original=document.title;document.title='[Critique] '+original;const s=document.createElement('script');s.type='application/json';s.id='critique-mutation-probe';s.textContent='{}';document.body.append(s);const ok=!!document.getElementById(s.id)&&document.title.startsWith('[Critique]');s.remove();document.title=original;return JSON.stringify({mutableDOM:ok})})()

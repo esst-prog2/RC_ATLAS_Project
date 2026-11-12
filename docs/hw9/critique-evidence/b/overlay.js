@@ -1,0 +1,1 @@
+﻿(() => { document.title='[Human] Institutional Overview critique'; window.scrollTo(0,0); const s=document.createElement('script'); s.src='http://localhost:8400/detect.js'; document.head.appendChild(s); return 'detector script appended'; })()
