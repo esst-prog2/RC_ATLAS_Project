@@ -1,6 +1,6 @@
 # HW9 promotional page — shape brief
 
-Status: explicitly confirmed by the owner on 2026-11-12. Code-first variant generation is authorized. Visual variant selection and publication require separate approvals.
+Status: brief confirmed on 2026-11-12. On 2026-11-13 the owner selected Institutional Overview as the primary design and authorized critique. Substantive improvements and publication still require separate approvals.
 
 ## Purpose and audience
 
@@ -52,4 +52,4 @@ No backend or security changes; no edits to existing untracked artifacts; no new
 
 After owner confirmation: generate the three real browser variants, wait for selection, critique the selection from the classmate/professor/new-visitor perspectives, and request approval of substantive improvements. Then implement and verify desktop/mobile behavior, links, accessibility, provenance, and the public deployment. Record each meaningful step and its genuine decision in PROCESS.md and commit it.
 
-Open: visual variant choice, any later verified product screenshots, exact publishing source, substantive critique revisions, and publication approval. The confirmed brief has now been used to generate all three previews; see GENERATE_REPORT.md.
+Selected: Institutional Overview (2026-11-13). Evaluate incorporating the editorial section “Work you can trace. Evidence you can explain.” without weakening the five-capability presentation. Open: critique recommendations, approval of substantive improvements, verified product screenshots, exact publishing source, and publication approval. See GENERATE_REPORT.md for the original alternatives.
