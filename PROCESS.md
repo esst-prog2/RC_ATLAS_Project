@@ -10,3 +10,12 @@ Dates use Europe/Budapest. Product-owner decisions below quote or summarize expl
 | 2026-11-12 | Create the HW9 branch | Fetched origin again; checked tracked cleanliness and existing paths against target additions; git switch --no-overwrite-ignore --no-track -c hw9-promo-page origin/main succeeded at 5d487f8ff2fff3a864bc5405a90d2555ee3b5218. All seven worktrees remain registered; the six other worktrees retain their prior branches and HEADs. The two local backup files still exist and are now ignored by the baseline .gitignore. Site.txt and .impeccable/config.json remain untracked. | Authorized branch creation inside the canonical checkout once safe, using latest origin/main and preserving existing work. |
 
 The original qa-system-audit planning addition is preserved in its own branch commit; it was not carried into the HW9 baseline. No existing untracked file is part of HW9. Publication, marketing choices, and design selection remain pending.
+
+## Tool and content preparation
+
+| Date | Step | Tool and actual result | Product-owner decision |
+|---|---|---|---|
+| 2026-11-12 | Verify required tools | Read installed gstack office-hours and Impeccable skills. gstack startup returned protocol 1 and session 1-1794469369-f5997c2e; context recovery and learning search ran. Impeccable context succeeded and confirmed version 4.7.0. gstack warned of a held workflow lease; no upgrade or lease repair was attempted. | Required both tools and authorized continuing HW9 after safe branch creation. No tool upgrade or fallback was approved. |
+| 2026-11-12 | Ground promo claims and prepare content proposal | Read README.md, docs/DEVELOPMENT.md, relevant workflow tests, and existing CSS tokens. Created docs/hw9/CONTENT_REVIEW.md with claim evidence, draft copy, excluded claims, and pending decisions. Tests were inspected but not executed. No app runtime was started. | Required repository-supported claims, established RC Atlas identity, and no unsupported production claims. Workflow-focused headline and audience were proposed by the assistant; owner approval is pending. |
+
+Office-hours is in progress. Impeccable init/shape, generate, critique, final implementation, and publication remain pending. No design or publication approval has been inferred.
