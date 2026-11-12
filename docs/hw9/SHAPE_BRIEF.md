@@ -1,6 +1,6 @@
 # HW9 promotional page — shape brief
 
-Status: ready for owner confirmation. No promotional page code has been written. Visual variant selection and publication require separate approvals.
+Status: explicitly confirmed by the owner on 2026-11-12. Code-first variant generation is authorized. Visual variant selection and publication require separate approvals.
 
 ## Purpose and audience
 

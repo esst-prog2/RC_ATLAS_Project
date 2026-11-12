@@ -32,3 +32,9 @@ Office-hours is in progress. Impeccable init/shape, generate, critique, final im
 |---|---|---|---|
 | 2026-11-12 | Confirm implementation and preview approach | Structured questions returned explicit approval of plain HTML/CSS with minimal JavaScript and code-first browser variants. Updated PRODUCT.md; left pre-existing Impeccable config unchanged. | Approved both choices for this promotional page only. |
 | 2026-11-12 | Produce the no-code shape brief | Followed Impeccable shape/new-work guidance; concept-seed returned three surface indices while preserving the incumbent identity. Wrote docs/hw9/SHAPE_BRIEF.md with message, sequence, constraints, and proposed compositions. No page code, generated images, or browser variants yet. Corrected a shell encoding defect in the headline documents and appended a planning-log correction without rewriting earlier log entries. | Existing identity, broad headline, capability scope, lightweight stack, and code-first approach approved; shape brief confirmation and final visual selection pending. |
+
+## Variant generation
+
+| Date | Step | Tool and actual result | Product-owner decision |
+|---|---|---|---|
+| 2026-11-12 | Confirm shape and prepare isolated preview source | Git status confirmed only the original untracked files. Read Impeccable generate/live/craft guidance and scanned tracked image paths (none found). Created a minimal promotional HTML target under docs/hw9/previews for the live generation tool. No application runtime started; no product screenshot used. | Explicitly approved the brief and the three named code-first variants, desktop/mobile screenshots, and a stop for visual selection. No publication or HW10 authorized. |
