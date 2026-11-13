@@ -1,0 +1,100 @@
+{
+  "checked_at_utc": "2026-11-13T12:36:14.795500+00:00",
+  "status": "PASS",
+  "url": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "source": {
+    "branch": "gh-pages",
+    "path": "/",
+    "configuration_observed": "Authenticated GitHub Pages UI already showed approved settings after sign-in handoff; agent did not click Save."
+  },
+  "publication_commit": "1f1a1f970ab27d4caa987f85f60b1ebc58883928",
+  "public_tree": "0565ed4592454e1c7f4261921cd0cd455985ec24",
+  "run": {
+    "id": 43426280309,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "1f1a1f970ab27d4caa987f85f60b1ebc58883928",
+    "head_branch": "gh-pages",
+    "html_url": "https://github.com/esst-prog2/RC_ATLAS_Project/actions/runs/43426280309"
+  },
+  "files": [
+    {
+      "source": "branch",
+      "path": ".nojekyll",
+      "status": 200,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": "text/plain; charset=utf-8"
+    },
+    {
+      "source": "site",
+      "path": ".nojekyll",
+      "status": 200,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": "application/octet-stream"
+    },
+    {
+      "source": "branch",
+      "path": "favicon.svg",
+      "status": 200,
+      "sha256": "93e3b8c434f9903ff68685b3a8c842404a698f5ef3f25e30e1fa94aa4c375191",
+      "content_type": "image/svg+xml"
+    },
+    {
+      "source": "site",
+      "path": "favicon.svg",
+      "status": 200,
+      "sha256": "93e3b8c434f9903ff68685b3a8c842404a698f5ef3f25e30e1fa94aa4c375191",
+      "content_type": "image/svg+xml"
+    },
+    {
+      "source": "branch",
+      "path": "index.html",
+      "status": 200,
+      "sha256": "19f1f8d4220d1b405546e2344cc3628f7f32b7be88d606f3085c4a31ddb782e0",
+      "content_type": "text/plain; charset=utf-8"
+    },
+    {
+      "source": "site",
+      "path": "index.html",
+      "status": 200,
+      "sha256": "19f1f8d4220d1b405546e2344cc3628f7f32b7be88d606f3085c4a31ddb782e0",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "source": "branch",
+      "path": "styles.css",
+      "status": 200,
+      "sha256": "52407af1c0d469913b52b1027d2cd8666518c8f14ab8b58d3faffcfad4335e17",
+      "content_type": "text/plain; charset=utf-8"
+    },
+    {
+      "source": "site",
+      "path": "styles.css",
+      "status": 200,
+      "sha256": "52407af1c0d469913b52b1027d2cd8666518c8f14ab8b58d3faffcfad4335e17",
+      "content_type": "text/css; charset=utf-8"
+    }
+  ],
+  "excluded_paths": [
+    {
+      "path": "PROCESS.md",
+      "status": 404
+    },
+    {
+      "path": "docs/ui-01/PHASE_1_REPORT.md",
+      "status": 404
+    },
+    {
+      "path": "logitrack_studio.html",
+      "status": 404
+    },
+    {
+      "path": "Site.txt",
+      "status": 404
+    },
+    {
+      "path": "logitrack_data.json",
+      "status": 404
+    }
+  ]
+}
