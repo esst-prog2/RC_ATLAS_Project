@@ -1,0 +1,7 @@
+# HW10 local dependencies and disposable render state only
+node_modules/
+.cache/
+.tooling/
+.tmp/
+.hyperframes/
+assets/fonts/
