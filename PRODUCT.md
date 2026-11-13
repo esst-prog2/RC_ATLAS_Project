@@ -66,3 +66,7 @@ The owner selected Institutional Overview on 2026-11-13 and requested evaluation
 ## HW9 delivery status — 2026-11-13
 
 The owner approved the final candidate and exact four-file publication. The promotional page is now publicly verified at https://esst-prog2.github.io/RC_ATLAS_Project/, served from gh-pages root. This supersedes earlier pending-publication status. Screenshot text fallback and sequential-critique disclosure remain as approved; no backend deployment or HW10 work occurred. See docs/hw9/PUBLICATION_REPORT.md.
+
+## Approved logo deployment status - 2026-11-13
+
+The owner-approved seven-file logo update is now published and publicly verified at https://esst-prog2.github.io/RC_ATLAS_Project/ from gh-pages commit 23de743. This supersedes earlier local-candidate/four-file status. See docs/hw9/branding/DEPLOYMENT_REPORT.md. The 16px favicon limitation remains documented; application integration and HW10 have not started.

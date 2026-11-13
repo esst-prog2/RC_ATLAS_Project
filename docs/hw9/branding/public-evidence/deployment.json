@@ -1,0 +1,70 @@
+{
+  "verified_at_utc": "2026-11-13T17:51:13.322911+00:00",
+  "site": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "commit": "23de743274a68e1a0863ca733e13c1a5ce94a348",
+  "tree": "3a6e92000e6437f754a1b70f2f7174a39bd02e33",
+  "run": {
+    "id": 43476713822,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/esst-prog2/RC_ATLAS_Project/actions/runs/43476713822"
+  },
+  "files": [
+    {
+      "file": ".nojekyll",
+      "http_status": 200,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": "application/octet-stream"
+    },
+    {
+      "file": "favicon.ico",
+      "http_status": 200,
+      "bytes": 3170,
+      "sha256": "97f582f8733901e3382f07e1a8783212239e989648eca3d3f379decc22878e8d",
+      "content_type": "image/vnd.microsoft.icon"
+    },
+    {
+      "file": "favicon.png",
+      "http_status": 200,
+      "bytes": 1635,
+      "sha256": "ca7bfdf88a6bf1c973382c4975bb93b71ed9d2d4a26706e47094fa494686f18d",
+      "content_type": "image/png"
+    },
+    {
+      "file": "index.html",
+      "http_status": 200,
+      "bytes": 10526,
+      "sha256": "e4923301d1677c003c87229713e95b8dd68f653413107da7bdb50af22f4fd682",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "file": "logo.png",
+      "http_status": 200,
+      "bytes": 11925,
+      "sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee",
+      "content_type": "image/png"
+    },
+    {
+      "file": "logo@2x.png",
+      "http_status": 200,
+      "bytes": 37965,
+      "sha256": "58104a244d99a417403466e9c242660b110ef052ad3a909be6604a05cc7fb7c7",
+      "content_type": "image/png"
+    },
+    {
+      "file": "styles.css",
+      "http_status": 200,
+      "bytes": 10240,
+      "sha256": "edf29f168bb51ba5bc9370d6cd8fd3d27eab28012a131c3401fa75de72d02225",
+      "content_type": "text/css; charset=utf-8"
+    }
+  ],
+  "excluded_paths": {
+    "favicon.svg": 404,
+    "PROCESS.md": 404,
+    "docs/ui-01/PHASE_1_REPORT.md": 404,
+    "logitrack_studio.html": 404,
+    "Site.txt": 404
+  }
+}
