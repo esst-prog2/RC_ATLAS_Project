@@ -40,6 +40,8 @@ The application runs locally in a browser. Its featured course workflow follows 
 
 ## Brand Commitments
 
+On 2026-11-13 the owner approved the standalone RC Atlas raster logo supplied in the canonical workspace. Its exact source and proportionally resized derivatives are recorded in docs/hw9/branding. Preserve its artwork, transparency and proportions; no redraw, crop, substitute or vector claim without approval. The logo-update candidate is local and awaiting visual review/publication approval; the previous four-file site remains the deployed version. Application reuse is planned only.
+
 Preserve the RC Atlas name, established visual identity, and approved headline. This is a promotional page, not an application redesign. Explain capabilities in plain language. Use no invented endorsements, adoption claims, commercial availability, or fabricated product screenshots.
 
 ## Evidence on Hand

@@ -7,10 +7,11 @@ import re
 import subprocess
 from urllib.parse import urlparse
 from urllib.request import urlopen
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC = ROOT / 'promo'
-EXPECTED = {'.nojekyll', 'favicon.svg', 'index.html', 'styles.css'}
+EXPECTED = {'.nojekyll', 'favicon.ico', 'favicon.png', 'index.html', 'styles.css', 'logo.png', 'logo@2x.png'}
 EXTERNAL = {
     'https://github.com/esst-prog2/RC_ATLAS_Project',
     'https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md',
@@ -38,6 +39,8 @@ class Page(HTMLParser):
         if tag == 'img':
             assert 'alt' in a, 'Image lacks an alternative-text attribute'
             self.assets.append(a['src'])
+            if 'srcset' in a:
+                self.assets.extend(item.strip().split()[0] for item in a['srcset'].split(','))
 
 
 def main():
@@ -52,7 +55,7 @@ def main():
         committed = git('show', f'HEAD:promo/{name}')
         assert data == committed, f'Uncommitted public bytes in {name}'
         assert not re.search(rb'PRIVATE KEY|github_pat_|ghp_[A-Za-z0-9]|Bearer\s+[A-Za-z0-9]|(?:password|api_key)\s*=|(?<![A-Za-z])[A-Za-z]:[\\/]', data, re.I), f'Suspicious public content: {name}'
-        with urlopen(f'http://127.0.0.1:8770/{name}', timeout=10) as response:
+        with urlopen(f'http://127.0.0.1:8782/{name}', timeout=10) as response:
             assert response.status == 200 and response.read() == data
         files.append({'source': f'promo/{name}', 'published_path': name,
                       'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(),
@@ -72,26 +75,32 @@ def main():
     for asset in page.assets:
         assert asset in EXPECTED and not urlparse(asset).scheme
     assert 'url(' not in (PUBLIC / 'styles.css').read_text(encoding='utf-8')
-    assert 'http' not in (PUBLIC / 'favicon.svg').read_text(encoding='utf-8').replace('http://www.w3.org/2000/svg', '')
+    for name, size in [('logo.png', (192, 128)), ('logo@2x.png', (384, 256)), ('favicon.png', (48, 48))]:
+        with Image.open(PUBLIC / name) as image:
+            assert image.format == 'PNG' and image.mode == 'RGBA' and image.size == size
+            assert not image.info, f'Unexpected image metadata: {name}'
+            image.verify()
+    with Image.open(PUBLIC / 'favicon.ico') as image:
+        assert image.ico.sizes() == {(16, 16), (32, 32), (48, 48)}
     assert (PUBLIC / '.nojekyll').stat().st_size == 0
     tree = git('rev-parse', 'HEAD:promo').decode().strip()
     entries = git('ls-tree', tree).decode().splitlines()
-    assert len(entries) == 4 and all(e.startswith('100644 blob ') for e in entries)
+    assert len(entries) == len(EXPECTED) and all(e.startswith('100644 blob ') for e in entries)
     manifest = {
-        'status': 'VALIDATED_LOCAL_CANDIDATE_NOT_PUBLISHED',
+        'status': 'LOGO_UPDATE_VALIDATED_LOCAL_ONLY_AWAITING_OWNER_REVIEW',
         'source_commit': git('rev-parse', 'HEAD').decode().strip(),
         'public_git_tree': tree,
         'proposed_repository': 'esst-prog2/RC_ATLAS_Project',
         'proposed_source': {'method': 'Deploy from a branch', 'branch': 'gh-pages', 'folder': '/'},
-        'expected_url_not_yet_verified': 'https://esst-prog2.github.io/RC_ATLAS_Project/',
+        'existing_public_url_update_not_deployed': 'https://esst-prog2.github.io/RC_ATLAS_Project/',
         'files': files,
         'total_bytes': sum(f['bytes'] for f in files),
         'external_links': sorted(EXTERNAL),
         'product_screenshots': [],
         'fallback': 'Owner-approved labelled text explanations; no verified runtime screenshot available.',
-        'review': 'Four files manually reviewed. No credentials, personal/institutional data, application code, technical reports, or preview artifacts in this tree.',
+        'review': 'Seven-file logo-update candidate; previous four-file approval does not authorize this deployment. Source artwork and review artifacts stay outside promo. No credentials, personal/institutional data, application code, technical reports, or preview artifacts in this tree.',
     }
-    (ROOT / 'docs/hw9/PUBLICATION_MANIFEST.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+    (ROOT / 'docs/hw9/branding/PUBLICATION_MANIFEST.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({'status': manifest['status'], 'files': len(files), 'bytes': manifest['total_bytes'], 'git_tree': tree}))
 
 

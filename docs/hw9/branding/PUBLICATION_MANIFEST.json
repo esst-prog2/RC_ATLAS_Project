@@ -1,0 +1,78 @@
+{
+  "status": "LOGO_UPDATE_VALIDATED_LOCAL_ONLY_AWAITING_OWNER_REVIEW",
+  "source_commit": "28a670637edc72aa5123aa50685aaf02beeb1c3f",
+  "public_git_tree": "3a6e92000e6437f754a1b70f2f7174a39bd02e33",
+  "proposed_repository": "esst-prog2/RC_ATLAS_Project",
+  "proposed_source": {
+    "method": "Deploy from a branch",
+    "branch": "gh-pages",
+    "folder": "/"
+  },
+  "existing_public_url_update_not_deployed": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "files": [
+    {
+      "source": "promo/.nojekyll",
+      "published_path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/favicon.ico",
+      "published_path": "favicon.ico",
+      "bytes": 3170,
+      "sha256": "97f582f8733901e3382f07e1a8783212239e989648eca3d3f379decc22878e8d",
+      "git_blob": "451c609a4e5c59003d9a96bb85caee392db0fe94",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/favicon.png",
+      "published_path": "favicon.png",
+      "bytes": 1635,
+      "sha256": "ca7bfdf88a6bf1c973382c4975bb93b71ed9d2d4a26706e47094fa494686f18d",
+      "git_blob": "2d062f80c98a348616fe99248a6aa86eec541889",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/index.html",
+      "published_path": "index.html",
+      "bytes": 10526,
+      "sha256": "e4923301d1677c003c87229713e95b8dd68f653413107da7bdb50af22f4fd682",
+      "git_blob": "9915fdb47f5b87bc7e6e0fa991ec888f349f2657",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/logo.png",
+      "published_path": "logo.png",
+      "bytes": 11925,
+      "sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee",
+      "git_blob": "8a647c31442dd729e761a4a8098c134fa399b6ac",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/logo@2x.png",
+      "published_path": "logo@2x.png",
+      "bytes": 37965,
+      "sha256": "58104a244d99a417403466e9c242660b110ef052ad3a909be6604a05cc7fb7c7",
+      "git_blob": "e754cf3bcd6b777072885439ef3be98923b53588",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/styles.css",
+      "published_path": "styles.css",
+      "bytes": 10240,
+      "sha256": "edf29f168bb51ba5bc9370d6cd8fd3d27eab28012a131c3401fa75de72d02225",
+      "git_blob": "dbb5c12823e90d592314e999d54d51a09c2749e8",
+      "local_http_status": 200
+    }
+  ],
+  "total_bytes": 75461,
+  "external_links": [
+    "https://github.com/esst-prog2/RC_ATLAS_Project",
+    "https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md"
+  ],
+  "product_screenshots": [],
+  "fallback": "Owner-approved labelled text explanations; no verified runtime screenshot available.",
+  "review": "Seven-file logo-update candidate; previous four-file approval does not authorize this deployment. Source artwork and review artifacts stay outside promo. No credentials, personal/institutional data, application code, technical reports, or preview artifacts in this tree."
+}

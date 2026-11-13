@@ -1,0 +1,55 @@
+{
+  "url": "http://127.0.0.1:8782/",
+  "width": 768,
+  "height": 1024,
+  "overflow": false,
+  "logo": {
+    "loaded": true,
+    "source": "http://127.0.0.1:8782/logo.png",
+    "width": 90,
+    "height": 60,
+    "ratio": 1.5,
+    "objectFit": "contain",
+    "alt": ""
+  },
+  "brandName": "RC Atlas",
+  "mainCount": 1,
+  "headingCount": 1,
+  "navHits": [
+    {
+      "label": "Capabilities",
+      "width": 94.40625,
+      "height": 44
+    },
+    {
+      "label": "The workflow",
+      "width": 108.171875,
+      "height": 44
+    },
+    {
+      "label": "Explore",
+      "width": 66.59375,
+      "height": 44
+    }
+  ],
+  "brokenAnchors": [],
+  "favicon": [
+    "http://127.0.0.1:8782/favicon.ico",
+    "http://127.0.0.1:8782/favicon.png"
+  ],
+  "heroInset": 48,
+  "sectionPadding": [
+    "80px",
+    "80px",
+    "80px",
+    "80px"
+  ],
+  "definitionPadding": [
+    "14px",
+    "14px",
+    "14px",
+    "0px",
+    "0px",
+    "0px"
+  ]
+}
