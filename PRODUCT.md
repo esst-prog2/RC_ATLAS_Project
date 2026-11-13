@@ -59,4 +59,4 @@ The owner requires an accessible, responsive, professional, lightweight page for
 
 ## Open HW9 Decisions
 
-The owner selected Institutional Overview on 2026-11-13 and requested evaluation of the editorial evidence section and one or two genuine synthetic-data screenshots. Substantive critique revisions and publication still require separate owner approvals. Reserve space for a later video without an empty player; do not generate video in HW9.
+The owner selected Institutional Overview on 2026-11-13 and requested evaluation of the editorial evidence section and one or two genuine synthetic-data screenshots. The owner approved the four P2 revisions and P3 typography on 2026-11-13, accepted the disclosed sequential critique without retries, and authorized text evidence if safe synthetic screenshot capture cannot be verified. Final publication remains subject to separate approval. Reserve space for a later video without an empty player; do not generate video in HW9.
