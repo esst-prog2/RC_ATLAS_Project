@@ -1,0 +1,133 @@
+﻿--- BEGIN UNTRUSTED EXTERNAL CONTENT (source: http://127.0.0.1:8770/) ---
+- link "Skip to content":
+  - /url: "#main"
+- banner:
+  - link "RC Atlas":
+    - /url: "#main"
+  - navigation "Main navigation":
+    - link "Capabilities":
+      - /url: "#capabilities"
+    - link "The workflow":
+      - /url: "#workflow"
+    - link "Explore":
+      - /url: "#explore"
+- main:
+  - region "RC Atlas — From institutional data to coordinated action.":
+    - heading "RC Atlas — From institutional data to coordinated action." [level=1]:
+      - text: RC Atlas — From institutional data to
+      - emphasis: coordinated action.
+    - paragraph: Project work, monitoring, indicators, analytics, and reporting. A connected workspace for teams that need to understand both delivery and results.
+    - link "Explore on GitHub":
+      - /url: https://github.com/esst-prog2/RC_ATLAS_Project
+    - link "See the workflow":
+      - /url: "#workflow"
+    - paragraph: RC Atlas currently requires local setup. No public live demo is available.
+    - navigation "Explore the five capabilities":
+      - link "Project management Responsibility & delivery":
+        - /url: "#project-management"
+      - link "Monitoring Progress & records":
+        - /url: "#monitoring"
+      - link "Indicators Baselines & targets":
+        - /url: "#indicators"
+      - link "Analytics Methods & evidence":
+        - /url: "#analytics"
+      - link "Reporting Review & discussion":
+        - /url: "#reporting"
+  - region "One workspace. Five connected capabilities.":
+    - heading "One workspace. Five connected capabilities." [level=2]
+    - paragraph: For programme managers, field coordinators, and monitoring and evaluation teams in institutions and project organizations.
+    - paragraph: A completed-task count cannot explain the whole picture. Teams also need clear responsibilities, reporting records, and evidence they can interpret.
+    - article:
+      - heading "Project management" [level=3]
+      - paragraph: Organize project work, assign responsibility, set deadlines, and follow tasks through review.
+    - article:
+      - heading "Monitoring" [level=3]
+      - paragraph: Follow operational progress and reporting records. See what has been submitted and what still needs attention.
+    - article:
+      - heading "Indicators" [level=3]
+      - paragraph: Examine baselines, targets, and results. For configured indicators, inspect the selected method and reporting period.
+      - text: Analysis requires approved methods and suitable source data.
+    - article:
+      - heading "Analytics" [level=3]
+      - paragraph: Understand supported indicator calculations through explanations, source context, and data-quality checks.
+      - text: Checks apply to the selected indicator. Missing configuration and unsupported results are identified explicitly.
+    - article:
+      - heading "Reporting" [level=3]
+      - paragraph: Review recorded information and prepare report previews to support discussion and decisions.
+      - text: Final report exports with a preserved audit record remain future work.
+  - region "Accountability, one handoff at a time.":
+    - heading "Accountability, one handoff at a time." [level=2]
+    - paragraph: Follow one task from assignment to approval. Each handoff gives the next person a clear responsibility.
+    - list "Assignment-to-approval workflow":
+      - listitem:
+        - heading "Assign" [level=3]
+        - paragraph:
+          - strong: Programme manager
+          - text: Set responsibility and a deadline.
+      - listitem:
+        - heading "Work" [level=3]
+        - paragraph:
+          - strong: Field coordinator
+          - text: Start the task and update progress.
+      - listitem:
+        - heading "Submit" [level=3]
+        - paragraph:
+          - strong: Field coordinator
+          - text: Send completed work for review.
+      - listitem:
+        - heading "Validate" [level=3]
+        - paragraph:
+          - strong: Reviewer
+          - text: Examine the submission.
+      - listitem:
+        - heading "Approve" [level=3]
+        - paragraph:
+          - strong: Programme manager
+          - text: Confirm completion.
+    - paragraph: This illustration uses both validation and approval. Other configured task flows exist.
+  - region "Work you can trace. Evidence you can explain.":
+    - heading "Work you can trace. Evidence you can explain." [level=2]
+    - paragraph: Delivery checks and indicator measurements answer different questions. Keep both in view when discussing results.
+    - paragraph: Illustrative examples of supported behavior — not live project results or application screenshots.
+    - article:
+      - heading "Submitted is not yet approved." [level=3]
+      - paragraph: A coordinator submits a completed field activity. In the two-stage workflow, a reviewer validates it before the manager approves completion.
+      - term: Submission
+      - definition: The work is ready for review.
+      - term: Validation
+      - definition: The submission passes the review checkpoint.
+      - term: Approval
+      - definition: The final completion checkpoint is confirmed.
+      - paragraph: These states describe delivery. They do not, by themselves, demonstrate an institutional outcome.
+    - article:
+      - heading "A result needs its context." [level=3]
+      - paragraph: "For a method that measures change from a baseline to a final target, these illustrative inputs give 50% achievement:"
+      - term: Baseline
+      - definition: "20"
+      - term: Reported value
+      - definition: "60"
+      - term: Final target
+      - definition: "100"
+      - paragraph:
+        - text: Change toward the final target
+        - strong: (60 − 20) ÷ (100 − 20) × 100 = 50%
+      - paragraph: In RC Atlas, a supported calculation is tied to its configured method, source data, period, and version. This percentage is not task completion or proof of impact; another method can answer a different question.
+    - paragraph: Reporting brings recorded information and previews into the review conversation. Interpret each result alongside its method and limitations.
+  - region "Explore the work. Understand the approach.":
+    - heading "Explore the work. Understand the approach." [level=2]
+    - paragraph: RC Atlas is a locally run course project. Explore the public repository for its source, documented workflow, and setup instructions.
+    - link "Explore on GitHub":
+      - /url: https://github.com/esst-prog2/RC_ATLAS_Project
+    - complementary "Explore on your own computer.":
+      - heading "Explore on your own computer." [level=3]
+      - paragraph: Start with the documented workflow. To try the application, follow the technical setup guide and initialize a fresh local workspace.
+      - paragraph: This promotional page does not run the application. There is no public live demo.
+      - link "Read the local setup guide":
+        - /url: https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md
+    - strong: Current scope
+    - paragraph: Indicator analysis requires configured methods and suitable data. Some wider analytical and reporting functions remain under development. RC Atlas is not offered here as a production-hosted or commercial service.
+- contentinfo:
+  - text: RC Atlas · From institutional data to coordinated action.
+  - link "View the project on GitHub":
+    - /url: https://github.com/esst-prog2/RC_ATLAS_Project
+--- END UNTRUSTED EXTERNAL CONTENT ---

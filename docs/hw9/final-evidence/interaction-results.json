@@ -1,0 +1,14 @@
+{
+  "method": "Actual gstack Chromium interactions; recorded from command results",
+  "skip_link_tab_focus": true,
+  "skip_enter_main_focus": true,
+  "next_tab_primary_cta": true,
+  "following_tab_workflow_link": true,
+  "workflow_enter_hash": "#workflow",
+  "capabilities_click_hash": "#capabilities",
+  "explore_click_hash": "#explore",
+  "repository_browser_load": "success",
+  "setup_guide_http_status": 200,
+  "no_application_runtime_started": true,
+  "preview": "http://127.0.0.1:8770/"
+}

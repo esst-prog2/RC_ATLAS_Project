@@ -1,0 +1,389 @@
+{
+  "url": "http://127.0.0.1:8770/",
+  "title": "RC Atlas — From institutional data to coordinated action.",
+  "siteId": {
+    "found": true,
+    "text": "",
+    "tag": "IMG",
+    "alt": null
+  },
+  "pageName": {
+    "found": true,
+    "text": "RC Atlas — From institutional data to coordinated action."
+  },
+  "navigation": [
+    {
+      "text": "Main navigation",
+      "links": 3
+    },
+    {
+      "text": "Explore the five capabilities",
+      "links": 5
+    }
+  ],
+  "youAreHere": [],
+  "search": {
+    "found": false
+  },
+  "breadcrumbs": {
+    "found": false,
+    "items": []
+  },
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "RC Atlas — From institutional data to coordinated action.",
+      "size": "87.84px"
+    },
+    {
+      "tag": "H2",
+      "text": "One workspace.Five connected capabilities.",
+      "size": "50px"
+    },
+    {
+      "tag": "H3",
+      "text": "Project management",
+      "size": "30px"
+    },
+    {
+      "tag": "H3",
+      "text": "Monitoring",
+      "size": "30px"
+    },
+    {
+      "tag": "H3",
+      "text": "Indicators",
+      "size": "30px"
+    },
+    {
+      "tag": "H3",
+      "text": "Analytics",
+      "size": "30px"
+    },
+    {
+      "tag": "H3",
+      "text": "Reporting",
+      "size": "30px"
+    },
+    {
+      "tag": "H2",
+      "text": "Accountability,one handoff at a time.",
+      "size": "50px"
+    },
+    {
+      "tag": "H3",
+      "text": "Assign",
+      "size": "24px"
+    },
+    {
+      "tag": "H3",
+      "text": "Work",
+      "size": "24px"
+    },
+    {
+      "tag": "H3",
+      "text": "Submit",
+      "size": "24px"
+    },
+    {
+      "tag": "H3",
+      "text": "Validate",
+      "size": "24px"
+    },
+    {
+      "tag": "H3",
+      "text": "Approve",
+      "size": "24px"
+    },
+    {
+      "tag": "H2",
+      "text": "Work you can trace.Evidence you can explain.",
+      "size": "50px"
+    },
+    {
+      "tag": "H3",
+      "text": "Submitted is not yet approved.",
+      "size": "30px"
+    },
+    {
+      "tag": "H3",
+      "text": "A result needs its context.",
+      "size": "30px"
+    },
+    {
+      "tag": "H2",
+      "text": "Explore the work.Understand the approach.",
+      "size": "50px"
+    },
+    {
+      "tag": "H3",
+      "text": "Explore on your own computer.",
+      "size": "25px"
+    }
+  ],
+  "interactive": [
+    {
+      "tag": "A",
+      "text": "Skip to content",
+      "type": null,
+      "role": null,
+      "w": 145,
+      "h": 53,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "RC Atlas",
+      "type": null,
+      "role": null,
+      "w": 137,
+      "h": 44,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "Capabilities",
+      "type": null,
+      "role": null,
+      "w": 94,
+      "h": 44,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "The workflow",
+      "type": null,
+      "role": null,
+      "w": 108,
+      "h": 44,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "Explore",
+      "type": null,
+      "role": null,
+      "w": 67,
+      "h": 44,
+      "visible": true
+    },
+    {
+      "tag": "MAIN",
+      "text": "RC Atlas — From institutional data to coordinated ",
+      "type": null,
+      "role": null,
+      "w": 1440,
+      "h": 3711,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "Explore on GitHub",
+      "type": null,
+      "role": null,
+      "w": 214,
+      "h": 50,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "See the workflow",
+      "type": null,
+      "role": null,
+      "w": 125,
+      "h": 44,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "Project managementResponsibility & delivery",
+      "type": null,
+      "role": null,
+      "w": 240,
+      "h": 118,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "MonitoringProgress & records",
+      "type": null,
+      "role": null,
+      "w": 240,
+      "h": 118,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "IndicatorsBaselines & targets",
+      "type": null,
+      "role": null,
+      "w": 240,
+      "h": 118,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "AnalyticsMethods & evidence",
+      "type": null,
+      "role": null,
+      "w": 240,
+      "h": 118,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "ReportingReview & discussion",
+      "type": null,
+      "role": null,
+      "w": 240,
+      "h": 118,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "Explore on GitHub",
+      "type": null,
+      "role": null,
+      "w": 214,
+      "h": 50,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "Read the local setup guide",
+      "type": null,
+      "role": null,
+      "w": 192,
+      "h": 44,
+      "visible": true
+    },
+    {
+      "tag": "A",
+      "text": "View the project on GitHub",
+      "type": null,
+      "role": null,
+      "w": 168,
+      "h": 44,
+      "visible": true
+    }
+  ],
+  "textBlocks": [
+    {
+      "text": "Project work, monitoring, indicators, analytics, and reporting. A connected workspace for teams that need to understand both delivery and results.",
+      "wordCount": 20
+    },
+    {
+      "text": "RC Atlas currently requires local setup.No public live demo is available.",
+      "wordCount": 11
+    },
+    {
+      "text": "For programme managers, field coordinators, and monitoring and evaluation teams in institutions and project organizations.\n            A completed-task count cannot explain the whole picture. Teams al",
+      "wordCount": 35
+    },
+    {
+      "text": "For programme managers, field coordinators, and monitoring and evaluation teams in institutions and project organizations.",
+      "wordCount": 15
+    },
+    {
+      "text": "A completed-task count cannot explain the whole picture. Teams also need clear responsibilities, reporting records, and evidence they can interpret.",
+      "wordCount": 20
+    },
+    {
+      "text": "Organize project work, assign responsibility, set deadlines, and follow tasks through review.",
+      "wordCount": 12
+    },
+    {
+      "text": "Follow operational progress and reporting records. See what has been submitted and what still needs attention.",
+      "wordCount": 16
+    },
+    {
+      "text": "Examine baselines, targets, and results. For configured indicators, inspect the selected method and reporting period.",
+      "wordCount": 15
+    },
+    {
+      "text": "Understand supported indicator calculations through explanations, source context, and data-quality checks.",
+      "wordCount": 11
+    },
+    {
+      "text": "Review recorded information and prepare report previews to support discussion and decisions.",
+      "wordCount": 12
+    },
+    {
+      "text": "Follow one task from assignment to approval. Each handoff gives the next person a clear responsibility.",
+      "wordCount": 16
+    },
+    {
+      "text": "Programme managerSet responsibility and a deadline.",
+      "wordCount": 6
+    },
+    {
+      "text": "Field coordinatorStart the task and update progress.",
+      "wordCount": 7
+    },
+    {
+      "text": "Field coordinatorSend completed work for review.",
+      "wordCount": 6
+    },
+    {
+      "text": "ReviewerExamine the submission.",
+      "wordCount": 3
+    },
+    {
+      "text": "Programme managerConfirm completion.",
+      "wordCount": 3
+    },
+    {
+      "text": "This illustration uses both validation and approval. Other configured task flows exist.",
+      "wordCount": 12
+    },
+    {
+      "text": "Delivery checks and indicator measurements answer different questions. Keep both in view when discussing results.",
+      "wordCount": 15
+    },
+    {
+      "text": "Illustrative examples of supported behavior — not live project results or application screenshots.",
+      "wordCount": 13
+    },
+    {
+      "text": "A coordinator submits a completed field activity. In the two-stage workflow, a reviewer validates it before the manager approves completion.",
+      "wordCount": 20
+    },
+    {
+      "text": "These states describe delivery. They do not, by themselves, demonstrate an institutional outcome.",
+      "wordCount": 13
+    },
+    {
+      "text": "For a method that measures change from a baseline to a final target, these illustrative inputs give 50% achievement:",
+      "wordCount": 19
+    },
+    {
+      "text": "Change toward the final target(60 − 20) ÷ (100 − 20) × 100 = 50%",
+      "wordCount": 15
+    },
+    {
+      "text": "In RC Atlas, a supported calculation is tied to its configured method, source data, period, and version. This percentage is not task completion or proof of impact; another method can answer a differen",
+      "wordCount": 34
+    },
+    {
+      "text": "Reporting brings recorded information and previews into the review conversation. Interpret each result alongside its method and limitations.",
+      "wordCount": 18
+    },
+    {
+      "text": "RC Atlas is a locally run course project. Explore the public repository for its source, documented workflow, and setup instructions.",
+      "wordCount": 20
+    },
+    {
+      "text": "Start with the documented workflow. To try the application, follow the technical setup guide and initialize a fresh local workspace.",
+      "wordCount": 20
+    },
+    {
+      "text": "This promotional page does not run the application. There is no public live demo.",
+      "wordCount": 14
+    },
+    {
+      "text": "Indicator analysis requires configured methods and suitable data. Some wider analytical and reporting functions remain under development. RC Atlas is not offered here as a production-hosted or commerc",
+      "wordCount": 29
+    }
+  ],
+  "totalWords": 567
+}

@@ -1,0 +1,54 @@
+{
+  "status": "VALIDATED_LOCAL_CANDIDATE_NOT_PUBLISHED",
+  "source_commit": "6930cd6b88fcde6bd0a71e427282518810413b54",
+  "public_git_tree": "0565ed4592454e1c7f4261921cd0cd455985ec24",
+  "proposed_repository": "esst-prog2/RC_ATLAS_Project",
+  "proposed_source": {
+    "method": "Deploy from a branch",
+    "branch": "gh-pages",
+    "folder": "/"
+  },
+  "expected_url_not_yet_verified": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "files": [
+    {
+      "source": "promo/.nojekyll",
+      "published_path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/favicon.svg",
+      "published_path": "favicon.svg",
+      "bytes": 162,
+      "sha256": "93e3b8c434f9903ff68685b3a8c842404a698f5ef3f25e30e1fa94aa4c375191",
+      "git_blob": "db11345bc9ca0521e4e98e9d453556acdf22d2b4",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/index.html",
+      "published_path": "index.html",
+      "bytes": 10400,
+      "sha256": "19f1f8d4220d1b405546e2344cc3628f7f32b7be88d606f3085c4a31ddb782e0",
+      "git_blob": "df4d9fe4b30f4499b52aaca80981d4b5a6c52e7b",
+      "local_http_status": 200
+    },
+    {
+      "source": "promo/styles.css",
+      "published_path": "styles.css",
+      "bytes": 10125,
+      "sha256": "52407af1c0d469913b52b1027d2cd8666518c8f14ab8b58d3faffcfad4335e17",
+      "git_blob": "568250ce17b54e9524abab9bfef84abe5bd59670",
+      "local_http_status": 200
+    }
+  ],
+  "total_bytes": 20687,
+  "external_links": [
+    "https://github.com/esst-prog2/RC_ATLAS_Project",
+    "https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md"
+  ],
+  "product_screenshots": [],
+  "fallback": "Owner-approved labelled text explanations; no verified runtime screenshot available.",
+  "review": "Four files manually reviewed. No credentials, personal/institutional data, application code, technical reports, or preview artifacts in this tree."
+}
