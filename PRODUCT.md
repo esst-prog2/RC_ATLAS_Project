@@ -60,3 +60,7 @@ The owner requires an accessible, responsive, professional, lightweight page for
 ## Open HW9 Decisions
 
 The owner selected Institutional Overview on 2026-11-13 and requested evaluation of the editorial evidence section and one or two genuine synthetic-data screenshots. The owner approved the four P2 revisions and P3 typography on 2026-11-13, accepted the disclosed sequential critique without retries, and authorized text evidence if safe synthetic screenshot capture cannot be verified. Final publication remains subject to separate approval. Reserve space for a later video without an empty player; do not generate video in HW9.
+
+## HW9 delivery status — 2026-11-13
+
+The owner approved the final candidate and exact four-file publication. The promotional page is now publicly verified at https://esst-prog2.github.io/RC_ATLAS_Project/, served from gh-pages root. This supersedes earlier pending-publication status. Screenshot text fallback and sequential-critique disclosure remain as approved; no backend deployment or HW10 work occurred. See docs/hw9/PUBLICATION_REPORT.md.

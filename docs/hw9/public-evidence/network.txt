@@ -1,0 +1,3 @@
+﻿GET https://esst-prog2.github.io/RC_ATLAS_Project/ → 200 (2968ms, 3777B)
+GET https://esst-prog2.github.io/RC_ATLAS_Project/styles.css → 200 (174ms, 2908B)
+GET https://esst-prog2.github.io/RC_ATLAS_Project/favicon.svg → 200 (171ms, 313B)

@@ -1,0 +1,253 @@
+﻿{
+  "viewport": [
+    1440,
+    1000
+  ],
+  "title": "RC Atlas — From institutional data to coordinated action.",
+  "main": 1,
+  "landmarks": [
+    {
+      "tag": "HEADER",
+      "label": null
+    },
+    {
+      "tag": "NAV",
+      "label": "Main navigation"
+    },
+    {
+      "tag": "MAIN",
+      "label": null
+    },
+    {
+      "tag": "NAV",
+      "label": "Explore the five capabilities"
+    },
+    {
+      "tag": "FOOTER",
+      "label": null
+    }
+  ],
+  "headings": [
+    {
+      "level": "H1",
+      "text": "RC Atlas — From institutional data to coordinated action."
+    },
+    {
+      "level": "H2",
+      "text": "One workspace.Five connected capabilities."
+    },
+    {
+      "level": "H3",
+      "text": "Project management"
+    },
+    {
+      "level": "H3",
+      "text": "Monitoring"
+    },
+    {
+      "level": "H3",
+      "text": "Indicators"
+    },
+    {
+      "level": "H3",
+      "text": "Analytics"
+    },
+    {
+      "level": "H3",
+      "text": "Reporting"
+    },
+    {
+      "level": "H2",
+      "text": "Accountability,one handoff at a time."
+    },
+    {
+      "level": "H3",
+      "text": "Assign"
+    },
+    {
+      "level": "H3",
+      "text": "Work"
+    },
+    {
+      "level": "H3",
+      "text": "Submit"
+    },
+    {
+      "level": "H3",
+      "text": "Validate"
+    },
+    {
+      "level": "H3",
+      "text": "Approve"
+    },
+    {
+      "level": "H2",
+      "text": "Work you can trace.Evidence you can explain."
+    },
+    {
+      "level": "H3",
+      "text": "Submitted is not yet approved."
+    },
+    {
+      "level": "H3",
+      "text": "A result needs its context."
+    },
+    {
+      "level": "H2",
+      "text": "Explore the work.Understand the approach."
+    },
+    {
+      "level": "H3",
+      "text": "Explore on your own computer."
+    }
+  ],
+  "targets": [
+    {
+      "label": "RC Atlas",
+      "x": 120,
+      "y": 22,
+      "width": 136.9375,
+      "height": 44
+    },
+    {
+      "label": "Capabilities",
+      "x": 1026.828125,
+      "y": 22,
+      "width": 94.40625,
+      "height": 44
+    },
+    {
+      "label": "The workflow",
+      "x": 1133.234375,
+      "y": 22,
+      "width": 108.171875,
+      "height": 44
+    },
+    {
+      "label": "Explore",
+      "x": 1253.40625,
+      "y": 22,
+      "width": 66.59375,
+      "height": 44
+    },
+    {
+      "label": "Explore on GitHub",
+      "x": 803.625,
+      "y": 363.71875,
+      "width": 213.5,
+      "height": 50
+    },
+    {
+      "label": "See the workflow",
+      "x": 1037.125,
+      "y": 366.71875,
+      "width": 125.375,
+      "height": 44
+    },
+    {
+      "label": "Project managementResponsibility & delivery",
+      "x": 120,
+      "y": 524.71875,
+      "width": 240,
+      "height": 117.59375
+    },
+    {
+      "label": "MonitoringProgress & records",
+      "x": 360,
+      "y": 524.71875,
+      "width": 240,
+      "height": 117.59375
+    },
+    {
+      "label": "IndicatorsBaselines & targets",
+      "x": 600,
+      "y": 524.71875,
+      "width": 240,
+      "height": 117.59375
+    },
+    {
+      "label": "AnalyticsMethods & evidence",
+      "x": 840,
+      "y": 524.71875,
+      "width": 240,
+      "height": 117.59375
+    },
+    {
+      "label": "ReportingReview & discussion",
+      "x": 1080,
+      "y": 524.71875,
+      "width": 240,
+      "height": 117.59375
+    },
+    {
+      "label": "Explore on GitHub",
+      "x": 120,
+      "y": 3526.84375,
+      "width": 213.5,
+      "height": 50
+    },
+    {
+      "label": "Read the local setup guide",
+      "x": 815.890625,
+      "y": 3495.578125,
+      "width": 192.46875,
+      "height": 44
+    },
+    {
+      "label": "View the project on GitHub",
+      "x": 1151.953125,
+      "y": 3823.015625,
+      "width": 168.046875,
+      "height": 44
+    }
+  ],
+  "insets": [
+    {
+      "section": "hero",
+      "left": 120,
+      "paddingTop": "48px"
+    },
+    {
+      "section": "capabilities",
+      "left": 120,
+      "paddingTop": "80px"
+    },
+    {
+      "section": "workflow",
+      "left": 120,
+      "paddingTop": "80px"
+    },
+    {
+      "section": "evidence",
+      "left": 120,
+      "paddingTop": "80px"
+    },
+    {
+      "section": "explore",
+      "left": 120,
+      "paddingTop": "80px"
+    }
+  ],
+  "reviewRows": [
+    {
+      "paddingBottom": "14px"
+    },
+    {
+      "paddingBottom": "14px"
+    },
+    {
+      "paddingBottom": "14px"
+    }
+  ],
+  "images": [
+    {
+      "src": "favicon.svg",
+      "alt": "",
+      "loaded": true
+    }
+  ],
+  "scripts": 0,
+  "videoPlayers": 0,
+  "evidenceFollowsWorkflow": true,
+  "availabilityNearCTA": "RC Atlas currently requires local setup.No public live demo is available."
+}
