@@ -1,0 +1,45 @@
+{
+  "source_sha256": "479835cff8a75eabb4e8f62e1d51093a374e775344628a77db1b2d2c10459cc7",
+  "source_dimensions": [
+    1536,
+    1024
+  ],
+  "method": "Pillow Lanczos proportional resizing; transparent square padding for icons; original alpha retained; no crop, redraw, recolour or SVG conversion",
+  "files": [
+    {
+      "file": "favicon.ico",
+      "bytes": 3170,
+      "sha256": "97f582f8733901e3382f07e1a8783212239e989648eca3d3f379decc22878e8d"
+    },
+    {
+      "file": "icon-192.png",
+      "bytes": 12133,
+      "sha256": "f3f44f22e1ae2ab5d1a6990a107089e35bb4644eea83f3d34cd1fcc4097f27c6"
+    },
+    {
+      "file": "icon-384.png",
+      "bytes": 38699,
+      "sha256": "71e9c715277ae39959279710d19dc0a9a229c5ea3f1f453f92596b516083eeb9"
+    },
+    {
+      "file": "icon-48.png",
+      "bytes": 1635,
+      "sha256": "ca7bfdf88a6bf1c973382c4975bb93b71ed9d2d4a26706e47094fa494686f18d"
+    },
+    {
+      "file": "icon-96.png",
+      "bytes": 4266,
+      "sha256": "f2c11a06c238fce4bc1283e4b81125a6575371ddc4074bcd986d0ec4fcf53283"
+    },
+    {
+      "file": "logo.png",
+      "bytes": 11925,
+      "sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee"
+    },
+    {
+      "file": "logo@2x.png",
+      "bytes": 37965,
+      "sha256": "58104a244d99a417403466e9c242660b110ef052ad3a909be6604a05cc7fb7c7"
+    }
+  ]
+}
