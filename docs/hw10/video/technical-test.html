@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1920,height=1080"><script src="assets/gsap.min.js"></script><style>
+*{box-sizing:border-box}body{margin:0;width:1920px;height:1080px;background:#123b5d;color:white;font-family:'Segoe UI',sans-serif}#test{position:relative;width:1920px;height:1080px;display:flex;align-items:center;justify-content:center;gap:30px}img{width:420px;height:280px;object-fit:contain}h1{font-size:96px}#rule{position:absolute;left:420px;top:780px;width:1000px;height:8px;background:#9ddbd5;transform-origin:left}
+</style></head><body><div id="test" data-composition-id="test" data-start="0" data-duration="2" data-fps="30" data-width="1920" data-height="1080"><img src="assets/rc-atlas-approved.png" alt="RC Atlas logo"><h1>RC Atlas</h1><div id="rule"></div></div><script>
+const tl=gsap.timeline({paused:true});tl.fromTo('#rule',{scaleX:0},{scaleX:1,duration:1.8,ease:'power2.out'},0);window.__timelines=window.__timelines||{};window.__timelines.test=tl;
+</script></body></html>

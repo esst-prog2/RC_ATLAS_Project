@@ -1,0 +1,10 @@
+{
+  "name": "rc-atlas-hw10-video",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "hyperframes": "0.9.42",
+    "gsap": "3.14.2"
+  }
+}
