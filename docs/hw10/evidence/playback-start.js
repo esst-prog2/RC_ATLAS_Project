@@ -1,0 +1,1 @@
+(async()=>{const v=document.querySelector('video');if(v.readyState<2)await new Promise((resolve,reject)=>{v.addEventListener('loadeddata',resolve,{once:true});v.addEventListener('error',reject,{once:true});});v.currentTime=0;await v.play();return {duration:v.duration,width:v.videoWidth,height:v.videoHeight,playing:!v.paused,source:v.currentSrc,error:v.error};})()

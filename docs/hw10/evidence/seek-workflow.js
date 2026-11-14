@@ -1,0 +1,1 @@
+(async()=>{const v=document.querySelector('video');v.pause();const seek=new Promise(resolve=>v.addEventListener('seeked',resolve,{once:true}));v.currentTime=15.5;await seek;return {time:v.currentTime,width:v.clientWidth,height:v.clientHeight,overflow:document.documentElement.scrollWidth>innerWidth,error:v.error};})()

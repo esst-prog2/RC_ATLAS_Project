@@ -1,0 +1,1 @@
+(()=>{const v=document.querySelector('video');return {duration:v.duration,currentTime:v.currentTime,ended:v.ended,paused:v.paused,readyState:v.readyState,error:v.error,quality:{total:v.getVideoPlaybackQuality().totalVideoFrames,dropped:v.getVideoPlaybackQuality().droppedVideoFrames},overflow:document.documentElement.scrollWidth>innerWidth};})()

@@ -1,0 +1,38 @@
+{
+  "file": "rc-atlas-promo.mp4",
+  "sha256": "970f44467d8a7f58e483869c275b186aee5f0c92adcea4f0f4c4ad84ce963bd0",
+  "bytes": 1056009,
+  "duration_seconds": 30,
+  "frames": 900,
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "codec": "h264",
+  "pixel_format": "yuv420p",
+  "audio_streams": 0,
+  "decode_errors": 0,
+  "faststart": true,
+  "mp4_boxes": [
+    {
+      "type": "ftyp",
+      "offset": 0,
+      "size": 32
+    },
+    {
+      "type": "moov",
+      "offset": 32,
+      "size": 4777
+    },
+    {
+      "type": "free",
+      "offset": 4809,
+      "size": 8
+    },
+    {
+      "type": "mdat",
+      "offset": 4817,
+      "size": 1051192
+    }
+  ],
+  "logo_sha256": "479835cff8a75eabb4e8f62e1d51093a374e775344628a77db1b2d2c10459cc7"
+}

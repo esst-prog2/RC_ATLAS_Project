@@ -1,0 +1,8 @@
+{
+  "duration": 30,
+  "width": 1920,
+  "height": 1080,
+  "playing": true,
+  "source": "http://127.0.0.1:8786/rc-atlas-promo.mp4",
+  "error": null
+}
