@@ -22,6 +22,9 @@ def scene(name, duration, markup, css='', moves=''):
     folder.mkdir(exist_ok=True)
     # Keep the opening title fully visible from frame zero.
     fade = '1' if name == 'intro' else '0'
+    text_fades = '' if name == 'intro' else f"tl.fromTo('#{name}-content',{{opacity:0}},{{opacity:1,duration:0.25,ease:'power1.out'}},0.2);"
+    if name != 'closing':
+        text_fades += f"tl.to('#{name}-content',{{opacity:0,duration:0.15,ease:'power1.in'}},{duration-0.5});"
     body = f'''<template>
 <style>{COMMON}{css}</style>
 <div id="root" data-composition-id="{name}" data-width="1920" data-height="1080" data-duration="{duration}">
@@ -34,6 +37,7 @@ const tl=gsap.timeline({{paused:true}});
 tl.fromTo('#{name}-surface',{{opacity:{fade}}},{{opacity:1,duration:0.35,ease:'power1.out'}},0);
 tl.fromTo('#{name}-content',{{y:12}},{{y:0,duration:0.4,ease:'power2.out'}},0);
 {moves}
+{text_fades}
 window.__timelines=window.__timelines||{{}};window.__timelines['{name}']=tl;
 </script></template>'''
     (folder / f'{name}.html').write_text(body, encoding='utf-8')
@@ -57,7 +61,7 @@ def main():
     stages = ''.join(f'<div class="stage" id="stage-{i}"><div class="node" id="node-{i}" aria-hidden="true"></div><div class="stage-label">{label}</div></div>' for i,label in enumerate(labels))
     scene('workflow', 7.35,
           '<h2>One example<br>workflow.</h2><div class="flow"><div class="connector" aria-hidden="true"></div>' + stages + '</div><p class="support">Clear responsibility at each handoff.</p>',
-          'h2{font-size:92px}.flow{position:relative;display:grid;grid-template-columns:repeat(4,1fr);column-gap:24px;margin-top:112px}.connector{position:absolute;left:18px;right:340px;top:18px;height:4px;background:#52758c}.node{width:40px;height:40px;border:3px solid #9ddbd5;border-radius:50%;background:#123b5d;position:relative}.stage-label{font-size:62px;font-weight:600;margin-top:35px;letter-spacing:-.02em}.support{font-size:62px;color:#c8e8e6;margin-top:125px}',
+          'h2{font-size:92px}.flow{position:relative;display:grid;grid-template-columns:repeat(4,1fr);column-gap:24px;margin-top:112px}.connector{position:absolute;left:18px;right:340px;top:18px;height:4px;background:#52758c}.node{width:40px;height:40px;border:3px solid #9ddbd5;border-radius:50%;background:#123b5d;position:relative}.stage-label{font-size:74px;font-weight:600;margin-top:35px;letter-spacing:-.035em}.support{font-size:62px;color:#c8e8e6;margin-top:125px}',
           '\n'.join(f"tl.fromTo('#node-{i}',{{backgroundColor:'#123b5d'}},{{backgroundColor:'#9ddbd5',duration:0.35}},{0.6+i*1.3});" for i in range(4)))
 
     scene('evidence', 6.35,
@@ -67,7 +71,7 @@ def main():
 
     scene('closing', 5,
           f'<div class="brand">{logo.replace("5.35", "5").replace("<img ", "<img id=\"closing-logo\" ")}<span>RC Atlas</span></div><h2>Explore RC Atlas<br><span class="accent">on GitHub.</span></h2><p class="url">github.com/esst-prog2/<br>RC_ATLAS_Project</p><p class="availability">Local setup required · No public live demo</p>',
-          '.content{padding-top:75px}.brand{height:220px}.brand img{width:330px;height:220px}h2{font-size:92px;margin-top:34px}.url{font-size:60px;line-height:1.18;margin-top:45px;color:#c8e8e6}.availability{font-size:56px;margin-top:54px}',
+          '.content{padding-top:75px}.brand{height:220px}.brand img{width:330px;height:220px}h2{font-size:92px;margin-top:34px}.url{font-size:72px;line-height:1.18;margin-top:45px;color:#c8e8e6}.availability{font-size:72px;line-height:1.18;margin-top:30px}',
           "tl.fromTo('.url',{opacity:0.3},{opacity:1,duration:0.35},0.3);")
 
     hosts = ''.join(f'<div id="{name}" data-composition-id="{name}" data-composition-src="compositions/{name}.html" data-start="{start}" data-duration="{duration}" data-width="1920" data-height="1080" data-track-index="{i}" data-track-kind="graphics" data-layout-allow-overlap style="position:absolute;inset:0;z-index:{i}"></div>\n' for i,(name,start,duration) in enumerate([('intro',0,5.35),('capabilities',5,7.35),('workflow',12,7.35),('evidence',19,6.35),('closing',25,5)]))

@@ -1,0 +1,588 @@
+{
+  "ok": true,
+  "outputDir": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review",
+  "frames": [
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-01-at-0.3s.png",
+      "time": 0.3,
+      "role": "beat",
+      "label": "intro"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-02-at-2.675s.png",
+      "time": 2.675,
+      "role": "beat",
+      "label": "intro mid"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-03-at-5.3s.png",
+      "time": 5.3,
+      "role": "beat",
+      "label": "capabilities"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-04-at-8.675s.png",
+      "time": 8.675,
+      "role": "beat",
+      "label": "capabilities mid"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-05-at-12.3s.png",
+      "time": 12.3,
+      "role": "beat",
+      "label": "workflow"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-06-at-15.675s.png",
+      "time": 15.675,
+      "role": "beat",
+      "label": "workflow mid"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-07-at-19.3s.png",
+      "time": 19.3,
+      "role": "beat",
+      "label": "evidence"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-08-at-22.175s.png",
+      "time": 22.175,
+      "role": "beat",
+      "label": "evidence mid"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-09-at-25.3s.png",
+      "time": 25.3,
+      "role": "beat",
+      "label": "closing"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-10-at-27.5s.png",
+      "time": 27.5,
+      "role": "beat",
+      "label": "closing mid"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-1-at-4.8s.png",
+      "time": 4.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-2-at-4.9s.png",
+      "time": 4.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-3-at-5s.png",
+      "time": 5,
+      "role": "seam",
+      "label": "cut intro -> capabilities"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-4-at-5.1s.png",
+      "time": 5.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-5-at-5.2s.png",
+      "time": 5.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-1-at-5.15s.png",
+      "time": 5.15,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-2-at-5.25s.png",
+      "time": 5.25,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-3-at-5.35s.png",
+      "time": 5.35,
+      "role": "seam",
+      "label": "cut capabilities -> workflow"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-4-at-5.45s.png",
+      "time": 5.45,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-5-at-5.55s.png",
+      "time": 5.55,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-1-at-11.8s.png",
+      "time": 11.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-2-at-11.9s.png",
+      "time": 11.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-3-at-12s.png",
+      "time": 12,
+      "role": "seam",
+      "label": "cut capabilities -> workflow"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-4-at-12.1s.png",
+      "time": 12.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-5-at-12.2s.png",
+      "time": 12.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-1-at-12.15s.png",
+      "time": 12.15,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-2-at-12.25s.png",
+      "time": 12.25,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-3-at-12.35s.png",
+      "time": 12.35,
+      "role": "seam",
+      "label": "cut workflow -> evidence"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-4-at-12.45s.png",
+      "time": 12.45,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-5-at-12.55s.png",
+      "time": 12.55,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-1-at-18.8s.png",
+      "time": 18.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-2-at-18.9s.png",
+      "time": 18.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-3-at-19s.png",
+      "time": 19,
+      "role": "seam",
+      "label": "cut workflow -> evidence"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-4-at-19.1s.png",
+      "time": 19.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-5-at-19.2s.png",
+      "time": 19.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-1-at-19.15s.png",
+      "time": 19.15,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-2-at-19.25s.png",
+      "time": 19.25,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-3-at-19.35s.png",
+      "time": 19.35,
+      "role": "seam",
+      "label": "cut evidence -> closing"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-4-at-19.45s.png",
+      "time": 19.45,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-5-at-19.55s.png",
+      "time": 19.55,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-1-at-24.8s.png",
+      "time": 24.8,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-2-at-24.9s.png",
+      "time": 24.9,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-3-at-25s.png",
+      "time": 25,
+      "role": "seam",
+      "label": "cut evidence -> closing"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-4-at-25.1s.png",
+      "time": 25.1,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-5-at-25.2s.png",
+      "time": 25.2,
+      "role": "seam",
+      "label": "+0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-1-at-25.15s.png",
+      "time": 25.15,
+      "role": "seam",
+      "label": "cut -0.2"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-2-at-25.25s.png",
+      "time": 25.25,
+      "role": "seam",
+      "label": "-0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-3-at-25.35s.png",
+      "time": 25.35,
+      "role": "seam",
+      "label": "cut closing -> end"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-4-at-25.45s.png",
+      "time": 25.45,
+      "role": "seam",
+      "label": "+0.1"
+    },
+    {
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-5-at-25.55s.png",
+      "time": 25.55,
+      "role": "seam",
+      "label": "+0.2"
+    }
+  ],
+  "contactSheets": [
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-beats.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-01.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-02.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-03.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-04.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-05.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-06.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-07.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-08.jpg",
+    "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-phone.jpg"
+  ],
+  "review": {
+    "window": [
+      0,
+      30
+    ],
+    "scenes": [
+      {
+        "id": "intro",
+        "start": 0,
+        "end": 5.35
+      },
+      {
+        "id": "capabilities",
+        "start": 5,
+        "end": 12.35
+      },
+      {
+        "id": "workflow",
+        "start": 12,
+        "end": 19.35
+      },
+      {
+        "id": "evidence",
+        "start": 19,
+        "end": 25.35
+      },
+      {
+        "id": "closing",
+        "start": 25,
+        "end": 30
+      }
+    ],
+    "beats": [
+      {
+        "time": 0.3,
+        "label": "intro",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-01-at-0.3s.png"
+      },
+      {
+        "time": 2.675,
+        "label": "intro mid",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-02-at-2.675s.png"
+      },
+      {
+        "time": 5.3,
+        "label": "capabilities",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-03-at-5.3s.png"
+      },
+      {
+        "time": 8.675,
+        "label": "capabilities mid",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-04-at-8.675s.png"
+      },
+      {
+        "time": 12.3,
+        "label": "workflow",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-05-at-12.3s.png"
+      },
+      {
+        "time": 15.675,
+        "label": "workflow mid",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-06-at-15.675s.png"
+      },
+      {
+        "time": 19.3,
+        "label": "evidence",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-07-at-19.3s.png"
+      },
+      {
+        "time": 22.175,
+        "label": "evidence mid",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-08-at-22.175s.png"
+      },
+      {
+        "time": 25.3,
+        "label": "closing",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-09-at-25.3s.png"
+      },
+      {
+        "time": 27.5,
+        "label": "closing mid",
+        "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\beat-10-at-27.5s.png"
+      }
+    ],
+    "seams": [
+      {
+        "time": 5,
+        "from": "intro",
+        "to": "capabilities",
+        "times": [
+          4.8,
+          4.9,
+          5,
+          5.1,
+          5.2
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-1-at-4.8s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-2-at-4.9s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-3-at-5s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-4-at-5.1s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-01-5-at-5.2s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-01.jpg"
+      },
+      {
+        "time": 5.35,
+        "from": "capabilities",
+        "to": "workflow",
+        "times": [
+          5.15,
+          5.25,
+          5.35,
+          5.45,
+          5.55
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-1-at-5.15s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-2-at-5.25s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-3-at-5.35s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-4-at-5.45s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-02-5-at-5.55s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-02.jpg"
+      },
+      {
+        "time": 12,
+        "from": "capabilities",
+        "to": "workflow",
+        "times": [
+          11.8,
+          11.9,
+          12,
+          12.1,
+          12.2
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-1-at-11.8s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-2-at-11.9s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-3-at-12s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-4-at-12.1s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-03-5-at-12.2s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-03.jpg"
+      },
+      {
+        "time": 12.35,
+        "from": "workflow",
+        "to": "evidence",
+        "times": [
+          12.15,
+          12.25,
+          12.35,
+          12.45,
+          12.55
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-1-at-12.15s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-2-at-12.25s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-3-at-12.35s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-4-at-12.45s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-04-5-at-12.55s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-04.jpg"
+      },
+      {
+        "time": 19,
+        "from": "workflow",
+        "to": "evidence",
+        "times": [
+          18.8,
+          18.9,
+          19,
+          19.1,
+          19.2
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-1-at-18.8s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-2-at-18.9s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-3-at-19s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-4-at-19.1s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-05-5-at-19.2s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-05.jpg"
+      },
+      {
+        "time": 19.35,
+        "from": "evidence",
+        "to": "closing",
+        "times": [
+          19.15,
+          19.25,
+          19.35,
+          19.45,
+          19.55
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-1-at-19.15s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-2-at-19.25s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-3-at-19.35s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-4-at-19.45s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-06-5-at-19.55s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-06.jpg"
+      },
+      {
+        "time": 25,
+        "from": "evidence",
+        "to": "closing",
+        "times": [
+          24.8,
+          24.9,
+          25,
+          25.1,
+          25.2
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-1-at-24.8s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-2-at-24.9s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-3-at-25s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-4-at-25.1s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-07-5-at-25.2s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-07.jpg"
+      },
+      {
+        "time": 25.35,
+        "from": "closing",
+        "to": null,
+        "times": [
+          25.15,
+          25.25,
+          25.35,
+          25.45,
+          25.55
+        ],
+        "paths": [
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-1-at-25.15s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-2-at-25.25s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-3-at-25.35s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-4-at-25.45s.png",
+          "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\seam-08-5-at-25.55s.png"
+        ],
+        "sheet": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-08.jpg"
+      }
+    ],
+    "sheets": {
+      "beats": [
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-beats.jpg"
+      ],
+      "seams": [
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-01.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-02.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-03.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-04.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-05.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-06.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-07.jpg",
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-seam-08.jpg"
+      ],
+      "phone": [
+        "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\evidence\\final-review\\review-phone.jpg"
+      ]
+    },
+    "notes": []
+  },
+  "_meta": {
+    "version": "0.9.42",
+    "updateAvailable": false
+  }
+}

@@ -1,0 +1,13 @@
+# Preserve intermediate local evidence without adding it to the deliverable commit.
+composition-check.json
+composition-check-final.json
+composition-check-refined.json
+preview.json
+snapshot-result.json
+review-snapshot-result.json
+review-refined.json
+scene-review/
+review-sheets/
+review-refined/
+*.log
+final-review/*.png

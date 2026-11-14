@@ -21,5 +21,6 @@ const tl=gsap.timeline({paused:true});
 tl.fromTo('#intro-surface',{opacity:1},{opacity:1,duration:0.35,ease:'power1.out'},0);
 tl.fromTo('#intro-content',{y:12},{y:0,duration:0.4,ease:'power2.out'},0);
 
+tl.to('#intro-content',{opacity:0,duration:0.15,ease:'power1.in'},4.85);
 window.__timelines=window.__timelines||{};window.__timelines['intro']=tl;
 </script></template>
