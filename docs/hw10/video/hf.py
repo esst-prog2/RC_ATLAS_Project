@@ -11,7 +11,7 @@ TOOLS = ROOT.parent / 'tooling'
 def environment():
     env = os.environ.copy()
     for key, relative in {
-        'TEMP': '.tmp', 'TMP': '.tmp', 'TMPDIR': '.tmp',
+        'TEMP': '../tooling/temp', 'TMP': '../tooling/temp', 'TMPDIR': '../tooling/temp',
         'npm_config_cache': '.cache/npm', 'XDG_CACHE_HOME': '.cache',
         'PUPPETEER_CACHE_DIR': '.cache/puppeteer',
         'HYPERFRAMES_CONFIG_DIR': '.cache/hyperframes-config',

@@ -1,0 +1,25 @@
+<template>
+<style>
+@font-face{font-family:RCAtlasUI;src:local('Segoe UI');font-weight:400}
+@font-face{font-family:RCAtlasUI;src:local('Segoe UI Semibold');font-weight:600 800}
+*{box-sizing:border-box}#root{position:absolute;inset:0;font-family:RCAtlasUI;color:#fff}
+.surface{position:absolute;inset:0;background:#123b5d;overflow:hidden}
+.content{position:absolute;inset:0;padding:110px 192px}
+h1,h2,p{margin:0}h1,h2{font-weight:600;letter-spacing:-.025em;line-height:1.12}
+.brand{display:flex;align-items:center;gap:26px;height:242px;font-size:78px;font-weight:600}
+.brand img{display:block;width:360px;height:240px;object-fit:contain;flex-shrink:0}
+.brand span{margin-left:-20px}.accent{color:#9ddbd5}
+.footer-line{position:absolute;left:192px;right:192px;bottom:128px;height:3px;background:#52758c}
+h1{font-size:104px;margin-top:76px;line-height:1.14}</style>
+<div id="root" data-composition-id="intro" data-width="1920" data-height="1080" data-duration="5.35">
+ <div id="intro-clip" class="clip" data-start="0" data-duration="5.35" data-track-index="0" data-hold="Reading hold for concise approved copy" data-layout-allow-overlap>
+  <div class="surface" id="intro-surface"><div class="content" id="intro-content"><div class="brand"><img id="intro-logo" src="assets/rc-atlas-approved.png" width="360" height="240" alt="Official RC Atlas logo" data-var-src="logo" data-start="0" data-duration="5.35"><span>RC Atlas</span></div><h1 id="intro-title">From institutional data<br>to <span class="accent">coordinated action.</span></h1><div class="footer-line" aria-hidden="true"></div></div></div>
+ </div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('#intro-surface',{opacity:1},{opacity:1,duration:0.35,ease:'power1.out'},0);
+tl.fromTo('#intro-content',{y:12},{y:0,duration:0.4,ease:'power2.out'},0);
+
+window.__timelines=window.__timelines||{};window.__timelines['intro']=tl;
+</script></template>
