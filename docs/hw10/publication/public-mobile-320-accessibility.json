@@ -1,0 +1,29 @@
+{
+  "page": "/RC_ATLAS_Project/",
+  "viewport": [
+    320,
+    844
+  ],
+  "documentWidth": 320,
+  "h1Count": 1,
+  "headline": "RC Atlas — From institutional data to coordinated action.",
+  "brokenAnchors": [],
+  "overflow": [],
+  "lowContrast": [],
+  "remoteResources": [],
+  "links": [
+    "#main",
+    "#capabilities",
+    "#workflow",
+    "#explore",
+    "https://github.com/esst-prog2/RC_ATLAS_Project",
+    "#video",
+    "#project-management",
+    "#monitoring",
+    "#indicators",
+    "#analytics",
+    "#reporting",
+    "rc-atlas-promo.mp4",
+    "https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md"
+  ]
+}

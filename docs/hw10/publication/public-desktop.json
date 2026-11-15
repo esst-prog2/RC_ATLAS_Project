@@ -1,0 +1,31 @@
+{
+  "url": "https://esst-prog2.github.io/RC_ATLAS_Project/#video",
+  "width": 1440,
+  "overflow": false,
+  "video": {
+    "controls": true,
+    "autoplay": false,
+    "loop": false,
+    "playsinline": true,
+    "preload": "none",
+    "width": 960,
+    "height": 540,
+    "label": "RC Atlas in 30 seconds.",
+    "posterLoaded": true,
+    "source": "https://esst-prog2.github.io/RC_ATLAS_Project/rc-atlas-promo.mp4"
+  },
+  "transcript": {
+    "summaryHeight": 51.1875,
+    "open": true,
+    "items": 5
+  },
+  "brokenAnchors": [],
+  "capabilities": [
+    "Project management",
+    "Monitoring",
+    "Indicators",
+    "Analytics",
+    "Reporting"
+  ],
+  "logoLoaded": true
+}

@@ -1,0 +1,79 @@
+{
+  "run": {
+    "id": 43692941823,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "4be004c0adebb4fdb8de0b440d3e360a33cd9810",
+    "url": "https://github.com/esst-prog2/RC_ATLAS_Project/actions/runs/43692941823",
+    "head_branch": "gh-pages"
+  },
+  "tree": {
+    "sha": "b10c88e4b1ca927a5fc54361ddbdb4577a516d33",
+    "truncated": false,
+    "files": [
+      {
+        "path": ".nojekyll",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "favicon.ico",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "451c609a4e5c59003d9a96bb85caee392db0fe94",
+        "size": 3170
+      },
+      {
+        "path": "favicon.png",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "2d062f80c98a348616fe99248a6aa86eec541889",
+        "size": 1635
+      },
+      {
+        "path": "index.html",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "280199306853c5edea7c317bc77ecbbcdaf8fb4b",
+        "size": 12674
+      },
+      {
+        "path": "logo.png",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "8a647c31442dd729e761a4a8098c134fa399b6ac",
+        "size": 11925
+      },
+      {
+        "path": "logo@2x.png",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "e754cf3bcd6b777072885439ef3be98923b53588",
+        "size": 37965
+      },
+      {
+        "path": "rc-atlas-promo.mp4",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "5f04d5cad6f1a3c64724a9f0bf2bd8f9660f5d99",
+        "size": 1056009
+      },
+      {
+        "path": "styles.css",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "99324bf846c598d7568cfdd0ef32286a8b350f95",
+        "size": 11294
+      },
+      {
+        "path": "video-poster.jpg",
+        "type": "blob",
+        "mode": "100644",
+        "sha": "720155b0d0d6c0f3152b21d6e69756b8fbb55cfe",
+        "size": 46826
+      }
+    ]
+  }
+}

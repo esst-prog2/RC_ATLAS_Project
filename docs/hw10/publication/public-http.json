@@ -1,0 +1,88 @@
+{
+  "site": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "files": [
+    {
+      "path": ".nojekyll",
+      "status": 200,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": "application/octet-stream"
+    },
+    {
+      "path": "favicon.ico",
+      "status": 200,
+      "bytes": 3170,
+      "sha256": "97f582f8733901e3382f07e1a8783212239e989648eca3d3f379decc22878e8d",
+      "content_type": "image/vnd.microsoft.icon"
+    },
+    {
+      "path": "favicon.png",
+      "status": 200,
+      "bytes": 1635,
+      "sha256": "ca7bfdf88a6bf1c973382c4975bb93b71ed9d2d4a26706e47094fa494686f18d",
+      "content_type": "image/png"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "bytes": 12674,
+      "sha256": "1b9dc227f264bfa4848653820901dbccf8d63bf482f95a29b4eeab5bfd3d51fd",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "logo.png",
+      "status": 200,
+      "bytes": 11925,
+      "sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee",
+      "content_type": "image/png"
+    },
+    {
+      "path": "logo@2x.png",
+      "status": 200,
+      "bytes": 37965,
+      "sha256": "58104a244d99a417403466e9c242660b110ef052ad3a909be6604a05cc7fb7c7",
+      "content_type": "image/png"
+    },
+    {
+      "path": "rc-atlas-promo.mp4",
+      "status": 200,
+      "bytes": 1056009,
+      "sha256": "970f44467d8a7f58e483869c275b186aee5f0c92adcea4f0f4c4ad84ce963bd0",
+      "content_type": "video/mp4"
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "bytes": 11294,
+      "sha256": "6baa04d5af5b40e16216ebbde0917133b4d9bed7e2e4798cfeb947e4ed0465e7",
+      "content_type": "text/css; charset=utf-8"
+    },
+    {
+      "path": "video-poster.jpg",
+      "status": 200,
+      "bytes": 46826,
+      "sha256": "373ca0433a02f94ce373a25f50ba386a4847dc549aa002bb9ec921144c9a9483",
+      "content_type": "image/jpeg"
+    }
+  ],
+  "range_status": 206,
+  "range_bytes_verified": 32,
+  "external_links": [
+    {
+      "url": "https://github.com/esst-prog2/RC_ATLAS_Project",
+      "status": 200
+    },
+    {
+      "url": "https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md",
+      "status": 200
+    }
+  ],
+  "excluded_paths": {
+    "PROCESS.md": 404,
+    "Site.txt": 404,
+    "docs/ui-01/PHASE_1_REPORT.md": 404,
+    "docs/hw10/video/index.html": 404,
+    "logitrack_studio.html": 404
+  },
+  "result": "PASS"
+}

@@ -1,0 +1,1 @@
+(()=>{document.querySelector('video').focus();return {focused:document.activeElement.tagName};})()

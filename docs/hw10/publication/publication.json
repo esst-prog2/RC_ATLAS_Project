@@ -14,8 +14,9 @@
     "styles.css",
     "video-poster.jpg"
   ],
-  "status": "deployment_success_public_checks_pending",
+  "status": "deployment_success_public_verification_passed",
   "pushed_hw10_commit": "7051245f1797bd1aefee4dc81b9a38e3726d0b58",
   "run_id": 43692941823,
-  "run_url": "https://github.com/esst-prog2/RC_ATLAS_Project/actions/runs/43692941823"
+  "run_url": "https://github.com/esst-prog2/RC_ATLAS_Project/actions/runs/43692941823",
+  "public_url": "https://esst-prog2.github.io/RC_ATLAS_Project/"
 }

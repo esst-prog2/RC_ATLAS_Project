@@ -1,0 +1,1 @@
+(()=>({url:location.href,title:document.title,active:document.activeElement.id||document.activeElement.tagName}))()

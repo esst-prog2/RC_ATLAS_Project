@@ -1,0 +1,13 @@
+{
+  "duration": 30,
+  "currentTime": 30,
+  "ended": true,
+  "paused": true,
+  "readyState": 4,
+  "error": null,
+  "quality": {
+    "total": 904,
+    "dropped": 0
+  },
+  "overflow": false
+}
