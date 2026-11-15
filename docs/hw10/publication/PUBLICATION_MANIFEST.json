@@ -20,8 +20,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 12839,
-      "sha256": "3419bcc52041b982b9a86e7c427d4edf109223733df6d7b9d193b1a9c5319158",
+      "bytes": 12674,
+      "sha256": "1b9dc227f264bfa4848653820901dbccf8d63bf482f95a29b4eeab5bfd3d51fd",
       "git_blob": "280199306853c5edea7c317bc77ecbbcdaf8fb4b"
     },
     {
@@ -44,8 +44,8 @@
     },
     {
       "path": "styles.css",
-      "bytes": 11471,
-      "sha256": "98f15b02a3b2f0469bf71faac856b3c4d69da0de969251a04b0a93965c024b00",
+      "bytes": 11294,
+      "sha256": "6baa04d5af5b40e16216ebbde0917133b4d9bed7e2e4798cfeb947e4ed0465e7",
       "git_blob": "99324bf846c598d7568cfdd0ef32286a8b350f95"
     },
     {
@@ -55,7 +55,7 @@
       "git_blob": "720155b0d0d6c0f3152b21d6e69756b8fbb55cfe"
     }
   ],
-  "total_bytes": 1181840,
+  "total_bytes": 1181498,
   "external_links": [
     {
       "url": "https://github.com/esst-prog2/RC_ATLAS_Project",
@@ -74,5 +74,6 @@
   "existing_markup_and_brand_assets_preserved": true,
   "poster": "Frame at 2.5 seconds from approved MP4, scaled to 1280x720; no generated imagery",
   "transcript": "Inline complete text and visual sequence description; video has no audio",
-  "validated_source_commit": "0a4a1946e44a856531f9349398379fa634c7eaa0"
+  "validated_source_commit": "6bdfa380b9e84e6dbf9e02153eb4d4deab97da2b",
+  "public_git_tree": "b10c88e4b1ca927a5fc54361ddbdb4577a516d33"
 }
