@@ -1,0 +1,1 @@
+(()=>{document.querySelector('.video-transcript summary').focus();return {focused:document.activeElement.tagName,open:document.querySelector('.video-transcript').open};})()

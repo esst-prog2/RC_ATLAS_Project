@@ -160,3 +160,18 @@ footer a { display: inline-flex; align-items: center; min-height: 44px; padding-
   .scope { grid-template-columns: 1fr; gap: 12px; margin-top: 35px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+
+/* HW10: native, user-controlled video and equivalent accessible text. */
+.video-feature { margin-top: 48px; padding-top: 40px; border-top: 1px solid #6d9aa9; }
+.video-feature h3 { font-size: clamp(26px, 3vw, 36px); }
+.promo-film { max-width: 960px; margin: 26px 0 0; }
+.promo-film video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--navy); color: white; border-radius: 5px; }
+.promo-film figcaption { margin-top: 16px; max-width: 75ch; color: #365864; font-size: 15px; }
+.video-transcript { max-width: 960px; margin-top: 24px; border-block: 1px solid #6d9aa9; }
+.video-transcript summary { min-height: 48px; padding: 12px 6px; cursor: pointer; font-size: 17px; font-weight: 600; }
+.transcript-content { padding: 12px 6px 20px; font-size: 16px; color: #365864; }
+.transcript-content ol { margin: 0; padding-left: 24px; }
+.transcript-content li { margin-bottom: 16px; }
+.transcript-content li:last-child { margin-bottom: 0; }
+.transcript-content a { overflow-wrap: anywhere; }
+.video-download { margin-top: 12px; }

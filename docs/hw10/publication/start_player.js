@@ -1,0 +1,1 @@
+(async()=>{const v=document.querySelector('video');await v.play();v.currentTime=0;return {duration:v.duration,width:v.videoWidth,height:v.videoHeight,playing:!v.paused,error:v.error};})()

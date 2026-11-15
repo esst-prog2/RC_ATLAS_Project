@@ -8,7 +8,7 @@
   <title>RC Atlas — From institutional data to coordinated action.</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" href="favicon.png" type="image/png" sizes="48x48">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=hw10">
 </head>
 <body class="site">
   <a class="skip" href="#main">Skip to content</a>
@@ -32,6 +32,7 @@
             <div class="actions">
               <a class="button light" href="https://github.com/esst-prog2/RC_ATLAS_Project">Explore on GitHub <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
               <a class="text-link" href="#workflow">See the workflow</a>
+              <a class="text-link" href="#video">Watch the 30-second introduction</a>
             </div>
             <p class="availability">RC Atlas currently requires local setup.<br>No public live demo is available.</p>
           </div>
@@ -79,7 +80,30 @@
           <li class="step"><span class="order" aria-hidden="true">05</span><h3>Approve</h3><p><strong>Programme manager</strong><br>Confirm completion.</p></li>
         </ol>
         <p class="note">This illustration uses both validation and approval. Other configured task flows exist.</p>
-        <!-- A future accessible promotional video can follow this workflow in its own figure, with captions and a transcript. No player is rendered until media exists. -->
+        <div class="video-feature" id="video">
+          <h3 id="video-title">RC Atlas in 30 seconds.</h3>
+          <figure class="promo-film">
+            <video controls playsinline preload="none" poster="video-poster.jpg" width="1920" height="1080" aria-labelledby="video-title" aria-describedby="video-description">
+              <source src="rc-atlas-promo.mp4" type="video/mp4">
+              Your browser does not support this video. <a href="rc-atlas-promo.mp4">Download the MP4</a> or read the transcript below.
+            </video>
+            <figcaption id="video-description">A silent, text-led introduction to RC Atlas. Use the player controls to play, pause, seek, or view full screen. The complete transcript is below.</figcaption>
+          </figure>
+          <details class="video-transcript" id="video-transcript">
+            <summary>Read the video transcript</summary>
+            <div class="transcript-content">
+              <p>The official RC Atlas logo opens and closes this navy-and-teal introduction. All information is presented on screen; there is no audio.</p>
+              <ol>
+                <li><strong>0&ndash;5 seconds:</strong> RC Atlas &mdash; From institutional data to coordinated action.</li>
+                <li><strong>5&ndash;12 seconds:</strong> For institutional project teams. Project management, monitoring, indicators, analytics and reporting.</li>
+                <li><strong>12&ndash;19 seconds:</strong> One example workflow. Assignment &rarr; Submission &rarr; Validation &rarr; Approval. Four connected stages are highlighted in order. Clear responsibility at each handoff.</li>
+                <li><strong>19&ndash;25 seconds:</strong> From completed work to measurable results. Reliable indicators require evidence and clear methods.</li>
+                <li><strong>25&ndash;30 seconds:</strong> Explore RC Atlas on GitHub: <a href="https://github.com/esst-prog2/RC_ATLAS_Project">github.com/esst-prog2/RC_ATLAS_Project</a>. Local setup required. No public live demo.</li>
+              </ol>
+            </div>
+          </details>
+          <a class="text-link video-download" href="rc-atlas-promo.mp4" download>Download the video (MP4, 1.1 MB)</a>
+        </div>
       </div>
     </section>
 

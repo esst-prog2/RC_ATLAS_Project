@@ -1,0 +1,1 @@
+(()=>{const v=document.querySelector('video'),s=getComputedStyle(v);return {color:s.color,background:s.backgroundColor,cssLoaded:[...document.styleSheets].flatMap(s=>[...s.cssRules].map(r=>r.cssText)).filter(s=>s.startsWith('.promo-film video'))};})()
