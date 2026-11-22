@@ -1,0 +1,180 @@
+{
+  "mode": "record4",
+  "source": "Unmodified committed RC Atlas application served by Uvicorn",
+  "synthetic_only": true,
+  "events": [
+    {
+      "role": "field_coordinator",
+      "path": "/v1/demo/tasks/task_proj_resilience_review_buzi_field_report/update",
+      "status": 200,
+      "task": {
+        "id": "task_proj_resilience_review_buzi_field_report",
+        "status": "in_progress",
+        "review_stage": "execution",
+        "progress_pct": 25
+      }
+    },
+    {
+      "label": "started",
+      "task_id": "task_proj_resilience_review_buzi_field_report",
+      "status": "in_progress",
+      "review_stage": "execution",
+      "progress_pct": 25,
+      "evidence_count": 0,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "role": "field_coordinator",
+      "path": "/v1/demo/tasks/task_proj_resilience_review_buzi_field_report/update",
+      "status": 200,
+      "task": {
+        "id": "task_proj_resilience_review_buzi_field_report",
+        "status": "pending_validation",
+        "review_stage": "validation",
+        "progress_pct": 100
+      }
+    },
+    {
+      "label": "submitted",
+      "task_id": "task_proj_resilience_review_buzi_field_report",
+      "status": "pending_validation",
+      "review_stage": "validation",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "role": "meal_officer",
+      "path": "/v1/demo/tasks/task_proj_resilience_review_buzi_field_report/validate",
+      "status": 200,
+      "task": {
+        "id": "task_proj_resilience_review_buzi_field_report",
+        "status": "pending_validation",
+        "review_stage": "approval",
+        "progress_pct": 100
+      }
+    },
+    {
+      "label": "validated",
+      "task_id": "task_proj_resilience_review_buzi_field_report",
+      "status": "pending_validation",
+      "review_stage": "approval",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "role": "programme_manager",
+      "path": "/v1/demo/tasks/task_proj_resilience_review_buzi_field_report/validate",
+      "status": 200,
+      "task": {
+        "id": "task_proj_resilience_review_buzi_field_report",
+        "status": "completed",
+        "review_stage": "complete",
+        "progress_pct": 100
+      }
+    },
+    {
+      "label": "approved",
+      "task_id": "task_proj_resilience_review_buzi_field_report",
+      "status": "completed",
+      "review_stage": "complete",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "label": "persisted_after_relogin",
+      "task_id": "task_proj_resilience_review_buzi_field_report",
+      "status": "completed",
+      "review_stage": "complete",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    }
+  ],
+  "errors": [],
+  "clips": [
+    {
+      "role": "field_coordinator",
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\authentic-demo\\raw\\page@1e3daa7cdf08848ed3b59d7a666a92c5.webm",
+      "marks": [
+        {
+          "name": "start_before",
+          "seconds": 7.1
+        },
+        {
+          "name": "start_click",
+          "seconds": 9.245
+        },
+        {
+          "name": "started",
+          "seconds": 14.024
+        },
+        {
+          "name": "submit_before",
+          "seconds": 16.355
+        },
+        {
+          "name": "complete_click",
+          "seconds": 18.695
+        },
+        {
+          "name": "submitted",
+          "seconds": 21.419
+        }
+      ],
+      "clock_origin": "wall clock after page creation; verify against decoded video frames"
+    },
+    {
+      "role": "meal_officer",
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\authentic-demo\\raw\\page@fd06d8d6809abc0bb34a268096d86e36.webm",
+      "marks": [
+        {
+          "name": "validate_before",
+          "seconds": 6.916
+        },
+        {
+          "name": "validate_click",
+          "seconds": 9.184
+        },
+        {
+          "name": "validated",
+          "seconds": 11.972
+        }
+      ],
+      "clock_origin": "wall clock after page creation; verify against decoded video frames"
+    },
+    {
+      "role": "programme_manager",
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\authentic-demo\\raw\\page@abaf245d339b558aeab4599e58be2a52.webm",
+      "marks": [
+        {
+          "name": "approve_before",
+          "seconds": 7.247
+        },
+        {
+          "name": "approve_click",
+          "seconds": 8.847
+        },
+        {
+          "name": "approved",
+          "seconds": 11.933
+        },
+        {
+          "name": "completed_table",
+          "seconds": 15.899
+        }
+      ],
+      "clock_origin": "wall clock after page creation; verify against decoded video frames"
+    },
+    {
+      "role": "programme_manager",
+      "path": "D:\\MASTER SURVEY STATISTICS & DATA ANALYSIS\\ADVANCED PROGRAMING\\RC_Atlas_Project\\docs\\hw10\\authentic-demo\\raw\\page@3d5cd4a1b1b646bd1130ddbf5054c8e9.webm",
+      "marks": [],
+      "clock_origin": "wall clock after page creation; verify against decoded video frames"
+    }
+  ],
+  "task_id": "task_proj_resilience_review_buzi_field_report",
+  "status": "PASS"
+}

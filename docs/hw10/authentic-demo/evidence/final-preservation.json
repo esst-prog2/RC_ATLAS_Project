@@ -1,0 +1,24 @@
+{
+  "source_commit": "640bcb2827c0d328069a0bb52defa9e7fec9f92e",
+  "current_head": "640bcb2827c0d328069a0bb52defa9e7fec9f92e",
+  "branch": "hw10-promo-video",
+  "source_files": 205,
+  "source_mismatches": [],
+  "published_asset_count": 9,
+  "published_asset_mismatches": [],
+  "registered_worktrees": 7,
+  "worktree_registrations_and_heads_unchanged": true,
+  "tracked_changes": [
+    "PLANNING_LOG.md",
+    "PROCESS.md"
+  ],
+  "index_changes": [],
+  "existing_untracked_paths_present": {
+    ".impeccable": true,
+    "Site.txt": true,
+    "a_clean_professional_flat_logo_on_a_white_backgro.png": true
+  },
+  "status": "M PLANNING_LOG.md\n M PROCESS.md\n?? .impeccable/\n?? Site.txt\n?? a_clean_professional_flat_logo_on_a_white_backgro.png\n?? docs/hw10/authentic-demo/",
+  "no_git_writes_performed": true,
+  "verification": "PASS"
+}

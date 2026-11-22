@@ -1,0 +1,39 @@
+{
+  "console_errors": [],
+  "layouts": [
+    {
+      "viewport": 1440,
+      "document": 1440,
+      "video": 1232
+    },
+    {
+      "viewport": 390,
+      "document": 390,
+      "video": 358
+    },
+    {
+      "viewport": 320,
+      "document": 320,
+      "video": 288
+    }
+  ],
+  "checks": {
+    "seek": true,
+    "keyboard_play_pause": true,
+    "full_playback": {
+      "ended": true,
+      "time": 29.8,
+      "error": null
+    },
+    "range_206": true,
+    "server_allowlist": true
+  },
+  "media": {
+    "duration": 29.8,
+    "width": 1920,
+    "height": 1080,
+    "controls": true,
+    "playsInline": true
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "same_task_end_to_end": true,
+  "verified_before_recording": true,
+  "states": [
+    {
+      "label": "assigned",
+      "task_id": "task_proj_resilience_verify_buzi_workflow_preflight2",
+      "status": "not_started",
+      "review_stage": "execution",
+      "progress_pct": 0,
+      "evidence_count": 0,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "label": "started",
+      "task_id": "task_proj_resilience_verify_buzi_workflow_preflight2",
+      "status": "in_progress",
+      "review_stage": "execution",
+      "progress_pct": 25,
+      "evidence_count": 0,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "label": "submitted",
+      "task_id": "task_proj_resilience_verify_buzi_workflow_preflight2",
+      "status": "pending_validation",
+      "review_stage": "validation",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "label": "validated",
+      "task_id": "task_proj_resilience_verify_buzi_workflow_preflight2",
+      "status": "pending_validation",
+      "review_stage": "approval",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "label": "approved",
+      "task_id": "task_proj_resilience_verify_buzi_workflow_preflight2",
+      "status": "completed",
+      "review_stage": "complete",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    },
+    {
+      "label": "persisted_after_relogin",
+      "task_id": "task_proj_resilience_verify_buzi_workflow_preflight2",
+      "status": "completed",
+      "review_stage": "complete",
+      "progress_pct": 100,
+      "evidence_count": 1,
+      "assignee": "Aline Duarte (Demo)"
+    }
+  ],
+  "harness_notes": "Initial PM selector corrected from portfolio button attribute, then disambiguated to the Workplan button. Approval and fresh-login persistence completed on the same task. No application changes."
+}

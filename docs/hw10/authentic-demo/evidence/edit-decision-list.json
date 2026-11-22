@@ -1,0 +1,180 @@
+{
+  "duration": 29.8,
+  "fps": 30,
+  "source": "Actual Playwright Chromium screencasts; no application screen recreation",
+  "editing": "Cuts, static crops/zooms and footer captions; original source speed; no invented cursor",
+  "approved_logo_sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee",
+  "shots": [
+    {
+      "shot": 1,
+      "source": "raw/page@48aa891aa09d34c1fb8ea0b6ecfbe476.webm",
+      "source_sha256": "a0630caacdfccfcab03d2cf28c191ac95dfeb56fa9c9c350a614be24d3523274",
+      "source_start": 7.8,
+      "duration": 1.7,
+      "output_start": 0,
+      "crop": {
+        "width": 1920,
+        "height": 1080,
+        "x": 0,
+        "y": 0
+      },
+      "caption": "RC Atlas | Coordinating institutional work",
+      "supporting_text": "Real application footage. Isolated synthetic data.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 2,
+      "source": "raw/page@48aa891aa09d34c1fb8ea0b6ecfbe476.webm",
+      "source_sha256": "a0630caacdfccfcab03d2cf28c191ac95dfeb56fa9c9c350a614be24d3523274",
+      "source_start": 9.8,
+      "duration": 2.5,
+      "output_start": 1.7,
+      "crop": {
+        "width": 1664,
+        "height": 936,
+        "x": 256,
+        "y": 144
+      },
+      "caption": "Programme Manager | Assign work and reviewers",
+      "supporting_text": "A real task with a separate validator and approver.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 3,
+      "source": "raw/page@48aa891aa09d34c1fb8ea0b6ecfbe476.webm",
+      "source_sha256": "a0630caacdfccfcab03d2cf28c191ac95dfeb56fa9c9c350a614be24d3523274",
+      "source_start": 14.8,
+      "duration": 2.0,
+      "output_start": 4.2,
+      "crop": {
+        "width": 1920,
+        "height": 1080,
+        "x": 0,
+        "y": 0
+      },
+      "caption": "Assigned | Review Buzi field report",
+      "supporting_text": "Created in the operational workplan.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 4,
+      "source": "raw/page@1e3daa7cdf08848ed3b59d7a666a92c5.webm",
+      "source_sha256": "60d0fa13de485d32528c11a7231adba26f68cb0db57650775668b0d53c4a4cdd",
+      "source_start": 8.5,
+      "duration": 3.5,
+      "output_start": 6.2,
+      "crop": {
+        "width": 1088,
+        "height": 612,
+        "x": 64,
+        "y": 260
+      },
+      "caption": "Field Coordinator | Start the assigned task",
+      "supporting_text": "The application changes the status to In Progress.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 5,
+      "source": "raw/page@1e3daa7cdf08848ed3b59d7a666a92c5.webm",
+      "source_sha256": "60d0fa13de485d32528c11a7231adba26f68cb0db57650775668b0d53c4a4cdd",
+      "source_start": 14.7,
+      "duration": 5.0,
+      "output_start": 9.7,
+      "crop": {
+        "width": 1088,
+        "height": 612,
+        "x": 64,
+        "y": 260
+      },
+      "caption": "Field Coordinator | Submit for validation",
+      "supporting_text": "Progress, an evidence note and a comment are recorded.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 6,
+      "source": "raw/page@fd06d8d6809abc0bb34a268096d86e36.webm",
+      "source_sha256": "71a04c193833b91f26f84f1a44afcb5ffbc13197967b1d55c350d9ec51a18903",
+      "source_start": 8.2,
+      "duration": 4.5,
+      "output_start": 14.7,
+      "crop": {
+        "width": 1088,
+        "height": 612,
+        "x": 64,
+        "y": 260
+      },
+      "caption": "MEAL Officer | Validate the submitted work",
+      "supporting_text": "Validation routes this task to its designated approver.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 7,
+      "source": "raw/page@abaf245d339b558aeab4599e58be2a52.webm",
+      "source_sha256": "2c72ea7a91766f74487c7ef344212fae8cca02258f352075a8be5055a9485ce2",
+      "source_start": 7.3,
+      "duration": 1.3,
+      "output_start": 19.2,
+      "crop": {
+        "width": 640,
+        "height": 360,
+        "x": 1280,
+        "y": 0
+      },
+      "caption": "Programme Manager | Review pending approval",
+      "supporting_text": "Validation and approval are separate workflow steps.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 8,
+      "source": "raw/page@abaf245d339b558aeab4599e58be2a52.webm",
+      "source_sha256": "2c72ea7a91766f74487c7ef344212fae8cca02258f352075a8be5055a9485ce2",
+      "source_start": 10.3,
+      "duration": 1.7,
+      "output_start": 20.5,
+      "crop": {
+        "width": 640,
+        "height": 360,
+        "x": 1280,
+        "y": 500
+      },
+      "caption": "Programme Manager | Approve the task",
+      "supporting_text": "The real application records the approval.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 9,
+      "source": "raw/page@abaf245d339b558aeab4599e58be2a52.webm",
+      "source_sha256": "2c72ea7a91766f74487c7ef344212fae8cca02258f352075a8be5055a9485ce2",
+      "source_start": 12.0,
+      "duration": 3.0,
+      "output_start": 22.2,
+      "crop": {
+        "width": 640,
+        "height": 360,
+        "x": 1280,
+        "y": 0
+      },
+      "caption": "Completed | Evidence note retained",
+      "supporting_text": "Completion is recorded after validation and approval.",
+      "source_speed": 1.0
+    },
+    {
+      "shot": 10,
+      "source": "raw/page@abaf245d339b558aeab4599e58be2a52.webm",
+      "source_sha256": "2c72ea7a91766f74487c7ef344212fae8cca02258f352075a8be5055a9485ce2",
+      "source_start": 16.2,
+      "duration": 4.6,
+      "output_start": 25.2,
+      "crop": {
+        "width": 1920,
+        "height": 1080,
+        "x": 0,
+        "y": 0
+      },
+      "caption": "RC Atlas | Completed work, visible in the workplan",
+      "supporting_text": "Task completion does not establish indicator outcomes.",
+      "source_speed": 1.0
+    }
+  ],
+  "output_sha256": "cc8dbe3276a7c4ca8dc580e683b0a85852a99342f95327cb4b85a67452efc574"
+}

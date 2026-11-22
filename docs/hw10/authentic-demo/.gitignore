@@ -1,0 +1,4 @@
+.runtime/
+raw/
+output/segments/
+__pycache__/
