@@ -1,6 +1,6 @@
 # HW10 — authentic RC Atlas application recording
 
-Completed locally on 22 November 2026. **Approved by the Product Owner on 22 November 2026; replacement publication authorized.** UI-01 remains paused.
+Completed locally on 22 November 2026. **Approved by the Product Owner and published on 22 November 2026.** UI-01 remains paused.
 
 ## Deliverable
 
@@ -74,3 +74,7 @@ Evidence: `evidence/final-media.json`, `evidence/review-browser-validation.json`
 ## Publication approval ? 22 November 2026
 
 The owner visually reviewed and approved this exact 29.8-second film and authorized replacing the existing public promotional video. Publication and verification are recorded separately under `publication/`; the local-delivery history above is retained. UI-01 remains paused.
+
+## Publication completed ? 22 November 2026
+
+The approved exact MP4 is now live at https://esst-prog2.github.io/RC_ATLAS_Project/#video. GitHub Pages run 45037722255 succeeded for cb18155c7e4239ff636f711ff9da42376f02c990. Public byte hashes, complete playback, seeking, keyboard controls and desktop/mobile checks passed. See [publication/PUBLICATION_REPORT.md](publication/PUBLICATION_REPORT.md). Earlier local-only statements above describe the pre-approval delivery checkpoint. UI-01 remains paused.

@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "main": "9093a3cb01b92a83d690e596ff95f0d4a5988053",
+  "other_branches_unchanged": {
+    "refs/heads/feature/ui-01-consolidation": "5d487f8ff2fff3a864bc5405a90d2555ee3b5218",
+    "refs/heads/hw4-spike": "5719990cf6f8d12d24b0e5616f69a3e77ed6c687",
+    "refs/heads/hw5-usable": "7cf185fbbc84267099cfab6d016547ea750b3672",
+    "refs/heads/hw6-review": "02d6e966f40e7fe15a90e6fd0dc14e75e5e913af",
+    "refs/heads/hw9-promo-page": "07f80e3f450009b28823d6e1f0295fd214c26e11",
+    "refs/heads/main": "9093a3cb01b92a83d690e596ff95f0d4a5988053",
+    "refs/heads/qa-system-audit": "dd9f0f3d55b2f7cfbae6878a719c4527073d2c52",
+    "refs/heads/remediation/institutional-security": "a739b46940089a44a3585157ad09df982165bd42",
+    "refs/heads/remediation/wave-1-security-integrity": "2ec64f7b100c317daed4061efe46b896a38e2888",
+    "refs/heads/remediation/wave-2-analytical-consumers": "8113299e5bfa1c310015f6b30fd2680abca2538d",
+    "refs/heads/remediation/wave-2-methodological-core": "fadf7de6781c7fb96e3978e7b3b5aac5f195af26"
+  },
+  "seven_worktrees_preserved": true,
+  "other_worktree_heads_unchanged": true,
+  "application_diff": [],
+  "copied_source_hashes_unchanged": 205,
+  "original_untracked_paths_present": {
+    ".impeccable": true,
+    "Site.txt": true,
+    "a_clean_professional_flat_logo_on_a_white_backgro.png": true
+  },
+  "source_head": "ed8bb392edf6238b5bc4b9f78b7bb33aa22d2747",
+  "pages_head": "cb18155c7e4239ff636f711ff9da42376f02c990",
+  "index_empty": true,
+  "verification_stage": "After deployment, before the final documentation commit"
+}

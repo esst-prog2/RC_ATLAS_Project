@@ -15,5 +15,8 @@
     "video-poster.jpg"
   ],
   "source": "gh-pages /(root)",
-  "status": "prepared; not yet pushed"
+  "status": "published and publicly verified",
+  "deployment_run": 45037722255,
+  "deployment_conclusion": "success",
+  "public_url": "https://esst-prog2.github.io/RC_ATLAS_Project/#video"
 }

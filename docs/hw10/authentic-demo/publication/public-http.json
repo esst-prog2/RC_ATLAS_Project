@@ -1,0 +1,120 @@
+{
+  "status": "PASS",
+  "files": [
+    {
+      "path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "favicon.ico",
+      "bytes": 3170,
+      "sha256": "97f582f8733901e3382f07e1a8783212239e989648eca3d3f379decc22878e8d"
+    },
+    {
+      "path": "favicon.png",
+      "bytes": 1635,
+      "sha256": "ca7bfdf88a6bf1c973382c4975bb93b71ed9d2d4a26706e47094fa494686f18d"
+    },
+    {
+      "path": "index.html",
+      "bytes": 13675,
+      "sha256": "5fd2049b8040074117220dfd59133785294b3c9dc1c5bbc392551aa7c43a06e7"
+    },
+    {
+      "path": "logo.png",
+      "bytes": 11925,
+      "sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee"
+    },
+    {
+      "path": "logo@2x.png",
+      "bytes": 37965,
+      "sha256": "58104a244d99a417403466e9c242660b110ef052ad3a909be6604a05cc7fb7c7"
+    },
+    {
+      "path": "rc-atlas-promo.mp4",
+      "bytes": 3594834,
+      "sha256": "cc8dbe3276a7c4ca8dc580e683b0a85852a99342f95327cb4b85a67452efc574"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 11294,
+      "sha256": "6baa04d5af5b40e16216ebbde0917133b4d9bed7e2e4798cfeb947e4ed0465e7"
+    },
+    {
+      "path": "video-poster.jpg",
+      "bytes": 261479,
+      "sha256": "82a19d5ceba3b19012b9d21c01fdf2bd70a39410c6b3f5f679feb53aaa262263"
+    }
+  ],
+  "video_sha256": "cc8dbe3276a7c4ca8dc580e683b0a85852a99342f95327cb4b85a67452efc574",
+  "old_video_hash": "970f44467d8a7f58e483869c275b186aee5f0c92adcea4f0f4c4ad84ce963bd0",
+  "only_three_static_files_changed": true,
+  "other_markup_and_six_assets_unchanged": true,
+  "pages_source": "gh-pages / (root)",
+  "public_url": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "http": [
+    {
+      "path": "/",
+      "status": 200,
+      "sha256": "5fd2049b8040074117220dfd59133785294b3c9dc1c5bbc392551aa7c43a06e7"
+    },
+    {
+      "path": ".nojekyll",
+      "status": 200,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "favicon.ico",
+      "status": 200,
+      "sha256": "97f582f8733901e3382f07e1a8783212239e989648eca3d3f379decc22878e8d"
+    },
+    {
+      "path": "favicon.png",
+      "status": 200,
+      "sha256": "ca7bfdf88a6bf1c973382c4975bb93b71ed9d2d4a26706e47094fa494686f18d"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "5fd2049b8040074117220dfd59133785294b3c9dc1c5bbc392551aa7c43a06e7"
+    },
+    {
+      "path": "logo.png",
+      "status": 200,
+      "sha256": "5f01ae7a53df9d72f18b9d096babf473be39c240f625105cb5ab6d33c19644ee"
+    },
+    {
+      "path": "logo@2x.png",
+      "status": 200,
+      "sha256": "58104a244d99a417403466e9c242660b110ef052ad3a909be6604a05cc7fb7c7"
+    },
+    {
+      "path": "rc-atlas-promo.mp4",
+      "status": 200,
+      "sha256": "cc8dbe3276a7c4ca8dc580e683b0a85852a99342f95327cb4b85a67452efc574"
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "sha256": "6baa04d5af5b40e16216ebbde0917133b4d9bed7e2e4798cfeb947e4ed0465e7"
+    },
+    {
+      "path": "video-poster.jpg",
+      "status": 200,
+      "sha256": "82a19d5ceba3b19012b9d21c01fdf2bd70a39410c6b3f5f679feb53aaa262263"
+    }
+  ],
+  "versioned_urls_match": true,
+  "range_206": true,
+  "external_links": [
+    {
+      "url": "https://github.com/esst-prog2/RC_ATLAS_Project",
+      "status": 200
+    },
+    {
+      "url": "https://github.com/esst-prog2/RC_ATLAS_Project/blob/main/docs/DEVELOPMENT.md",
+      "status": 200
+    }
+  ]
+}
