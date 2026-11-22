@@ -1,0 +1,19 @@
+{
+  "parent": "4be004c0adebb4fdb8de0b440d3e360a33cd9810",
+  "commit": "cb18155c7e4239ff636f711ff9da42376f02c990",
+  "tree": "0399f0733cef90174de01a614192b08a279c8ba1",
+  "source_commit": "18576434caab3c1f4b2d515d23832050344378d1",
+  "files": [
+    ".nojekyll",
+    "favicon.ico",
+    "favicon.png",
+    "index.html",
+    "logo.png",
+    "logo@2x.png",
+    "rc-atlas-promo.mp4",
+    "styles.css",
+    "video-poster.jpg"
+  ],
+  "source": "gh-pages /(root)",
+  "status": "prepared; not yet pushed"
+}
