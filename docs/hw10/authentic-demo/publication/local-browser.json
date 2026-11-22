@@ -1,0 +1,52 @@
+{
+  "url": "http://127.0.0.1:8790/",
+  "errors": [],
+  "layouts": [
+    {
+      "width": 1440,
+      "document": 1440,
+      "video": 960,
+      "logoLoaded": true,
+      "cssLoaded": true
+    },
+    {
+      "width": 390,
+      "document": 390,
+      "video": 350,
+      "logoLoaded": true,
+      "cssLoaded": true
+    },
+    {
+      "width": 320,
+      "document": 320,
+      "video": 280,
+      "logoLoaded": true,
+      "cssLoaded": true
+    }
+  ],
+  "navigation": [
+    "#capabilities",
+    "#workflow",
+    "#explore"
+  ],
+  "video_sha256": "cc8dbe3276a7c4ca8dc580e683b0a85852a99342f95327cb4b85a67452efc574",
+  "skip_link": true,
+  "media": {
+    "duration": 29.8,
+    "width": 1920,
+    "height": 1080,
+    "currentSrc": "http://127.0.0.1:8790/rc-atlas-promo.mp4?v=authentic-cc8dbe3276a7",
+    "controls": true,
+    "playsinline": true
+  },
+  "seeking": true,
+  "keyboard_controls": true,
+  "transcript_keyboard": true,
+  "playback": {
+    "ended": true,
+    "time": 29.8,
+    "error": null
+  },
+  "range_206": true,
+  "status": "PASS"
+}
