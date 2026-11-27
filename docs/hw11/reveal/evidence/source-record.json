@@ -1,0 +1,19 @@
+{
+  "checkpoint": "bbeed8433905e044c7df8f9c7a8ed2364aa1d37f",
+  "test_path": "assignment_aware_task_workflow_tests.py",
+  "test_sha256": "edb949f0e968e349760d76d093fe2ca72619f61ff131a38cd6e590dddf03b2d3",
+  "runtime_test_source_matches": true,
+  "test_lines": [
+    156,
+    168
+  ],
+  "learning_source": "logitrack_studio.html:14415",
+  "learning_record": "docs/ui-01/BACKLOG.md:64",
+  "focused_result": {
+    "run": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "execution": "Agent-executed focused check; no claim that the Product Owner personally ran it."
+}

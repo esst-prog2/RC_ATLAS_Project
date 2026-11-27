@@ -1,0 +1,14 @@
+
+    def test_capable_but_non_designated_reviewers_are_rejected(self):
+        data = MODULE.load_data_from_path()
+        teresa = MODULE.find_user_by_username(data, "teresa.mbanze")
+        teresa.permissions = [*MODULE.role_permissions(teresa.role), "VALIDATE_EVIDENCE"]
+        raimundo = MODULE.find_user_by_username(data, "raimundo.cumba")
+        raimundo.permissions = [*MODULE.role_permissions(raimundo.role), "APPROVE_TASKS"]
+        MODULE.save_data_to_path(data)
+        task_id = self.start("Designated reviewers")
+        self.assertEqual(self.update(task_id, "aline.duarte", complete_execution=True).status_code, 200)
+        self.assertEqual(self.review(task_id, "teresa.mbanze", "validated").status_code, 403)
+        self.assertEqual(self.review(task_id, "raimundo.cumba", "validated").status_code, 200)
+        self.assertEqual(self.review(task_id, "raimundo.cumba", "approved").status_code, 403)
+

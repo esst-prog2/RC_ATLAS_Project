@@ -1,0 +1,16 @@
+{
+  "url": "https://esst-prog2.github.io/RC_ATLAS_Project/slides/",
+  "httpStatus": 200,
+  "htmlSha256": "93032a0c4f4ef856a9d25fbe41b669571dee85b333d2038e4bb02761f00878eb",
+  "slides": 6,
+  "demoStages": 6,
+  "publicNotes": 6,
+  "imagesLoaded": true,
+  "keyboard": "ArrowRight, ArrowLeft, Space, N, Escape passed",
+  "errors": [],
+  "requests": [
+    "https://esst-prog2.github.io/RC_ATLAS_Project/slides/"
+  ],
+  "viewport": "1920x1080",
+  "passed": true
+}

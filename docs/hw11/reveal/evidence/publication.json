@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-27",
+  "parent": "cb18155c7e4239ff636f711ff9da42376f02c990",
+  "commit": "e87f654a2e3fc290e0d7c81d2accb7eda39e038c",
+  "changed_paths": [
+    "slides/index.html"
+  ],
+  "preserved_existing_files": 9,
+  "html_sha256": "93032a0c4f4ef856a9d25fbe41b669571dee85b333d2038e4bb02761f00878eb",
+  "url": "https://esst-prog2.github.io/RC_ATLAS_Project/slides/",
+  "pages_source": {
+    "branch": "gh-pages",
+    "path": "/"
+  }
+}

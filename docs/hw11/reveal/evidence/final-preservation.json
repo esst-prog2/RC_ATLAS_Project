@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-27",
+  "approved_files_unchanged": 16,
+  "seven_worktrees_unchanged": true,
+  "embedded_original_screenshots": 7,
+  "official_logo_hash_matches": true,
+  "public_payload_scan": "No workstation paths, runtime URLs or known synthetic credentials",
+  "html_sha256": "93032a0c4f4ef856a9d25fbe41b669571dee85b333d2038e4bb02761f00878eb",
+  "published": false
+}

@@ -1,0 +1,22 @@
+{
+  "checks": {
+    "slideCount": 6,
+    "embeddedImages": true,
+    "timings": [
+      45,
+      120,
+      60,
+      45,
+      30
+    ],
+    "externalResources": 0
+  },
+  "errors": [],
+  "requests": [
+    "http://127.0.0.1:8871/RC_ATLAS_Project/slides/"
+  ],
+  "keyboard": "ArrowRight, ArrowLeft, Space, N and Escape checked",
+  "demo": "six stages on one substantive slide",
+  "offline": "file:// load and fragment progression passed",
+  "viewport": "1920x1080"
+}

@@ -1,0 +1,3 @@
+        portfolioHealth: numericValue(workspace?.portfolio?.delivery_health_avg_pct) ?? 0,
+
+- UI01-03 Health/NOT_ASSESSED observation is now traced: backend portfolio delivery health is null/NOT_ASSESSED without an approved aggregate profile; `buildProgrammeManagerWorkspaceModel` uses `numericValue(...delivery_health_avg_pct) ?? 0` and the KPI formats `%`. Report output retains NOT_ASSESSED. This identifies an absent-value display fallback, not a measured zero. Preserve the existing correction scope and permissions; no calculation or Overview change is part of this batch.

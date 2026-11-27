@@ -1,0 +1,11 @@
+{
+  "verified_date": "2026-11-27",
+  "method": "Authenticated GET /repos/esst-prog2/RC_ATLAS_Project/pages",
+  "html_url": "https://esst-prog2.github.io/RC_ATLAS_Project/",
+  "status": "built",
+  "source": {
+    "branch": "gh-pages",
+    "path": "/"
+  },
+  "build_type": "legacy"
+}
